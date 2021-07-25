@@ -5,8 +5,8 @@
 #
 ###############################################################################
 
- This is a suite for quickly editing and testing a USB bootable disk 
- based on TinyCore Linux. It makes use of qemu and it should be installed
+ This is a suite for quickly editing and testing a USB bootable disk based on 
+ TinyCore Linux. It makes use of qemu and it should be installed in advance
 
  0. Please read copyright.txt for the license terms
 
