@@ -25,7 +25,7 @@
  sudo mount --rbind /sys rootfs/sys
  sudo mount --rbind /dev rootfs/dev
 
- cp ../debnames.txt rootfs
+ sudo cp ../debnames.txt rootfs
  sudo chroot rootfs
  echo -e "root\nroot\n" | passwd
 
@@ -62,8 +62,8 @@
  sudo tar czf ../system.tgz .
  cd ..
 
- sudo chown $user.$user system.tgz
- mv system.tgz ../../ntfs
+ sudo chown $SUDO_USER.$SUDO_USER system.tgz
+#mv system.tgz ../../ntfs
  cd ../..
 
  

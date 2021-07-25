@@ -5,4 +5,5 @@
 /tinycore/provides/tc*.db.gz
 /tinycore/tcz/*.tcz
 /tinycore/vmlinuz
-
+/tcl-64Mb-usb.disk.gz
+/ubuntu/tmp/
