@@ -29,8 +29,20 @@ else
 fi
 
 errot=0
-umount $ntdev
-mount -o remount,ro $tcdev
+if grep -qe "^$ntdev" /proc/mounts; then
+	if ! umount $ntdev; then
+		echo "ERROR: device $ntdev is busy"
+		echo
+		exit 1
+	fi
+fi
+if grep -qe "^$tcdev" /proc/mounts; then
+	if ! mount -o remount,ro $tcdev; then
+		echo "ERROR: device $tcdev is busy"
+		echo
+		exit 1
+	fi
+fi
 sync
 echo "Image is copying on $bkdev..."
 zcat "$image" >$bkdev
