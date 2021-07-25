@@ -190,7 +190,12 @@ function sshgettcdir() {
 
 function sshfingerprintclean() {
 	if [ "$sshkeycln" == "yes" ]; then
-		su -l $SUDO_USER -c "ssh-keygen -R $tcip"
+		if [ ! -d ~/.ssh ]; then
+			yes "" | su -l $SUDO_USER -c "ssh-keygen"
+		fi 2>/dev/null
+		if [ -e ~/.ssh/known_hosts ]; then
+			su -l $SUDO_USER -c "ssh-keygen -R $tcip"
+		fi
 		sshkeycln=no
 	fi >/dev/null
 }
