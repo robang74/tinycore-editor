@@ -1,6 +1,8 @@
 #
 # Authore: Roberto A. Foglietta <roberto.foglietta@gmail.com>
 #
+# Repository: https://github.com/robang74/tinycore-editor
+#
 ###############################################################################
 
  This is a suite for quickly editing and testing a USB bootable disk 
