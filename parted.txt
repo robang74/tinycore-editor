@@ -1,0 +1,12 @@
+http://ftp.gnu.org/gnu/parted/parted-3.4.tar.xz
+wget http://ftp.gnu.org/gnu/parted/static/parted-1.8.1-static
+https://www.gnu.org/software/parted/manual/html_node/Static-binaries.html
+https://www.gnu.org/software/parted/manual/html_node/Compiling.html#Compiling
+
+sudo apt install uuid-dev
+./configure --without-readline --disable-debug --disable-nls --disable-shared --disable-device-mapper 
+#--enable-discover-only
+#--build=i686-pc-linux-gnu CFLAGS=-m32 CXXFLAGS=-m32 LDFLAGS=-m32
+make
+export DESTDIR=$PWD/install
+make install

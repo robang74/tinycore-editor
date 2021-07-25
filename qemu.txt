@@ -1,0 +1,65 @@
+#
+# Autore: Roberto A. Foglietta <roberto.foglietta@altran.it>
+#
+#
+# Instructions to use qemu for testing the image and update it
+#
+
+myip=10.0.2.15
+brip=10.0.2.16
+tcip=10.0.2.17
+
+sudo brctl addbr brkvm
+sudo ip addr add $brip/24 dev brkvm
+sudo ip link set brkvm up
+sudo mkdir -p /etc/qemu
+sudo touch /etc/qemu/bridge.conf
+echo "allow brkvm" | sudo tee /etc/qemu/bridge.conf
+sudo dnsmasq --interface=brkvm --bind-interfaces --dhcp-range=$tcip,$tcip
+
+# sudo iptables -I FORWARD -m physdev --physdev-is-bridged -j ACCEPT
+# sudo sysctl -w net.ipv4.ip_forward=1
+
+drvboot="format=raw,file=tcl-64Mb-usb.disk"
+drvdata="format=raw,file=storage-10Mb.disk"
+sudo qemu-system-i386 --enable-kvm -m 256 -boot c -net nic -net bridge,br=brkvm -drive $drvboot -drive $drvdata
+
+######################## UPDATE THE SYSTEM VIA SSH ########################
+
+#
+# if necessary update by hand these files before transfer them
+#
+# 	rootfs.gz sshdconfig.tgz tccustom.tgz
+#
+
+tcdir="/mnt/sda1"
+
+sshpass -p tinycore ssh tc@$tcip "sudo root-ssh.sh; sudo unlock.sh"
+list=" 
+ntfscrea.sh
+reboot.sh
+root-ssh.sh
+sshdconfig.tgz
+sysinstall.sh
+sysreset.sh
+tccustom.tgz
+unlock.sh
+"
+cd tinycore/changes
+sshpass -p root scp $list root@$tcip:$tcdir/custom
+sshpass -p root scp afterboot.sh root@$tcip:$tcdir
+sshpass -p root scp syslinux.cfg root@$tcip:$tcdir/boot/syslinux
+cd ..
+cat rootfs.gz modules.gz | sshpass -p root ssh root@$tcip "dd of=$tcdir/boot/core.gz"
+sshpass -p root scp vmlinuz root@$tcip:$tcdir/boot
+cd ..
+sshpass -p root scp crea-usbkey.sh root@$tcip:$tcdir/custom/usbcreate.sh
+sshpass -p root ssh root@$tcip "dd if=/dev/zero of=$tcdir/zero; sync; rm -f $tcdir/zero; shutdown"
+
+###########################################################################
+
+sudo killall dnsmasq
+sudo ip link set brkvm down
+sudo ip addr del $brip/24 dev brkvm
+sudo brctl delbr brkvm
+

@@ -1,0 +1,78 @@
+#!/bin/sh
+# RC Script for Tiny Core Linux
+# (c) Robert Shingledecker 2004-2012
+#  +  afterboot + wait 4 tc + log
+#     by Roberto A. Foglietta, 2021
+
+logfile=/var/log/tcboot.log
+tclabel=TINYCORE
+
+if [ "$1" != "log" ]; then
+	exec 3>&1 4>&2
+	$0 log 2>&1 | tee $logfile
+	exit $?
+fi
+
+function uptimeshow() {
+	echo -e "\e[1;33mUptime: $(cat /proc/uptime | cut -d' ' -f1) s\e[0m"
+}
+
+function infotime() {
+	echo -e "\e[1;36m[$(cat /proc/uptime | cut -d' ' -f1)] $1\e[0m"
+}
+
+# Mount /proc.
+[ -f /proc/cmdline ] || /bin/mount /proc
+
+echo -e "\e[1;36mWait for $tclabel\e[0m"
+for i in $(seq 1 6); do
+	blkid | grep -qe "=.$tclabel. " && break
+	sleep 1
+done
+
+# Remount rootfs rw.
+/bin/mount -o remount,rw /
+
+# Mount system devices from /etc/fstab.
+/bin/mount -a
+
+/etc/init.d/tc-config
+
+function devdir() {
+	sed -ne "s,$1 on \([^ ]*\) .*,\1,p" /proc/mounts | head -n1
+}
+
+echo
+infotime "Searching for afterboot.sh..."
+tcdev=$(blkid | grep -e "=.$tclabel. " | cut -d: -f1)
+if [ "$tcdev" == "" ]; then
+	infotime "Searching for afterboot.sh: NOT FOUND"
+else
+	infotime "Searching for afterboot.sh: $tcdev"
+	mntdir=$(devdir $tcdev)
+	if [ "$mntdir" == "" ]; then
+		mntdir=$(echo "$tcdev" | sed -e "s,/dev/,/mnt/,")
+		mkdir -p $mntdir
+		if ! mount -o ro $tcdev $mntdir; then
+			mntdir=""
+		fi
+	fi
+	if [ "$mntdir" != "" ]; then
+		if [ -f $mntdir/afterboot.sh ]; then
+			echo
+			echo -e "\e[1;37m############# AFTER BOOT SCRIPT START #############\e[0m"
+			echo
+			$mntdir/afterboot.sh
+		fi
+	fi
+fi
+
+echo "The boot log is available in $logfile"
+uptimeshow
+echo
+echo -e "\e[1;37m############# PRESS ENTER TO CONTINUE #############\e[0m"
+echo "Auto login in 5 seconds..."
+timeout 5 dd bs=1 count=1
+exec 1>&3 2>&4
+clear
+

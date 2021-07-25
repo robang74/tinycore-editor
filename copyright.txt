@@ -1,0 +1,2 @@
+(C) 2021, Roberto A. Foglietta <roberto.foglietta@gmail.com>
+          TinyCore Editor is licensed under the GPL v2 terms
