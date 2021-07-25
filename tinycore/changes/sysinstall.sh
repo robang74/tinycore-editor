@@ -227,9 +227,9 @@ tag 30 "${stage}"
 
 if true; then
 	mkfs -t ext4 -F $rstdiskp1 -L LINUX
+	mkswap -L SWAP  $rstdiskp2
 	mkfs -t ext4 -F $rstdiskp3 -L VARLOG
 	mkfs -t ext4 -F $rstdiskp4 -L VARDATA
-	swaplabel -L SWAP $rstdiskp2
 fi >/dev/null 2>&1
 
 stage="Root filesystem transfer"
