@@ -1,7 +1,9 @@
 
- system.tgz: ubuntu-base-20.04.2-base-amd64.tar.gz + debs + update-initramfs 
- boot-grub.tgz: /boot/grub which are files created by grub configuration
- bootrd.gz : boot record for the specific grub version used here (AS-IS)
+ boot-grub.tgz : /boot/grub which are files created by grub configuration
+
+ bootrd.gz     : boot record for the specific grub version used here (AS-IS)
+ system.tgz    : ubuntu-base-20.04.2-base-amd64.tar.gz + debs + update-initramfs 
+ update.tgz    : explode after the untar of system.tgz to customise the installation
 
  deb files: debfiles.txt
  deb names: debnames.txt
