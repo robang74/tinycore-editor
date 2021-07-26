@@ -134,6 +134,7 @@ shared-mime-info
 sound-theme-freedesktop
 ssh
 ssh-import-id
+sudo
 systemd
 systemd-sysv
 systemd-timesyncd
