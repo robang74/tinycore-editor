@@ -39,7 +39,7 @@ done
 /etc/init.d/tc-config
 
 function devdir() {
-	sed -ne "s,$1 on \([^ ]*\) .*,\1,p" /proc/mounts | head -n1
+	sed -ne "s,$1 \([^ ]*\) .*,\1,p" /proc/mounts | head -n1
 }
 
 echo

@@ -12,7 +12,7 @@ fi
 
 readonly=0
 mntdir=$(tcldevdir.sh | cut -d: -f2)
-if mount | grep -qe "on /mnt/sda1 .* (ro,"; then
+if mount | grep -qe "on $mntdir .* (ro,"; then
 	mount -o remount,rw $mntdir
 	readonly=1
 fi

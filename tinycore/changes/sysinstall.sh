@@ -78,12 +78,13 @@ isanumber() {
         echo "$1" | grep -qe "^[0-9]*$"
 }
 
-#function rrdiskptbl() {
-#	dev=$1
-#	hdparm -z $dev >/dev/null
-#	disk=$(echo $dev | sed -e "s,/dev/,,")
-#	echo 1 > /sys/block/$disk/device/rescan
-#}
+function partready() {
+	part=$(basename $i)
+	if ! grep -qe "$part$" /proc/partitions; then
+		sleep 1
+		grep -qe "$part$" /proc/partitions
+	fi
+}
 
 ###############################################################################
 
@@ -219,7 +220,7 @@ fi | fdisk $rstdisk >/dev/null 2>&1
 sleep 1
 
 for i in $rstdiskp1 $rstdiskp2 $rstdiskp3 $rstdiskp4; do
-	fdisk -l $rstdisk | grep -qe "^$i "
+	partready $i
 done
 
 stage="Disk partitions preparation"

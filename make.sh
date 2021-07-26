@@ -521,7 +521,7 @@ if [ "$param" == "close" -o "$param" == "all" ]; then
 		gzip -9c tcl-8Gb-usb.disk >tcl-8Gb-usb.disk.gz
 		let nclosed++ || true
 	fi
-	chown $SUDO_USER.$SUDO_USER *.disk
+	chown $SUDO_USER.$SUDO_USER *.disk.gz
 	if [[ $nclosed -lt 1 ]]; then
 		warning="SUGGEST: do it manually or clean"
 		exit 1

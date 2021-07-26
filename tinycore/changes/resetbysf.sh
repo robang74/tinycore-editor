@@ -18,7 +18,14 @@ if [ "$USER" != "root" ]; then
 	exit 1
 fi
 
-tcdev=$(blkid | grep -e "=.TINYCORE. " | cut -d: -f1)
+label="TINYCORE"
+tcdev=$(blkid | grep -e "=.$label. " | cut -d: -f1)
+if [ "$tcdev" == "" ]; then
+	echo
+	echo "ERROR: partion label $label not found, abort"
+	echo
+	exit 1
+fi 
 ntdev=$(echo $tcdev | sed -e "s,1$,2,")
 bkdev=$(echo $tcdev | sed -e "s,1$,,")
 

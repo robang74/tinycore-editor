@@ -26,7 +26,7 @@ function warn() {
 }
 
 function devdir() {
-	sed -ne "s,$1 on \([^ ]*\) .*,\1,p" /proc/mounts | head -n1
+	sed -ne "s,$1 \([^ ]*\) .*,\1,p" /proc/mounts | head -n1
 }
 
 ###############################################################################
@@ -143,7 +143,7 @@ infotime "Upraising network and VLANs..." #####################################
 
 if which dhclient >/dev/null; then
 	echo -e "\tusing dhclient..."
-	dhclient="timeout 5 dhclient -4"
+	dhclient="timeout 5 dhclient"
 	mkdir -p /var/db
 else
 	echo -e "\tusing udhcpc..."
@@ -174,14 +174,6 @@ for k in $tcdir/flags/VLAN-ENA.BLE; do
 			echo " KO"
 		fi
 	done
-	if ! ifconfig eth0.1 | grep -q "inet "; then
-		echo -ne "\tmanual ip on eth0.1:"
-		if ifconfig eth0.1 172.18.2.117 up; then
-			echo " OK"
-		else
-			echo " KO"
-		fi
-	fi
 done
 
 infotime "Upraising SSH for {tc, $tcpassword}..." #############################
