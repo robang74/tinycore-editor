@@ -362,15 +362,14 @@ function killsshafterqemu() {
 }
 
 if [ "$param" == "qemu-test" ]; then
-	if [ "$option" == "8Gb" ]; then
-		if [ ! -f tcl-64Mb-usb.disk ]; then
-			$0 image
-		fi
+	if [ ! -f tcl-64Mb-usb.disk ]; then
+		$0 image
 	fi
-	time $0 image $option && \
-		$0 qemu-init && time $0 qemu $option && \
-			$0 ssh-root
-	test -z $? || realexit 1
+	if [ "$option" == "8Gb" ]; then
+		$0 image $option
+	fi
+	$0 qemu-init && time $0 qemu $option \
+		&& $0 ssh-root || realexit 1
 fi
 
 if [ "$param" == "qemu" -o "$param" == "all" ]; then
@@ -448,8 +447,17 @@ if [ "$param" == "image" -a "$option" != "8Gb" ]; then
 	if ! sudo fsck -fy ${devloop}p1; then
 		sudo fsck -fy ${devloop}p1
 	fi
+	eval $(grep "tclabel=" tinycore/changes/rcS)
+	if ! blkid  --label $tclabel $devloop; then
+		echo
+		warn "WARNING: in rcS the label is '$tclabel' but not in the image"
+		rm -f tcl-64Mb-usb.disk
+		sudo losetup -D $devloop
+		exit 1
+	fi
 	mkdir -p $tcldir
  	if ! sudo mount -o rw ${devloop}p1 $tcldir; then
+		rm -f tcl-64Mb-usb.disk
 		sudo losetup -D $devloop
 		rmdir $tcldir
 		exit 1		
