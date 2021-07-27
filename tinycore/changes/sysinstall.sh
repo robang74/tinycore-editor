@@ -7,7 +7,7 @@ export PATH=/home/tc/.local/bin:/usr/local/sbin:/usr/local/bin
 export PATH=$PATH:/apps/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
 logfile=/var/log/sysinstall.log
-showtransfer=yes
+showtransfer=no
 
 if [ "$USER" != "root" ]; then
 	echo
@@ -231,7 +231,7 @@ if true; then
 	mkswap -L SWAP  $rstdiskp2
 	mkfs -t ext4 -F $rstdiskp3 -L VARLOG
 	mkfs -t ext4 -F $rstdiskp4 -L VARDATA
-fi >/dev/null 2>&1
+fi >/dev/null
 
 stage="Root filesystem transfer"
 tag 40 "${stage}"
@@ -288,7 +288,7 @@ $bootdiskp1 / ext4 defaults 0 0
 $bootdiskp2 swap swap defaults 0 1
 $bootdiskp3 /var/log ext4 defaults 0 2
 $bootdiskp4 /var/data ext4 defaults 0 3
-" >$rootdir/etc/fstab
+" >$rootdir/etc/fstab 2>/dev/null
 
 stage="Umount destination block device partitions"
 tag 95 "${stage}"

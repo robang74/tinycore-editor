@@ -19,7 +19,7 @@ if [ "$USER" != "root" ]; then
 fi
 
 label="TINYCORE"
-tcdev=$(blkid | grep -e "=.$label. " | cut -d: -f1)
+tcdev=$(blkid --label $label | head -n1)
 if [ "$tcdev" == "" ]; then
 	echo
 	echo "ERROR: partion label $label not found, abort"
@@ -30,9 +30,16 @@ ntdev=$(echo $tcdev | sed -e "s,1$,2,")
 bkdev=$(echo $tcdev | sed -e "s,1$,,")
 
 if [ "$1" == "" ]; then
-	image=/mnt/sf_Shared/tcl-64Mb-usb.disk.gz
-else
+	image="/mnt/sf_Shared/tcl-64Mb-usb.disk.gz"
+elif [ -f "$1" ]; then
 	image="$1"
+elif [ -d "$1" ]; then
+	image="$1/tcl-64Mb-usb.disk.gz"
+else
+	echo
+	echo "ERROR: parameter is not a file not a directory"
+	echo
+	exit 1
 fi
 
 errot=0
@@ -54,6 +61,7 @@ sync
 echo "Image is copying on $bkdev..."
 zcat "$image" >$bkdev
 sync; sleep 1
+echo "Refreshing partition on $bkdev..."
 rrdiskptbl $bkdev
 if ! fsck -yf $tcdev; then
 	if ! fsck -yf $tcdev; then
@@ -61,6 +69,13 @@ if ! fsck -yf $tcdev; then
 	fi
 fi >/dev/null 2>&1
 ntfs-usbdisk-partition-create.sh
+echo "Checking label '$label' on $bkdev..."
+if ! blkid --label $label $bkdev >/dev/null; then
+	echo "WARNING: label '$label' not found, it might not boot"
+	echo
+	echo "         dosfslabel $bkdev $label"
+	echo
+fi
 if [ "$error" = "1" ]; then
 	echo "ERROR: root partition ${bkdev}1 is broken"
 	echo
