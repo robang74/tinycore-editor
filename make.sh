@@ -303,21 +303,20 @@ fi
 if [ "$param" == "all"   -a "$option" == "8Gb" ] \
 || [ "$param" == "image" -a "$option" == "8Gb" ]; then
 	info "executing: image 8Gb"
-	if [ -e tcl-8Gb-usb.disk ]; then
-		warning="SUGGEST: run 'rm -f tcl-8Gb-usb.disk' to remove existing disk"
-		exit 1
-	fi
 	if [ ! -e tcl-64Mb-usb.disk.gz -a ! -e tcl-64Mb-usb.disk ]; then
 		warning="SUGGEST: run '$myname image' to create the 64Mb disk image"
 		exit 1		
 	fi
-	dd if=/dev/zero bs=1M count=1 seek=7500 of=tcl-8Gb-usb.disk
+	if [ ! -e tcl-8Gb-usb.disk ]; then
+		create=yes
+		dd if=/dev/zero bs=1M count=1 seek=7500 of=tcl-8Gb-usb.disk
+	fi
 	if [ -e tcl-64Mb-usb.disk ]; then
 		dd if=tcl-64Mb-usb.disk bs=1M of=tcl-8Gb-usb.disk conv=notrunc
 	else
 		zcat tcl-64Mb-usb.disk.gz | dd bs=1M of=tcl-8Gb-usb.disk conv=notrunc
 	fi
-	if [ "$param" == "image" ]; then
+	if [ "$param" == "image" -a "$create" == "yes" ]; then
 		losetup --partscan $devloop tcl-8Gb-usb.disk
 		if true; then
 			echo -e "n\n p\n 2\n \n \n N"
