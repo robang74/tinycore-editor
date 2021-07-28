@@ -41,11 +41,15 @@ function mountdevdir() {
 	grep -qe "$(basename $1)$" /proc/partitions
 	curdir=$(devdir $1)
 	if [ -d "$curdir" ]; then
-		mount -o remount,rw $curdir
+		if [ "$3" == "rw" ]; then
+			mount -o remount,rw $curdir
+		fi
 		mount --bind $curdir $2
 		mount | grep -qe " on $2"
-	else
+	elif [ "$3" == "rw" ]; then
 		mount -o rw $1 $2
+	else
+		mount -o ro $1 $2
 	fi
 	FUNCNAME=$OLDFNAME
 }
@@ -176,11 +180,11 @@ else
 fi
 
 echo -n "Mounting: ROOT"
-mountdevdir $blkdevp1 $rootdir
-if mountdevdir $blkdevp3 $rootdir/var/log; then
+mountdevdir $blkdevp1 $rootdir rw
+if mountdevdir $blkdevp3 $rootdir/var/log rw; then
 	echo -n " LOG"
 fi
-if mountdevdir $blkdevp4 $rootdir/var/data; then
+if mountdevdir $blkdevp4 $rootdir/var/data rw; then
 	echo -n " DATA"
 fi
 
