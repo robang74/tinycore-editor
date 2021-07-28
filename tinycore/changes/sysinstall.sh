@@ -16,8 +16,8 @@ if [ "$USER" != "root" ]; then
 	exit 1
 fi
 
-tag() {
-	printf "%3d%% - %s\n" $1 "$2"
+function tag() {
+	printf "%3d%% - $2\n" $1
 }
 
 myname=$(basename $0)
@@ -29,7 +29,7 @@ usage() {
 	return 0
 }
 
-rstdisk_umount_all() {
+function rstdisk_umount_all() {
 	sync
 	ret=0
 	for i in $rstdiskp4 $rstdiskp3 $rstdiskp2 $rstdiskp1; do
@@ -43,7 +43,7 @@ rstdisk_umount_all() {
 	return $ret
 }
 
-alert_exit() {
+function alert_exit() {
 	if ! usage; then
 		tag $1 "$2"
 		stage="$3"
@@ -55,7 +55,7 @@ alert_exit() {
 	exit 1
 }
 
-atexit() {
+function atexit() {
 	set +ex
 	rstdisk_umount_all
 	tag  99 "$stage FAILED, abort"
@@ -72,17 +72,21 @@ atexit() {
 	exit 1
 }
 
-isanumber() {
+function isanumber() {
 # busybox grep do not support + in reg expression
 	test "$1" == "" && return 1
         echo "$1" | grep -qe "^[0-9]*$"
 }
 
 function partready() {
-	part=$(basename $i)
+	part=$(basename $1)
 	if ! grep -qe "$part$" /proc/partitions; then
 		sleep 1
 		grep -qe "$part$" /proc/partitions
+	fi
+	if [ ! -b $1 ]; then
+		sleep 1
+		test -b $1
 	fi
 }
 
@@ -181,6 +185,7 @@ fi
 
 ###############################################################################
 
+echo -n "" >$logfile
 PS4='DEBUG: $((LASTNO=$LINENO)): '
 exec 2>$logfile; set -ex
 trap 'atexit $LASTNO' EXIT
