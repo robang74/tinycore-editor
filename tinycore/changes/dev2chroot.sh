@@ -6,23 +6,16 @@
 export PATH=/home/tc/.local/bin:/usr/local/sbin:/usr/local/bin
 export PATH=$PATH:/apps/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
-if [ "$USER" != "root" ]; then
-	echo
-	warn "This script requires being root, abort"
-	echo
-	realexit 1
-fi
-
 function realexit() {
 	trap - EXIT
 	exit $1
 }
 
 function atexit() {
-	set +xe
+	set +ex
 	echo
 	unmountall
-	perr "ERROR: $myname failed at line $1, abort"
+	perr "ERROR: $myname failed at $FUNCNAME line $1, abort"
 	echo
 	echo "log file: $logfile"
 	echo
@@ -41,33 +34,38 @@ function devdir() {
 }
 
 function mountdevdir() {
+	OLDFNAME=$FUNCNAME
+	FUNCNAME="mountdevdir()"
 	mkdir -p $2 2>/dev/null
 	test -b "$1" || return 1
-	grep -qe "$(basename $1)$" /proc/partitions || return 1
-	curdir=$(devdir $tcdev)
+	grep -qe "$(basename $1)$" /proc/partitions
+	curdir=$(devdir $1)
 	if [ -d "$curdir" ]; then
-		mount -o remount,rw $1
+		mount -o remount,rw $curdir
 		mount --bind $curdir $2
 		mount | grep -qe " on $2"
 	else
 		mount -o rw $1 $2
 	fi
+	FUNCNAME=$OLDFNAME
 }
 
 function unmountall() {
 	set +ex
 	echo -n "Umounting everything on chroot..."
-	umount $rootdir/run
-	mount --make-rslave $rootdir/dev
-	umount -R $rootdir/dev
-	mount --make-rslave $rootdir/sys
-	umount -R $rootdir/sys
-	umount $rootdir/proc
-	umount $rootdir/mnt/tcp2
-	umount $rootdir/mnt/tcp1
-	umount $rootdir/var/data
-	umount $rootdir/var/log
-	umount $rootdir
+	if true; then
+		umount $rootdir/run
+		mount --make-rslave $rootdir/dev
+		umount -R $rootdir/dev
+		mount --make-rslave $rootdir/sys
+		umount -R $rootdir/sys
+		umount $rootdir/proc
+		umount $rootdir/mnt/tcp2
+		umount $rootdir/mnt/tcp1
+		umount $rootdir/var/data
+		umount $rootdir/var/log
+		umount $rootdir
+	fi 2>/dev/null
 	if mount | grep -qw $rootdir; then
 		perr " KO\n"
 	else
@@ -122,6 +120,13 @@ if [ "$1" == "-h" -o "$1" == "--help" ]; then
 	usage; realexit 1
 fi
 
+if [ "$USER" != "root" ]; then
+	echo
+	warn "This script requires being root, abort"
+	echo
+	realexit 1
+fi
+
 script=""
 if [ "$1" == "run" ]; then
 	script=$2
@@ -141,13 +146,14 @@ fi
 
 ###############################################################################
 
-PS4='DEBUG: $((LASTNO=$LINENO)): '
+echo -n "" >$logfile
+PS4='DEBUG: $((LASTNO=LINENO)): '
 exec 3>&2 2>$logfile; set -ex
 trap 'atexit $LASTNO' EXIT
 
 if mount | grep -qe " on $rootdir "; then
 	echo
-	perr "The $rootdir is just mounted, abort"
+	perr "The $rootdir is just mounted, try again"
 	echo
 	exit 1
 fi
@@ -176,13 +182,6 @@ if mountdevdir $blkdevp3 $rootdir/var/log; then
 fi
 if mountdevdir $blkdevp4 $rootdir/var/data; then
 	echo -n " DATA"
-fi
-
-conffile="$rootdir/$homedir/conf/modulename.conf"
-if grep -qe "NVR" -e "CMS" $conffile; then
-	if mountdevdir /dev/sda1 $rootdir/opt; then
-		echo -n " OPT"
-	fi
 fi
 
 tcdev=$(blkid | grep -e "=.TINYCORE. " | cut -d: -f1)
