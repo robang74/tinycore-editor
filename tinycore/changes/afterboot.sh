@@ -191,7 +191,7 @@ fi 2>/dev/null
 
 for i in /root /home/tc; do
 	mkdir -p $i/.ssh
-	cat $tcdir/sshkeys.pub/* > $i/.ssh/authorized_keys
+	cat $tcdir/sshkeys.pub/*.pub > $i/.ssh/authorized_keys
 	chmod 600 $i/.ssh/authorized_keys
 	chmod 700 $i/.ssh $i
 done

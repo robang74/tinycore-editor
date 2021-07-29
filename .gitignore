@@ -9,3 +9,4 @@
 /ubuntu/ubuntu-base-20.04.2-base-amd64.tar.gz
 /ubuntu/system.tgz
 /ubuntu/rootfs
+/sshkeys.pub/*.pub
