@@ -39,7 +39,7 @@ copylist="
 tinycore/tcz:
 tinycore/flags:
 tinycore/tinycore.conf:provides/
-tinycore/provides/*.sh:provides/
+tinycore/provides/tc[upd]*.sh:provides/
 tinycore/changes/afterboot.sh:
 tinycore/changes/{*.sh,*.tgz}:custom/
 tinycore/changes/syslinux.cfg:boot/syslinux/
@@ -361,14 +361,10 @@ function killsshafterqemu() {
 }
 
 if [ "$param" == "qemu-test" ]; then
-	if [ ! -f tcl-64Mb-usb.disk ]; then
-		$0 image
-	fi
-	if [ "$option" == "8Gb" ]; then
-		$0 image $option
-	fi
-	$0 qemu-init && time $0 qemu $option \
-		&& $0 ssh-root || realexit 1
+	$0 image $option && $0 qemu-init && \
+		$0 qemu $option
+	test "$?" != "0" && realexit 1
+	$0 ssh-root
 fi
 
 if [ "$param" == "qemu" -o "$param" == "all" ]; then
