@@ -26,7 +26,7 @@ function warn() {
 }
 
 function devdir() {
-	sed -ne "s,$1 \([^ ]*\) .*,\1,p" /proc/mounts | head -n1
+	sed -ne "s,^$1 \([^ ]*\) .*,\1,p" /proc/mounts | head -n1
 }
 
 ###############################################################################

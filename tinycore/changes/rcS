@@ -21,6 +21,11 @@ function infotime() {
 	echo -e "\e[1;36m[$(cat /proc/uptime | cut -d' ' -f1)] $1\e[0m"
 }
 
+function devdir() {
+	sed -ne "s,^$1 \([^ ]*\) .*,\1,p" /proc/mounts | head -n1
+}
+
+
 # Mount /proc.
 [ -f /proc/cmdline ] || /bin/mount /proc
 
@@ -37,10 +42,6 @@ done
 /bin/mount -a
 
 /etc/init.d/tc-config
-
-function devdir() {
-	sed -ne "s,$1 \([^ ]*\) .*,\1,p" /proc/mounts | head -n1
-}
 
 echo
 infotime "Searching for afterboot.sh..."
