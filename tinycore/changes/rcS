@@ -4,15 +4,6 @@
 #  +  afterboot + wait 4 tc + log
 #     by Roberto A. Foglietta, 2021
 
-logfile=/var/log/tcboot.log
-tclabel=TINYCORE
-
-if [ "$1" != "log" ]; then
-	exec 3>&1 4>&2
-	$0 log 2>&1 | tee $logfile
-	exit $?
-fi
-
 function uptimeshow() {
 	echo -e "\e[1;33mUptime: $(cat /proc/uptime | cut -d' ' -f1) s\e[0m"
 }
@@ -25,13 +16,23 @@ function devdir() {
 	sed -ne "s,^$1 \([^ ]*\) .*,\1,p" /proc/mounts | head -n1
 }
 
+logfile=/var/log/tcboot.log
+tclabel=TINYCORE
+
+if [ "$1" != "log" ]; then
+	exec 3>&1 4>&2
+	$0 log 2>&1 | tee $logfile
+	exit $?
+fi
 
 # Mount /proc.
 [ -f /proc/cmdline ] || /bin/mount /proc
 
-echo -e "\e[1;36mWait for $tclabel\e[0m"
+# Wait for hardware be ready
+echo -e "\n\e[1;36mWait for $tclabel\e[0m"
 for i in $(seq 1 6); do
-	blkid | grep -qe "=.$tclabel. " && break
+	tcdev=$(blkid --label $tclabel | cut -d: -f1)
+	test -n $tcdev && break
 	sleep 1
 done
 
@@ -44,8 +45,6 @@ done
 /etc/init.d/tc-config
 
 echo
-infotime "Searching for afterboot.sh..."
-tcdev=$(blkid | grep -e "=.$tclabel. " | cut -d: -f1)
 if [ "$tcdev" == "" ]; then
 	infotime "Searching for afterboot.sh: NOT FOUND"
 else
