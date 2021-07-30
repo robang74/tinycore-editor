@@ -3,6 +3,18 @@
 # Autore: Roberto A. Foglietta <roberto.foglietta@altran.it>
 #
 
+function partready() {
+	part=$(basename $1)
+	if ! grep -qe "$part$" /proc/partitions; then
+		sleep 1
+		grep -qe "$part$" /proc/partitions
+	fi
+	if [ ! -b $1 ]; then
+		sleep 1
+		test -b $1
+	fi
+}
+
 function devdir() {
 	sed -ne "s,^$1 \([^ ]*\) .*,\1,p" /proc/mounts | head -n1
 }
@@ -17,9 +29,9 @@ if [ "$USER" != "root" ]; then
 	exit 1
 fi
 
-tcdev=$(readlink -f /etc/sysconfig/tcdev)
-tcdir=$(readlink -f /etc/sysconfig/tcdir)
-ntdev=$(readlink -f /etc/sysconfig/ntdev)
+tcdev=$(readlink /etc/sysconfig/tcdev)
+tcdir=$(readlink /etc/sysconfig/tcdir)
+ntdev=$(readlink /etc/sysconfig/ntdev)
 ntdir=$(devdir $ntdev)
 bkdev=${tcdev%1}
 
@@ -33,7 +45,7 @@ if ! fdisk -l $bkdev | grep -e "^$ntdev"; then
 
 	echo -e "n\n p\n 2\n \n \n N\n w"  | fdisk $bkdev >/dev/null 2>&1
 	sleep 1
-
+	partready ${bkdev}2
 	if ! fdisk -l $bkdev | grep -qe "^$ntdev "; then
 		echo
 		echo "ERROR: cannot create ntfs partition in $bkdev"
@@ -42,9 +54,14 @@ if ! fdisk -l $bkdev | grep -e "^$ntdev"; then
 	else
 		echo -e "t\n 2\n 7\n w" | fdisk $bkdev >/dev/null 2>&1
 		sleep 1
+		partready ${bkdev}2
 	fi
-
 	ntfslabel $ntdev NTFS 2>/dev/null || true
+
+	if [ -z "$ntdir" ]; then
+		ntdir=${ntdev/dev/mnt}
+		mkdir -p $ntdir
+	fi
 	if mount -t ntfs $ntdev $ntdir; then
 		echo
 		echo "ntfs partition rescued, mounted in $ntdir"
@@ -59,7 +76,6 @@ if ! fdisk -l $bkdev | grep -e "^$ntdev"; then
 		echo
 		exit 1
 	fi
-	
 fi
 
 if mount | grep -q "$ntdev on"; then

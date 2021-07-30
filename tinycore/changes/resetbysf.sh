@@ -18,8 +18,8 @@ if [ "$USER" != "root" ]; then
 	exit 1
 fi
 
-tcdev=$(readlink -f /etc/sysconfig/tcdev)
-ntdev=$(readlink -f /etc/sysconfig/ntdev)
+tcdev=$(readlink /etc/sysconfig/tcdev)
+ntdev=$(readlink /etc/sysconfig/ntdev)
 bkdev=${tcdev%1}
 
 if [ "$tcdev" == "" ]; then
@@ -27,8 +27,7 @@ if [ "$tcdev" == "" ]; then
 	echo "ERROR: tinycore partion not found, abort"
 	echo
 	exit 1
-fi 
-
+fi
 
 if [ "$1" == "" ]; then
 	image="/mnt/sf_Shared/tcl-64Mb-usb.disk.gz"

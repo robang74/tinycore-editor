@@ -14,9 +14,9 @@ if [ "$USER" != "root" ]; then
 	exit 1
 fi
 
-tcdev=$(readlink -f /etc/sysconfig/tcdev)
-tcdir=$(readlink -f /etc/sysconfig/tcdir)
-ntdev=$(readlink -f /etc/sysconfig/ntdev)
+tcdev=$(readlink /etc/sysconfig/tcdev)
+tcdir=$(readlink /etc/sysconfig/tcdir)
+ntdev=$(readlink /etc/sysconfig/ntdev)
 ntdir=$(devdir $ntdev)
 
 if [ "$tcdir" == "" ]; then

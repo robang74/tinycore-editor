@@ -23,7 +23,7 @@ TXVsdGlwbGUgYWN0aXZlIHBhcnRpdGlvbnMuDQpmi0QIZgNGHGaJRAjoMP9yJ2aBPgB8WEZTQnUJ
 ZoPABOgc/3ITgT7+fVWqD4Xy/rz6e1pfB/r/5OgeAE9wZXJhdGluZyBzeXN0ZW0gbG9hZCBlcnJv
 ci4NCl6stA6KPmIEswfNEDwKdfHNGPTr/QAAAAAAAAAAAAAAAAAAAADZsspkAAA=
 "
-tcdev=$(readlink -f /etc/sysconfig/tcdev)
+tcdev=$(readlink /etc/sysconfig/tcdev)
 bkdev=${tcdev%1}
 
 if [ ! -b "$bkdev" ]; then

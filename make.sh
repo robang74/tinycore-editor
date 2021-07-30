@@ -39,7 +39,7 @@ copylist="
 tinycore/tcz:
 tinycore/flags:
 tinycore/tinycore.conf:provides/
-tinycore/provides/tc[upd]*.sh:provides/
+tinycore/provides/tc[udp]*.sh:provides/
 tinycore/changes/afterboot.sh:
 tinycore/changes/{*.sh,*.tgz}:custom/
 tinycore/changes/syslinux.cfg:boot/syslinux/

@@ -188,11 +188,11 @@ if mountdevdir $blkdevp4 $rootdir/var/data rw; then
 	echo -n " DATA"
 fi
 
-tcdev=$(readlink -f /etc/sysconfig/tcdev)
+tcdev=$(readlink /etc/sysconfig/tcdev)
 if mountdevdir $tcdev $rootdir/mnt/tcp1; then
 	echo -n " TCP1"
 fi
-ntdev=$(readlink -f /etc/sysconfig/ntdev)
+ntdev=$(readlink /etc/sysconfig/ntdev)
 if mountdevdir $ntdev $rootdir/mnt/tcp2; then
 	echo -n " TCP2"
 fi

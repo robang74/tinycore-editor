@@ -32,16 +32,6 @@ function perr() {
 
 myname=$(basename $0)
 
-rbuild=yes
-if [ "$USER" != "root" ]; then
-	if ! timeout 0.1 sudo -n true >/dev/null 2>&1; then
-		warn "WARNING: $myname requires root permissions"
-		echo
-	fi
-	sudo $0 "$@"
-	realexit $?
-fi
-
 ###############################################################################
 
 PS4='DEBUG: $((LASTNO=$LINENO)): '
@@ -116,14 +106,6 @@ done
 cd ..
 if [ "$SUDO_USER" != "" ]; then
 	chown -R $SUDO_USER.$SUDO_USER tcz
-fi
-
-
-if [ "$rbuild" == "yes" ]; then
-	info "Rebuild the rootfs.tgz..."
-	echo
-	./rootfs.sh update 2>&1
-	echo
 fi
 
 trap - EXIT

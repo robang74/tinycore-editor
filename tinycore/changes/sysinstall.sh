@@ -22,7 +22,7 @@ function tag() {
 
 myname=$(basename $0)
 
-usage() {
+function usage() {
 	echo
 	echo "$myname [rootsize] [datadir] destdisk [bootdisk]"
 	echo
@@ -173,9 +173,9 @@ else
 	alert_exit 0 "Unespected block device boot:${bootdisk}, abort" "Block devices check"
 fi
 
-tcdev=$(readlink -f /etc/sysconfig/tcdev)
-tcdir=$(readlink -f /etc/sysconfig/tcdir)
-ntdev=$(readlink -f /etc/sysconfig/ntdev)
+tcdev=$(readlink /etc/sysconfig/tcdev)
+tcdir=$(readlink /etc/sysconfig/tcdir)
+ntdev=$(readlink /etc/sysconfig/ntdev)
 ntdir=$(devdir $ntdev)
 
 if [ "$datadir" == "" ]; then
@@ -295,8 +295,8 @@ sed -i "s/$oldid/$newid/g" $rootdir/$grubcfg
 echo "
 $bootdiskp1 / ext4 defaults 0 0
 $bootdiskp2 swap swap defaults 0 1
-$bootdiskp3 /var/log ext4 defaults 0 2
-$bootdiskp4 /var/data ext4 defaults 0 3
+$bootdiskp3 /var/log ext4 defaults 0 1
+$bootdiskp4 /var/data ext4 defaults 0 1
 " >$rootdir/etc/fstab 2>/dev/null
 
 stage="Umount destination block device partitions"
