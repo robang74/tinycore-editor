@@ -143,6 +143,9 @@ fi
 blkdev=$1
 if [ "$blkdev" == "" ]; then
 	blkdev=/dev/mmcblk1
+	if [ ! -b $blkdev ]; then
+		usage; realexit 1
+	fi
 fi
 if [ ! -b $blkdev ]; then
 	usage; realexit 1
