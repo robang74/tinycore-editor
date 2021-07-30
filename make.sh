@@ -437,7 +437,7 @@ if [ "$param" == "image" -a "$option" != "8Gb" ]; then
 	fi
 	zcat tcl-64Mb-skeleton.disk.gz >tcl-64Mb-usb.disk
 	sync
-
+	cd tinycore; ./rootfs.sh update; cd -
 	sudo losetup --partscan $devloop tcl-64Mb-usb.disk
 	if ! sudo fsck -fy ${devloop}p1; then
 		sudo fsck -fy ${devloop}p1
