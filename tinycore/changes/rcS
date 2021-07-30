@@ -31,8 +31,9 @@ fi
 # Wait for hardware be ready
 echo -e "\n\e[1;36mWait for $tclabel\e[0m"
 for i in $(seq 1 6); do
-	tcdev=$(blkid --label $tclabel | cut -d: -f1)
-	test -n $tcdev && break
+	if blkid --label $tclabel; then
+		break;
+	fi >/dev/null
 	sleep 1
 done
 
@@ -45,24 +46,27 @@ done
 /etc/init.d/tc-config
 
 echo
+tcdev=$(blkid --label $tclabel | cut -d: -f1)
 if [ "$tcdev" == "" ]; then
 	infotime "Searching for afterboot.sh: NOT FOUND"
 else
-	infotime "Searching for afterboot.sh: $tcdev"
-	mntdir=$(devdir $tcdev)
-	if [ "$mntdir" == "" ]; then
-		mntdir=$(echo "$tcdev" | sed -e "s,/dev/,/mnt/,")
-		mkdir -p $mntdir
-		if ! mount -o ro $tcdev $mntdir; then
-			mntdir=""
+	ln -sf $tcdev /etc/sysconfig/tcdev
+	tcdir=$(devdir $tcdev)
+	if [ "$tcdir" == "" ]; then
+		tcdir=$(echo "$tcdev" | sed -e "s,/dev/,/mnt/,")
+		mkdir -p $tcdir
+		if ! mount -o ro $tcdev $tcdir; then
+			tcdir=""
 		fi
 	fi
-	if [ "$mntdir" != "" ]; then
-		if [ -f $mntdir/afterboot.sh ]; then
+	infotime "Searching for afterboot.sh in $tcdev"
+	if [ "$tcdir" != "" ]; then
+		ln -sf $tcdir /etc/sysconfig/tcdir
+		if [ -f $tcdir/afterboot.sh ]; then
 			echo
 			echo -e "\e[1;37m############# AFTER BOOT SCRIPT START #############\e[0m"
 			echo
-			$mntdir/afterboot.sh
+			$tcdir/afterboot.sh
 		fi
 	fi
 fi
