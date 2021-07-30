@@ -17,7 +17,7 @@ function devdir() {
 }
 
 logfile=/var/log/tcboot.log
-tclabel=TINYCORE
+tclabel=T1NYC0R3
 
 if [ "$1" != "log" ]; then
 	exec 3>&1 4>&2
@@ -50,6 +50,7 @@ tcdev=$(blkid --label $tclabel | cut -d: -f1)
 if [ "$tcdev" == "" ]; then
 	infotime "Searching for afterboot.sh: NOT FOUND"
 else
+	ln -sf ${tcdev%1}2 /etc/sysconfig/ntdev
 	ln -sf $tcdev /etc/sysconfig/tcdev
 	tcdir=$(devdir $tcdev)
 	if [ "$tcdir" == "" ]; then

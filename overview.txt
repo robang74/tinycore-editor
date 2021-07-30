@@ -11,7 +11,7 @@
 
 	WINDOWS: rufus select tcl-64Mb-usb.disk.gz and write
 
- USB firt partition label: TINYCORE (do not change it!)
+ USB firt partition label: T1NYC0R3 (but you can change it in rcS)
 
  Make any changes you like and be sure to update these files
 

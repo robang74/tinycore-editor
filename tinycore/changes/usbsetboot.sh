@@ -23,34 +23,33 @@ TXVsdGlwbGUgYWN0aXZlIHBhcnRpdGlvbnMuDQpmi0QIZgNGHGaJRAjoMP9yJ2aBPgB8WEZTQnUJ
 ZoPABOgc/3ITgT7+fVWqD4Xy/rz6e1pfB/r/5OgeAE9wZXJhdGluZyBzeXN0ZW0gbG9hZCBlcnJv
 ci4NCl6stA6KPmIEswfNEDwKdfHNGPTr/QAAAAAAAAAAAAAAAAAAAADZsspkAAA=
 "
-label="TINYCORE"
-tcdev=$(blkid | grep -e "=.$label. " | cut -d: -f1)
-usbdev=$(echo $tcdev | sed -e "s,1$,,")
+tcdev=$(readlink -f /etc/sysconfig/tcdev)
+bkdev=${tcdev%1}
 
-if [ ! -b $usbdev ]; then
+if [ ! -b "$bkdev" ]; then
 	echo
-	echo "ERROR: USB device '$label' not found"
+	echo "ERROR: TinyCore USB device not found, abort!"
 	echo
 	exit 1
 fi
 
 if ! which base64 >/dev/null; then
 	echo
-	echo "ERROR: command base64 not found"
+	echo "ERROR: command base64 not found, abort!"
 	echo
 	exit 1
 fi
 
 if [ "$1" == "enable" ]; then
-	if echo -n "$bootrd" | base64 -di >$usbdev; then
+	if echo -n "$bootrd" | base64 -di >$bkdev; then
 		echo
-		echo "USB boot enabled on $usbdev"
+		echo "USB boot enabled on $bkdev"
 		echo
 	fi
 elif [ "$1" == "disable" ]; then
-	if dd if=/dev/zero bs=1 count=446 of=$usbdev; then
+	if dd if=/dev/zero bs=1 count=446 of=$bkdev; then
 		echo
-		echo "USB boot disabled on $usbdev"
+		echo "USB boot disabled on $bkdev"
 		echo
 		echo "To re-enable the USB key boot, do this:"
 		echo

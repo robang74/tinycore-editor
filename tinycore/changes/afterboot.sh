@@ -32,7 +32,6 @@ function devdir() {
 ###############################################################################
 
 tcpassword="tinycore"
-label="TINYCORE"
 copylist="
 unlock.sh:unlock.sh
 reboot.sh:reboot.sh
@@ -55,21 +54,28 @@ export PATH=$PATH:/apps/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
 set +e
 
-infotime "Lookup for $label partitions..." ###################################
+infotime "Lookup for tinycore partitions..." ##################################
 
-tcdev=$(blkid | grep -e "=.$label. " | cut -d: -f1)
-tcdir=$(mount | grep -e "$tcdev on" | cut -d' ' -f3)
-ntdev=$(echo $tcdev | sed -e "s,1$,2,")
-ntdir=$(mount | grep -e "$ntdev on" | cut -d' ' -f3)
+tcdev=$(readlink -f /etc/sysconfig/tcdev)
+tcdir=$(readlink -f /etc/sysconfig/tcdir)
+ntdev=$(readlink -f /etc/sysconfig/ntdev)
+ntdir=$(devdir $ntdev)
+
+if [ "$tcdev" == "" ]; then
+	echo
+	warn "WARNING: I cannot find TinyCore device, abort!"
+	echo
+	exit 1
+fi
 
 if [ "$tcdir" == "" ]; then
-	tcdir=$(echo "$tcdev" | sed -e "s,/dev/,/mnt/,")
+	tcdir=${tcdev/dev/mnt}
 	mkdir -p $tcdir
-	mount -o ro $tcdev $tcdir
+	mount -o ro $tcdev $tcdir || exit 1
 fi
 
 if [ "$ntdir" == "" ]; then
-	ntdir=$(echo "$ntdev" | sed -e "s,/dev/,/mnt/,")
+	ntdir=${ntdev/dev/mnt}
 	mkdir -p $ntdir
 	mount -o ro -t ntfs $ntdev $ntdir || ntdir=""
 	

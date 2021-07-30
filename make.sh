@@ -234,7 +234,7 @@ fi
 
 if [ "$USER" != "root" ]; then
 	set -m
-	if ! timeout 0.1 sudo -n true; then
+	if ! timeout 0.2 sudo -n true; then
 		echo
 		warn "WARNING: $myname requires root permissions"
 		echo
@@ -361,6 +361,13 @@ function killsshafterqemu() {
 }
 
 if [ "$param" == "qemu-test" ]; then
+	if [ "$option" == "8Gb" ]; then
+		if [ -e tcl-64Mb-usb.disk ]; then
+			warn "WARNING: using current tcl-64Mb-usb.disk"
+		else
+			$0 image
+		fi
+	fi
 	$0 image $option && $0 qemu-init && \
 		$0 qemu $option
 	test "$?" != "0" && realexit 1
@@ -369,10 +376,15 @@ fi
 
 if [ "$param" == "qemu" -o "$param" == "all" ]; then
 	info "executing: qemu $option"
-	if [ ! -e storage-32Gb.disk -o ! -e tcl-64Mb-usb.disk ]; then
-		warning="SUGGEST: target open or image to deploy the disk images"
+	warning="SUGGEST: target open or image to deploy the disk images"
+	if [ ! -e storage-32Gb.disk ]; then	
+		exit 1
+	elif [ "$option" != "8Gb" -a ! -e tcl-64Mb-usb.disk ]; then
+		exit 1
+	elif [ "$option" == "8Gb" -a ! -e tcl-8Gb-usb.disk ]; then
 		exit 1
 	fi
+	warning=""
 	if ! ifconfig brkvm 2>/dev/null | grep -q "inet "; then
 		warning="SUGGEST: target qemu-init to uprise the enviroment"
 		exit 1
@@ -442,10 +454,11 @@ if [ "$param" == "image" -a "$option" != "8Gb" ]; then
 	if ! sudo fsck -fy ${devloop}p1; then
 		sudo fsck -fy ${devloop}p1
 	fi
-	eval $(grep "tclabel=" tinycore/changes/rcS)
+	eval $(grep "^tclabel=" tinycore/changes/rcS)
+	dosfslabel ${devloop}p1 $tclabel
 	if ! blkid  --label $tclabel $devloop; then
 		echo
-		warn "WARNING: in rcS the label is '$tclabel' but not in the image"
+		warn "WARNING: the label in rcS is '$tclabel' but not in the image"
 		rm -f tcl-64Mb-usb.disk
 		sudo losetup -D $devloop
 		exit 1
@@ -520,10 +533,10 @@ if [ "$param" == "close" -o "$param" == "all" ]; then
 		gzip -9c tcl-64Mb-usb.disk >tcl-64Mb-usb.disk.gz
 		let nclosed++ || true
 	fi
-	if [ -e tcl-8Gb-usb.disk ]; then
-		gzip -9c tcl-8Gb-usb.disk >tcl-8Gb-usb.disk.gz
-		let nclosed++ || true
-	fi
+#	if [ -e tcl-8Gb-usb.disk ]; then
+#		gzip -9c tcl-8Gb-usb.disk >tcl-8Gb-usb.disk.gz
+#		let nclosed++ || true
+#	fi
 	chown $SUDO_USER.$SUDO_USER *.disk.gz
 	if [[ $nclosed -lt 1 ]]; then
 		warning="SUGGEST: do it manually or clean"
@@ -539,7 +552,7 @@ if [ "$param" == "clean" -o "$param" == "all" ]; then
 	if sudo losetup -D $devloop; then
 		true
 	fi 2>/dev/null
-	rm -f tcl-8Gb-usb.disk tcl-64Mb-skeleton.disk tcl-64Mb-usb.disk
+	rm -f tcl-64Mb-skeleton.disk tcl-64Mb-usb.disk
 	rm -rf $tcldir
 fi
 

@@ -3,6 +3,10 @@
 # Autore: Roberto A. Foglietta <roberto.foglietta@altran.it>
 #
 
+function devdir() {
+	sed -ne "s,^$1 \([^ ]*\) .*,\1,p" /proc/mounts | head -n1
+}
+
 if [ "$USER" != "root" ]; then
 	echo
 	echo "This script requires being root, abort"
@@ -10,10 +14,10 @@ if [ "$USER" != "root" ]; then
 	exit 1
 fi
 
-tcdev=$(blkid | grep -e "=.TINYCORE. " | cut -d: -f1)
-tcdir=$(mount | grep -e "$tcdev on" | cut -d' ' -f3)
-ntdev=$(echo $tcdev | sed -e "s,1$,2,")
-ntdir=$(mount | grep -e "$ntdev on" | cut -d' ' -f3)
+tcdev=$(readlink -f /etc/sysconfig/tcdev)
+tcdir=$(readlink -f /etc/sysconfig/tcdir)
+ntdev=$(readlink -f /etc/sysconfig/ntdev)
+ntdir=$(devdir $ntdev)
 
 if [ "$tcdir" == "" ]; then
 	tcdir=$(echo "$tcdev" | sed -e "s,/dev/,/mnt/,")

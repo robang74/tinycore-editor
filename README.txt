@@ -3,10 +3,14 @@
 #
 # Repository: https://github.com/robang74/tinycore-editor
 #
+# m-list: https://groups.google.com/g/tinycore-editor
+#
 ###############################################################################
 
  This is a suite for quickly editing and testing a USB bootable disk based on 
- TinyCore Linux. It makes use of qemu and it should be installed in advance
+ TinyCore Linux. It makes use of qemu and it should be installed in advance.
+
+ USB firt partition label: T1NYC0R3 (but you can change it in rcS)
 
  0. Please read copyright.txt for the license terms
 

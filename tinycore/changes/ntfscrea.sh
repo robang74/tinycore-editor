@@ -3,6 +3,10 @@
 # Autore: Roberto A. Foglietta <roberto.foglietta@altran.it>
 #
 
+function devdir() {
+	sed -ne "s,^$1 \([^ ]*\) .*,\1,p" /proc/mounts | head -n1
+}
+
 export PATH=/home/tc/.local/bin:/usr/local/sbin:/usr/local/bin
 export PATH=$PATH:/apps/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
@@ -13,11 +17,11 @@ if [ "$USER" != "root" ]; then
 	exit 1
 fi
 
-tcdev=$(blkid | grep -e "=.TINYCORE. " | cut -d: -f1)
-tcdir=$(mount | grep -e "$tcdev on" | cut -d' ' -f3)
-ntdev=$(echo $tcdev | sed -e "s,1$,2,")
-ntdir=$(echo $ntdev | sed -e "s,/dev/,/mnt/,")
-bkdev=$(echo $tcdev | sed -e "s,1$,,")
+tcdev=$(readlink -f /etc/sysconfig/tcdev)
+tcdir=$(readlink -f /etc/sysconfig/tcdir)
+ntdev=$(readlink -f /etc/sysconfig/ntdev)
+ntdir=$(devdir $ntdev)
+bkdev=${tcdev%1}
 
 if ! fdisk -l $bkdev | grep -e "^$ntdev"; then
 #
