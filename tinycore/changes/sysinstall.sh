@@ -282,8 +282,8 @@ echo "v0.0.1" > $rootdir/$homedir/conf/version.conf
 if [ -f $datadir/$upfile ]; then
 	tar xzf $datadir/$upfile -moC $rootdir
 fi
-if [ -f $datadir/$upscrit ]; then
-	$datadir/$upscrit $rootdir 
+if [ -f $datadir/$upscript ]; then
+	$datadir/$upscript $rootdir
 fi
 
 grubcfg=/boot/grub/grub.cfg
