@@ -108,7 +108,7 @@ function perr() {
 
 function usage() {
 	echo
-	warn "USAGE: $myname [run script] device"
+	warn "USAGE: $myname [run script] drive"
 	echo
 }
 
