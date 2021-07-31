@@ -54,7 +54,7 @@ else
 	ln -sf $tcdev /etc/sysconfig/tcdev
 	tcdir=$(devdir $tcdev)
 	if [ "$tcdir" == "" ]; then
-		tcdir=$(echo "$tcdev" | sed -e "s,/dev/,/mnt/,")
+		tcdir=${tcdev/dev/mnt}
 		mkdir -p $tcdir
 		if ! mount -o ro $tcdev $tcdir; then
 			tcdir=""

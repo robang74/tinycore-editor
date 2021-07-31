@@ -20,7 +20,7 @@ ntdev=$(readlink /etc/sysconfig/ntdev)
 ntdir=$(devdir $ntdev)
 
 if [ "$tcdir" == "" ]; then
-	tcdir=$(echo "$tcdev" | sed -e "s,/dev/,/mnt/,")
+	tcdir=${tcdev/dev/mnt}
 	mkdir -p $tcdir
 fi
 
