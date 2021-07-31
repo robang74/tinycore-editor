@@ -25,6 +25,9 @@ if [ "$1" == "back" -o "$1" == "reverse" ]; then
 		mv -f $optional/*.tcz tcz
 		if [ "$1" == "reverse" ]; then
 			rm -rf tce
+			mkdir -p /tmp/tce
+			rm -f /etc/sysconfig/tcedir
+			ln -sf /tmp/tce /etc/sysconfig/tcedir
 		fi
 	fi
 	sync
@@ -39,6 +42,8 @@ ls -1 tcz/*.tcz 2>/dev/null && \
 	mv -f tcz/*.tcz $optional
 cd $optional
 ls -1 *.tcz >../onboot.lst 2>/dev/null
+rm -f /etc/sysconfig/tcedir
+ln -sf $mntdir/tce /etc/sysconfig/tcedir
 sync
 if [ "$readonly" != "0" ]; then
 	mount -o remount,ro $mntdir
