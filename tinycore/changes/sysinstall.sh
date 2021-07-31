@@ -182,7 +182,7 @@ if [ "$datadir" == "" ]; then
 	datadir=$ntdir
 fi
 
-usbdisk=$(echo $tcdev | sed -e "s,1$,,")
+usbdisk=${tcdev%1}
 if [ "$rstdisk" == "$usbdisk" ]; then
 	alert_exit 0 "Unsuitable block device usbdisk:${rstdisk}, abort" "Block devices check"
 fi

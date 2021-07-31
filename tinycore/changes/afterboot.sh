@@ -119,7 +119,8 @@ if [ ! -x /bin/bash ]; then
 	echo "ash \"\$@\"" >/bin/bash
 	chmod a+x /bin/bash
 fi
-gpg=$(which gpg2 | sed -e "s,2$,,")
+gpg=$(which gpg2)
+gpg=${gpg%2}
 test -n "$gpg" && ln -sf gpg2 "$gpg"
 if ! which shutdown >/dev/null; then
 	echo "poweroff" >/sbin/shutdown
