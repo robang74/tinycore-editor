@@ -140,7 +140,6 @@ function waitforssh() {
 			return 1
 		fi >/dev/null
 		k=$[k+1]
-		sleep 1
 	done 2>/dev/null
 	return 0
 }
