@@ -85,6 +85,7 @@ function exec2chroot() {
 	echo "sed -e 's,\\\.,,g' /etc/issue; cd $1; $2" > $script
 	chmod a+x $script
 	chroot $rootdir $execss 2>&3
+	echo $? >/run/tcchroot.exit
 	rm -f $script
 	unmountall
 }
@@ -143,7 +144,7 @@ fi
 blkdev=$1
 if [ "$blkdev" == "" ]; then
 	blkdev=/dev/mmcblk1
-	if [ ! -b $blkdev ]; then
+	if ! grep -qe "${blkdev/\/dev\//}$" /proc/partitions; then
 		usage; realexit 1
 	fi
 fi
