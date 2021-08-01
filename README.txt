@@ -102,11 +102,6 @@
     options which is required or optimal for your system. When you reach the
     definitive boot configuration edit the tinycore/changes/syslinux.cfg
 
-16. Alternatively you can use this ./make all or ./make all 8Gb which will
-    create the image, start a qemu session in which you can do tests and
-    modification the at the ssh exit the make will finalise creating an
-    image archive for future use with ./make.sh open or ./make.sh 8Gb
-
 ###############################################################################
 
 https://github.com/pbatard/rufus/releases/download/v3.14/rufus-3.14.exe
