@@ -388,6 +388,10 @@ if [ "$param" == "all"   -a "$option" == "8Gb" ] \
 	info "executing: image 8Gb"
 	if [ ! -e tcl-64Mb-usb.disk.gz -a ! -e tcl-64Mb-usb.disk ]; then
 		$0 image
+	else
+		echo
+		warn "WARNING: using existing 64Mb image for 8Gb image creation"
+		echo
 	fi
 	if [ ! -e tcl-8Gb-usb.disk ]; then
 		create=yes
