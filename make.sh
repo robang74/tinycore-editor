@@ -11,9 +11,9 @@ ARCH=x86_64 #i386
 qemuexec=qemu-system-$ARCH
 tcdir="" #if not defined, it will be found
 devloop="" #if not defined, it will be found
-drvi8gb="format=raw,file=tcl-8Gb-usb.disk"
-drvboot="format=raw,file=tcl-64Mb-usb.disk"
-drvdata="id=sd,if=none,bus=1,unit=0,format=raw,file=storage-32Gb.disk"
+drvi8GB="format=raw,file=tcl-8GB-usb.disk"
+drvboot="format=raw,file=tcl-64MB-usb.disk"
+drvdata="id=sd,if=none,bus=1,unit=0,format=raw,file=storage-32GB.disk"
 tcldir="tcldisk"
 
 if [ -e make.conf ]; then
@@ -68,17 +68,17 @@ function usage() {
 	info " USAGE: $myname target"
 	echo
 	echo -e "\ttargets:"
-	echo -e "\t\topen [8Gb]"
-	echo -e "\t\timage [8Gb]"
+	echo -e "\t\topen [8GB]"
+	echo -e "\t\timage [8GB]"
 	echo -e "\t\tqemu-init"
 	echo -e "\t\tqemu-test"
-	echo -e "\t\tqemu [8Gb]"
+	echo -e "\t\tqemu [8GB]"
 	echo -e "\t\tssh-copy [ip]"
-	echo -e "\t\tssh-end [8Gb]"
+	echo -e "\t\tssh-end [8GB]"
 	echo -e "\t\tqemu-stop"
-	echo -e "\t\tclose [8Gb]"
-	echo -e "\t\tclean [8Gb]"
-	echo -e "\t\tall [8Gb]"
+	echo -e "\t\tclose [8GB]"
+	echo -e "\t\tclean [8GB]"
+	echo -e "\t\tall [8GB]"
 	echo -e "\t\tssh-root [ip]"
 	echo
 }
@@ -275,7 +275,7 @@ if [ "$1" != "" ]; then
 	usage; exit 1
 fi
 
-if [ "$option" != "8Gb" -a "$option" != "" ]; then
+if [ "$option" != "8GB" -a "$option" != "" ]; then
 	usage; exit 1
 fi
 
@@ -307,48 +307,48 @@ if [ "$param" == "all" ]; then
 	info "executing: $myname $param $option"
 fi
 
-if [ "$param" == "open" -a "$option" != "8Gb" ]; then
+if [ "$param" == "open" -a "$option" != "8GB" ]; then
 	info "executing: open"
-	if [ -e tcl-64Mb-usb.disk ]; then
+	if [ -e tcl-64MB-usb.disk ]; then
 		warning="SUGGEST: run '$myname clean' to remove existing disk image"
 		exit 1
 	fi
-	if [ ! -e storage-32Gb.disk ]; then
-		dd if=/dev/zero bs=512 count=1 seek=61071359 of=storage-32Gb.disk
+	if [ ! -e storage-32GB.disk ]; then
+		dd if=/dev/zero bs=512 count=1 seek=61071359 of=storage-32GB.disk
 	fi
-	zcat tcl-64Mb-usb.disk.gz >tcl-64Mb-usb.disk
+	zcat tcl-64MB-usb.disk.gz >tcl-64MB-usb.disk
 	chown $SUDO_USER.$SUDO_USER *.disk
 	sync
 fi
 
-if [ "$param" == "open" -a "$option" == "8Gb" ]; then
-	info "executing: open 8Gb"
-	if [ -e tcl-8Gb-usb.disk ]; then
-		warning="SUGGEST: run '$myname clean 8Gb' to remove existing disk images"
+if [ "$param" == "open" -a "$option" == "8GB" ]; then
+	info "executing: open 8GB"
+	if [ -e tcl-8GB-usb.disk ]; then
+		warning="SUGGEST: run '$myname clean 8GB' to remove existing disk images"
 		exit 1
 	fi
-	if [ ! -e storage-32Gb.disk ]; then
-		dd if=/dev/zero bs=512 count=1 seek=61071359 of=storage-32Gb.disk
+	if [ ! -e storage-32GB.disk ]; then
+		dd if=/dev/zero bs=512 count=1 seek=61071359 of=storage-32GB.disk
 	fi
-	zcat tcl-8Gb-usb.disk.gz >tcl-8Gb-usb.disk
+	zcat tcl-8GB-usb.disk.gz >tcl-8GB-usb.disk
 	chown $SUDO_USER.$SUDO_USER *.disk
 	sync
 fi
 
-if [ "$param" == "image" -a "$option" != "8Gb" ] \
-|| [ "$param" == "all"   -a "$option" != "8Gb" ]; then
+if [ "$param" == "image" -a "$option" != "8GB" ] \
+|| [ "$param" == "all"   -a "$option" != "8GB" ]; then
 	info "executing: image"
-	if [ -e tcl-64Mb-usb.disk ]; then
+	if [ -e tcl-64MB-usb.disk ]; then
 		warning="SUGGEST: run '$myname clean' to remove existing disk images"
 		exit 1
 	fi
-	if [ ! -e storage-32Gb.disk ]; then
-		dd if=/dev/zero bs=512 count=1 seek=61071359 of=storage-32Gb.disk
+	if [ ! -e storage-32GB.disk ]; then
+		dd if=/dev/zero bs=512 count=1 seek=61071359 of=storage-32GB.disk
 	fi
-	zcat tcl-64Mb-skeleton.disk.gz >tcl-64Mb-usb.disk
+	zcat tcl-64MB-skeleton.disk.gz >tcl-64MB-usb.disk
 	sync
 	cd tinycore; ./rootfs.sh update; cd -
-	sudo losetup --partscan $devloop tcl-64Mb-usb.disk
+	sudo losetup --partscan $devloop tcl-64MB-usb.disk
 	if ! sudo fsck -fy ${devloop}p1; then
 		sudo fsck -fy ${devloop}p1
 	fi
@@ -357,13 +357,13 @@ if [ "$param" == "image" -a "$option" != "8Gb" ] \
 	if ! blkid  --label $tclabel $devloop; then
 		echo
 		warn "WARNING: the label in rcS is '$tclabel' but not in the image"
-		rm -f tcl-64Mb-usb.disk
+		rm -f tcl-64MB-usb.disk
 		sudo losetup -D $devloop
 		exit 1
 	fi
 	mkdir -p $tcldir
  	if ! sudo mount -o rw ${devloop}p1 $tcldir; then
-		rm -f tcl-64Mb-usb.disk
+		rm -f tcl-64MB-usb.disk
 		sudo losetup -D $devloop
 		rmdir $tcldir
 		exit 1		
@@ -383,27 +383,27 @@ if [ "$param" == "image" -a "$option" != "8Gb" ] \
 
 fi
 
-if [ "$param" == "all"   -a "$option" == "8Gb" ] \
-|| [ "$param" == "image" -a "$option" == "8Gb" ]; then
-	info "executing: image 8Gb"
-	if [ ! -e tcl-64Mb-usb.disk.gz -a ! -e tcl-64Mb-usb.disk ]; then
+if [ "$param" == "all"   -a "$option" == "8GB" ] \
+|| [ "$param" == "image" -a "$option" == "8GB" ]; then
+	info "executing: image 8GB"
+	if [ ! -e tcl-64MB-usb.disk.gz -a ! -e tcl-64MB-usb.disk ]; then
 		$0 image
 	else
 		echo
-		warn "WARNING: using existing 64Mb image for 8Gb image creation"
+		warn "WARNING: using existing 64MB image for 8GB image creation"
 		echo
 	fi
-	if [ ! -e tcl-8Gb-usb.disk ]; then
+	if [ ! -e tcl-8GB-usb.disk ]; then
 		create=yes
-		dd if=/dev/zero bs=1M count=1 seek=7500 of=tcl-8Gb-usb.disk
+		dd if=/dev/zero bs=1M count=1 seek=7500 of=tcl-8GB-usb.disk
 	fi
-	if [ -e tcl-64Mb-usb.disk ]; then
-		dd if=tcl-64Mb-usb.disk bs=1M of=tcl-8Gb-usb.disk conv=notrunc
+	if [ -e tcl-64MB-usb.disk ]; then
+		dd if=tcl-64MB-usb.disk bs=1M of=tcl-8GB-usb.disk conv=notrunc
 	else
-		zcat tcl-64Mb-usb.disk.gz | dd bs=1M of=tcl-8Gb-usb.disk conv=notrunc
+		zcat tcl-64MB-usb.disk.gz | dd bs=1M of=tcl-8GB-usb.disk conv=notrunc
 	fi
 	if [ "$param" == "image" -a "$create" == "yes" ]; then
-		losetup --partscan $devloop tcl-8Gb-usb.disk
+		losetup --partscan $devloop tcl-8GB-usb.disk
 		if true; then
 			echo -e "n\n p\n 2\n \n \n N"
 			echo -e "t\n 2\n 7\n w"
@@ -411,7 +411,7 @@ if [ "$param" == "all"   -a "$option" == "8Gb" ] \
 		mkfs -t ntfs -L NTFS -F -Q ${devloop}p2 >/dev/null
 		losetup -D $devloop
 	fi
-	chown $SUDO_USER.$SUDO_USER tcl-8Gb-usb.disk
+	chown $SUDO_USER.$SUDO_USER tcl-8GB-usb.disk
 	sync
 fi
 
@@ -433,9 +433,9 @@ if [ "$param" == "qemu-init" -o "$param" == "all" ]; then
 fi
 
 if [ "$param" == "qemu-test" ]; then
-	if [ "$option" == "8Gb" ]; then
-		if [ -e tcl-64Mb-usb.disk ]; then
-			warn "WARNING: using current tcl-64Mb-usb.disk"
+	if [ "$option" == "8GB" ]; then
+		if [ -e tcl-64MB-usb.disk ]; then
+			warn "WARNING: using current tcl-64MB-usb.disk"
 		else
 			$0 image
 		fi
@@ -449,11 +449,11 @@ fi
 if [ "$param" == "qemu" -o "$param" == "all" ]; then
 	info "executing: qemu $option"
 	warning="SUGGEST: target open or image to deploy the disk images"
-	if [ ! -e storage-32Gb.disk ]; then	
+	if [ ! -e storage-32GB.disk ]; then	
 		exit 1
-	elif [ "$option" != "8Gb" -a ! -e tcl-64Mb-usb.disk ]; then
+	elif [ "$option" != "8GB" -a ! -e tcl-64MB-usb.disk ]; then
 		exit 1
-	elif [ "$option" == "8Gb" -a ! -e tcl-8Gb-usb.disk ]; then
+	elif [ "$option" == "8GB" -a ! -e tcl-8GB-usb.disk ]; then
 		exit 1
 	fi
 	warning=""
@@ -465,9 +465,9 @@ if [ "$param" == "qemu" -o "$param" == "all" ]; then
 		warning="SUGGEST: qemu is just running, use it or kill it"
 		exit 1
 	fi
-	if [ "$option" == "8Gb" ]; then
-		info "executing: qemu will boot from the 8Gb image"
-		drvboot=$drvi8gb
+	if [ "$option" == "8GB" ]; then
+		info "executing: qemu will boot from the 8GB image"
+		drvboot=$drvi8GB
 	fi
 	sudo $qemuexec --cpu host --enable-kvm -m 256 -boot c -net nic \
 		-net bridge,br=brkvm -drive $drvboot -device sdhci-pci \
@@ -514,7 +514,7 @@ if [ "$param" == "ssh-end" -o "$param" == "all" ]; then
 	sshfingerprintclean
 	tcrootunlock
 	sshgettcdir
-	if [ "$option" == "8Gb" ]; then
+	if [ "$option" == "8GB" ]; then
 		myssh 0 root "ntfs-usbdisk-partition-create.sh && echo DONE" | grep -q DONE
 	fi
 	myssh 0 root "unlock.sh;
@@ -555,12 +555,12 @@ fi
 if [ "$param" == "close" -o "$param" == "all" ]; then
 	nclosed=0
 	info "executing: close $option"
-	if [ -e tcl-64Mb-usb.disk ]; then
-		gzip -9c tcl-64Mb-usb.disk >tcl-64Mb-usb.disk.gz
+	if [ -e tcl-64MB-usb.disk ]; then
+		gzip -9c tcl-64MB-usb.disk >tcl-64MB-usb.disk.gz
 		let nclosed++ || true
 	fi
-	if [ "$option" == "8Gb" ]; then
-		gzip -9c tcl-8Gb-usb.disk >tcl-8Gb-usb.disk.gz
+	if [ "$option" == "8GB" ]; then
+		gzip -9c tcl-8GB-usb.disk >tcl-8GB-usb.disk.gz
 		let nclosed++ || true
 	fi
 	chown $SUDO_USER.$SUDO_USER *.disk.gz
@@ -578,9 +578,9 @@ if [ "$param" == "clean" ]; then
 	if sudo losetup -D $devloop; then
 		true
 	fi 2>/dev/null
-	rm -f tcl-64Mb-skeleton.disk tcl-64Mb-usb.disk
-	if [ "$option" == "8Gb" ]; then
-		rm -f tcl-8Gb-usb.disk
+	rm -f tcl-64MB-skeleton.disk tcl-64MB-usb.disk
+	if [ "$option" == "8GB" ]; then
+		rm -f tcl-8GB-usb.disk
 	fi
 	rm -rf $tcldir
 fi

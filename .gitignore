@@ -5,7 +5,7 @@
 /tinycore/provides/tc*.db.gz
 /tinycore/tcz/*.tcz
 /tinycore/vmlinuz
-/tcl-64Mb-usb.disk.gz
+/tcl-*-usb.disk.gz
 /ubuntu/ubuntu-base-20.04.2-base-amd64.tar.gz
 /ubuntu/system.tgz
 /ubuntu/rootfs
