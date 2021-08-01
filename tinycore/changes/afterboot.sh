@@ -82,7 +82,6 @@ if [ "$ntdir" == "" ]; then
 fi
 
 if [ -d $tcdir/tcz ]; then
-	mkdir -p $tcdir/tcz
 	infotime -n "Loading TCZ archives: "
 	su - tc -c "tce-load -i $tcdir/tcz/*.tcz" | \
 		grep -v "is already installed!" | \
