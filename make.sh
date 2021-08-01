@@ -31,7 +31,6 @@ ssh-end
 qemu-stop
 close
 clean
-all
 image
 "
 
@@ -78,7 +77,6 @@ function usage() {
 	echo -e "\t\tqemu-stop"
 	echo -e "\t\tclose [8GB]"
 	echo -e "\t\tclean [8GB]"
-	echo -e "\t\tall [8GB]"
 	echo -e "\t\tssh-root [ip]"
 	echo
 }
@@ -303,9 +301,6 @@ set -e
 sshkeycln=yes
 warning=""
 echo
-if [ "$param" == "all" ]; then
-	info "executing: $myname $param $option"
-fi
 
 if [ "$param" == "open" -a "$option" != "8GB" ]; then
 	info "executing: open"
@@ -335,8 +330,7 @@ if [ "$param" == "open" -a "$option" == "8GB" ]; then
 	sync
 fi
 
-if [ "$param" == "image" -a "$option" != "8GB" ] \
-|| [ "$param" == "all"   -a "$option" != "8GB" ]; then
+if [ "$param" == "image" -a "$option" != "8GB" ]; then
 	info "executing: image"
 	if [ -e tcl-64MB-usb.disk ]; then
 		warning="SUGGEST: run '$myname clean' to remove existing disk images"
@@ -382,8 +376,7 @@ if [ "$param" == "image" -a "$option" != "8GB" ] \
 	rmdir $tcldir
 fi
 
-if [ "$param" == "all"   -a "$option" == "8GB" ] \
-|| [ "$param" == "image" -a "$option" == "8GB" ]; then
+if [ "$param" == "image" -a "$option" == "8GB" ]; then
 	info "executing: image 8GB"
 	if [ ! -e tcl-64MB-usb.disk.gz -a ! -e tcl-64MB-usb.disk ]; then
 		$0 image
@@ -415,7 +408,7 @@ if [ "$param" == "all"   -a "$option" == "8GB" ] \
 fi
 
 stayalive=no
-if [ "$param" == "qemu-init" -o "$param" == "all" ]; then
+if [ "$param" == "qemu-init" ]; then
 	info "executing: qemu-init"
 	if ! ifconfig brkvm 2>/dev/null | grep -q "inet "; then
 		sudo brctl addbr brkvm
@@ -445,7 +438,7 @@ if [ "$param" == "qemu-test" ]; then
 	$0 ssh-root
 fi
 
-if [ "$param" == "qemu" -o "$param" == "all" ]; then
+if [ "$param" == "qemu" ]; then
 	info "executing: qemu $option"
 	warning="SUGGEST: target open or image to deploy the disk images"
 	if [ ! -e storage-32GB.disk ]; then	
@@ -476,7 +469,7 @@ if [ "$param" == "qemu" -o "$param" == "all" ]; then
 	waitforssh 1
 fi
 
-if [ "$param" == "ssh-root" -o "$param" == "all" ]; then
+if [ "$param" == "ssh-root" ]; then
 	info "executing: ssh $tcip"
 	sshfingerprintclean
 	killsshafterqemu >/dev/null 2>&1 &
@@ -508,7 +501,7 @@ if [ "$param" == "ssh-copy" ]; then
 	rm -rf $tcldir
 fi
 
-if [ "$param" == "ssh-end" -o "$param" == "all" ]; then
+if [ "$param" == "ssh-end" ]; then
 	info "executing: ssh-end $option"
 	sshfingerprintclean
 	tcrootunlock
@@ -535,7 +528,7 @@ sync; rm -f $tcdir/zero; shutdown"
 	while pgrep qemu >/dev/null; do sleep 1; done
 fi
 
-if [ "$param" == "qemu-stop" -o "$param" == "all" ]; then
+if [ "$param" == "qemu-stop" ]; then
 	info "executing: qemu-stop"
 	if pgrep qemu >/dev/null; then
 		warning="SUGGEST: qemu is just running, use it or kill it"
@@ -551,7 +544,7 @@ if [ "$param" == "qemu-stop" -o "$param" == "all" ]; then
 	fi
 fi
 
-if [ "$param" == "close" -o "$param" == "all" ]; then
+if [ "$param" == "close" ]; then
 	nclosed=0
 	info "executing: close $option"
 	if [ -e tcl-64MB-usb.disk ]; then
