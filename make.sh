@@ -68,15 +68,16 @@ function usage() {
 	info " USAGE: $myname target"
 	echo
 	echo -e "\ttargets:"
-	echo -e "\t\topen | image [8Gb]"
+	echo -e "\t\topen [8Gb]"
+	echo -e "\t\timage [8Gb]"
 	echo -e "\t\tqemu-init"
 	echo -e "\t\tqemu-test"
 	echo -e "\t\tqemu [8Gb]"
 	echo -e "\t\tssh-copy [ip]"
 	echo -e "\t\tssh-end [8Gb]"
 	echo -e "\t\tqemu-stop"
-	echo -e "\t\tclose"
-	echo -e "\t\tclean"
+	echo -e "\t\tclose [8Gb]"
+	echo -e "\t\tclean [8Gb]"
 	echo -e "\t\tall [8Gb]"
 	echo -e "\t\tssh-root [ip]"
 	echo
@@ -206,6 +207,20 @@ function sshfingerprintclean() {
 	fi >/dev/null
 }
 
+function killsshafterqemu() {
+	while sleep 0.5; do
+		if pgrep qemu; then
+			break;
+		fi >/dev/null
+	done
+	while sleep 0.5; do
+		if ! pgrep qemu; then
+			pkill -f myssh
+			break;
+		fi >/dev/null 2>&1
+	done
+}
+
 function info() {
 	echo -e "\e[1;36m$@\e[0m"
 }
@@ -289,13 +304,13 @@ sshkeycln=yes
 warning=""
 echo
 if [ "$param" == "all" ]; then
-	info "executing: $myname $param"
+	info "executing: $myname $param $option"
 fi
 
-if [ "$param" == "open" -o "$param" == "all" ]; then
+if [ "$param" == "open" -a "$option" != "8Gb" ]; then
 	info "executing: open"
 	if [ -e tcl-64Mb-usb.disk ]; then
-		warning="SUGGEST: run '$myname clean' to remove existing disk images"
+		warning="SUGGEST: run '$myname clean' to remove existing disk image"
 		exit 1
 	fi
 	if [ ! -e storage-32Gb.disk ]; then
@@ -306,144 +321,22 @@ if [ "$param" == "open" -o "$param" == "all" ]; then
 	sync
 fi
 
-if [ "$param" == "all"   -a "$option" == "8Gb" ] \
-|| [ "$param" == "image" -a "$option" == "8Gb" ]; then
-	info "executing: image 8Gb"
-	if [ ! -e tcl-64Mb-usb.disk.gz -a ! -e tcl-64Mb-usb.disk ]; then
-		warning="SUGGEST: run '$myname image' to create the 64Mb disk image"
-		exit 1		
+if [ "$param" == "open" -a "$option" == "8Gb" ]; then
+	info "executing: open 8Gb"
+	if [ -e tcl-8Gb-usb.disk ]; then
+		warning="SUGGEST: run '$myname clean 8Gb' to remove existing disk images"
+		exit 1
 	fi
-	if [ ! -e tcl-8Gb-usb.disk ]; then
-		create=yes
-		dd if=/dev/zero bs=1M count=1 seek=7500 of=tcl-8Gb-usb.disk
+	if [ ! -e storage-32Gb.disk ]; then
+		dd if=/dev/zero bs=512 count=1 seek=61071359 of=storage-32Gb.disk
 	fi
-	if [ -e tcl-64Mb-usb.disk ]; then
-		dd if=tcl-64Mb-usb.disk bs=1M of=tcl-8Gb-usb.disk conv=notrunc
-	else
-		zcat tcl-64Mb-usb.disk.gz | dd bs=1M of=tcl-8Gb-usb.disk conv=notrunc
-	fi
-	if [ "$param" == "image" -a "$create" == "yes" ]; then
-		losetup --partscan $devloop tcl-8Gb-usb.disk
-		if true; then
-			echo -e "n\n p\n 2\n \n \n N"
-			echo -e "t\n 2\n 7\n w"
-		fi | fdisk $devloop >/dev/null 2>&1
-		mkfs -t ntfs -L NTFS -F -Q ${devloop}p2 >/dev/null
-		losetup -D $devloop
-	fi
-	chown $SUDO_USER.$SUDO_USER tcl-8Gb-usb.disk
+	zcat tcl-8Gb-usb.disk.gz >tcl-8Gb-usb.disk
+	chown $SUDO_USER.$SUDO_USER *.disk
 	sync
 fi
 
-stayalive=no
-if [ "$param" == "qemu-init" -o "$param" == "all" ]; then
-	info "executing: qemu-init"
-	if ! ifconfig brkvm 2>/dev/null | grep -q "inet "; then
-		sudo brctl addbr brkvm
-		sudo ip addr add $brip/$netm dev brkvm
-		sudo ip link set brkvm up
-		sudo mkdir -p /etc/qemu
-		sudo touch /etc/qemu/bridge.conf
-		echo "allow brkvm" | sudo tee /etc/qemu/bridge.conf
-		sudo dnsmasq --interface=brkvm --bind-interfaces --dhcp-range=$tcip,$tcip
-		sshfingerprintclean
-	else
-		stayalive=yes
-	fi
-fi
-
-function killsshafterqemu() {
-	while sleep 0.5; do
-		if pgrep qemu; then
-			break;
-		fi >/dev/null
-	done
-	while sleep 0.5; do
-		if ! pgrep qemu; then
-			pkill -f myssh
-			break;
-		fi >/dev/null 2>&1
-	done
-}
-
-if [ "$param" == "qemu-test" ]; then
-	if [ "$option" == "8Gb" ]; then
-		if [ -e tcl-64Mb-usb.disk ]; then
-			warn "WARNING: using current tcl-64Mb-usb.disk"
-		else
-			$0 image
-		fi
-	fi
-	$0 image $option && $0 qemu-init && \
-		$0 qemu $option
-	test "$?" != "0" && realexit 1
-	$0 ssh-root
-fi
-
-if [ "$param" == "qemu" -o "$param" == "all" ]; then
-	info "executing: qemu $option"
-	warning="SUGGEST: target open or image to deploy the disk images"
-	if [ ! -e storage-32Gb.disk ]; then	
-		exit 1
-	elif [ "$option" != "8Gb" -a ! -e tcl-64Mb-usb.disk ]; then
-		exit 1
-	elif [ "$option" == "8Gb" -a ! -e tcl-8Gb-usb.disk ]; then
-		exit 1
-	fi
-	warning=""
-	if ! ifconfig brkvm 2>/dev/null | grep -q "inet "; then
-		warning="SUGGEST: target qemu-init to uprise the enviroment"
-		exit 1
-	fi
-	if pgrep qemu >/dev/null; then
-		warning="SUGGEST: qemu is just running, use it or kill it"
-		exit 1
-	fi
-	if [ "$option" == "8Gb" ]; then
-		info "executing: qemu will boot from the 8Gb image"
-		drvboot=$drvi8gb
-	fi
-	sudo $qemuexec --cpu host --enable-kvm -m 256 -boot c -net nic \
-		-net bridge,br=brkvm -drive $drvboot -device sdhci-pci \
-		-device sdhci-pci -device sd-card,drive=sd -drive $drvdata &
-	info "executing: waiting for the qemu system start-up"
-	sshfingerprintclean
-	waitforssh 1
-fi
-
-if [ "$param" == "ssh-root" ]; then
-	info "executing: ssh $tcip"
-	sshfingerprintclean
-	killsshafterqemu >/dev/null 2>&1 &
-	tcrootunlock
-	set +e
-	myssh 0 root
-	info "executing: ssh-root $tcip completed"
-	trap - EXIT
-	exit 0
-fi
-
-if [ "$param" == "ssh-copy" -o "$param" == "all" ]; then
-	info "executing: ssh-copy $tcip"
-	if [ -e "$tcldir" ]; then
-		warning="SUGGEST: run '$myname clean' to remove existing disk folder"
-		exit 1
-	fi
-	sshfingerprintclean
-	tcrootunlock
-	sshgettcdir
-	tccopyall
-	cd $tcldir
-	chown -R $SUDO_USER.$SUDO_USER .
-	myssh 0 root "tcz2tce.sh back"
-	myscp * root@$tcip:$tcdir && \
-		echo -e "\ttransfer everything to $tcip:$tcdir"
-	myssh 0 root "test -e $tcdir/tce && tcz2tce.sh >/dev/null; sync"
-	cd ..
-	rm -rf $tcldir
-fi
-
-if [ "$param" == "image" -a "$option" != "8Gb" ]; then
+if [ "$param" == "image" -a "$option" != "8Gb" ] \
+|| [ "$param" == "all"   -a "$option" != "8Gb" ]; then
 	info "executing: image"
 	if [ -e tcl-64Mb-usb.disk ]; then
 		warning="SUGGEST: run '$myname clean' to remove existing disk images"
@@ -490,6 +383,128 @@ if [ "$param" == "image" -a "$option" != "8Gb" ]; then
 
 fi
 
+if [ "$param" == "all"   -a "$option" == "8Gb" ] \
+|| [ "$param" == "image" -a "$option" == "8Gb" ]; then
+	info "executing: image 8Gb"
+	if [ ! -e tcl-64Mb-usb.disk.gz -a ! -e tcl-64Mb-usb.disk ]; then
+		$0 image
+	fi
+	if [ ! -e tcl-8Gb-usb.disk ]; then
+		create=yes
+		dd if=/dev/zero bs=1M count=1 seek=7500 of=tcl-8Gb-usb.disk
+	fi
+	if [ -e tcl-64Mb-usb.disk ]; then
+		dd if=tcl-64Mb-usb.disk bs=1M of=tcl-8Gb-usb.disk conv=notrunc
+	else
+		zcat tcl-64Mb-usb.disk.gz | dd bs=1M of=tcl-8Gb-usb.disk conv=notrunc
+	fi
+	if [ "$param" == "image" -a "$create" == "yes" ]; then
+		losetup --partscan $devloop tcl-8Gb-usb.disk
+		if true; then
+			echo -e "n\n p\n 2\n \n \n N"
+			echo -e "t\n 2\n 7\n w"
+		fi | fdisk $devloop >/dev/null 2>&1
+		mkfs -t ntfs -L NTFS -F -Q ${devloop}p2 >/dev/null
+		losetup -D $devloop
+	fi
+	chown $SUDO_USER.$SUDO_USER tcl-8Gb-usb.disk
+	sync
+fi
+
+stayalive=no
+if [ "$param" == "qemu-init" -o "$param" == "all" ]; then
+	info "executing: qemu-init"
+	if ! ifconfig brkvm 2>/dev/null | grep -q "inet "; then
+		sudo brctl addbr brkvm
+		sudo ip addr add $brip/$netm dev brkvm
+		sudo ip link set brkvm up
+		sudo mkdir -p /etc/qemu
+		sudo touch /etc/qemu/bridge.conf
+		echo "allow brkvm" | sudo tee /etc/qemu/bridge.conf
+		sudo dnsmasq --interface=brkvm --bind-interfaces --dhcp-range=$tcip,$tcip
+		sshfingerprintclean
+	else
+		stayalive=yes
+	fi
+fi
+
+if [ "$param" == "qemu-test" ]; then
+	if [ "$option" == "8Gb" ]; then
+		if [ -e tcl-64Mb-usb.disk ]; then
+			warn "WARNING: using current tcl-64Mb-usb.disk"
+		else
+			$0 image
+		fi
+	fi
+	$0 image $option && $0 qemu-init && \
+		$0 qemu $option
+	test "$?" != "0" && realexit 1
+	$0 ssh-root
+fi
+
+if [ "$param" == "qemu" -o "$param" == "all" ]; then
+	info "executing: qemu $option"
+	warning="SUGGEST: target open or image to deploy the disk images"
+	if [ ! -e storage-32Gb.disk ]; then	
+		exit 1
+	elif [ "$option" != "8Gb" -a ! -e tcl-64Mb-usb.disk ]; then
+		exit 1
+	elif [ "$option" == "8Gb" -a ! -e tcl-8Gb-usb.disk ]; then
+		exit 1
+	fi
+	warning=""
+	if ! ifconfig brkvm 2>/dev/null | grep -q "inet "; then
+		warning="SUGGEST: target qemu-init to uprise the enviroment"
+		exit 1
+	fi
+	if pgrep qemu >/dev/null; then
+		warning="SUGGEST: qemu is just running, use it or kill it"
+		exit 1
+	fi
+	if [ "$option" == "8Gb" ]; then
+		info "executing: qemu will boot from the 8Gb image"
+		drvboot=$drvi8gb
+	fi
+	sudo $qemuexec --cpu host --enable-kvm -m 256 -boot c -net nic \
+		-net bridge,br=brkvm -drive $drvboot -device sdhci-pci \
+		-device sdhci-pci -device sd-card,drive=sd -drive $drvdata &
+	info "executing: waiting for the qemu system start-up"
+	sshfingerprintclean
+	waitforssh 1
+fi
+
+if [ "$param" == "ssh-root" -o "$param" == "all" ]; then
+	info "executing: ssh $tcip"
+	sshfingerprintclean
+	killsshafterqemu >/dev/null 2>&1 &
+	tcrootunlock
+	set +e
+	myssh 0 root
+	info "executing: ssh-root $tcip completed"
+#	trap - EXIT
+#	exit 0
+fi
+
+if [ "$param" == "ssh-copy" ]; then
+	info "executing: ssh-copy $tcip"
+	if [ -e "$tcldir" ]; then
+		warning="SUGGEST: run '$myname clean' to remove existing disk folder"
+		exit 1
+	fi
+	sshfingerprintclean
+	tcrootunlock
+	sshgettcdir
+	tccopyall
+	cd $tcldir
+	chown -R $SUDO_USER.$SUDO_USER .
+	myssh 0 root "tcz2tce.sh back"
+	myscp * root@$tcip:$tcdir && \
+		echo -e "\ttransfer everything to $tcip:$tcdir"
+	myssh 0 root "test -e $tcdir/tce && tcz2tce.sh >/dev/null; sync"
+	cd ..
+	rm -rf $tcldir
+fi
+
 if [ "$param" == "ssh-end" -o "$param" == "all" ]; then
 	info "executing: ssh-end $option"
 	sshfingerprintclean
@@ -498,7 +513,9 @@ if [ "$param" == "ssh-end" -o "$param" == "all" ]; then
 	if [ "$option" == "8Gb" ]; then
 		myssh 0 root "ntfs-usbdisk-partition-create.sh && echo DONE" | grep -q DONE
 	fi
-	myssh 0 root "dd if=/dev/zero of=$tcdir/zero; sync; rm -f $tcdir/zero; shutdown"
+	myssh 0 root "unlock.sh;
+dd if=/dev/zero of=$tcdir/zero; 
+sync; rm -f $tcdir/zero; shutdown"
 	info "executing: waiting for the qemu system shut down"
 	k=0
 	sleep 1
@@ -533,15 +550,15 @@ fi
 
 if [ "$param" == "close" -o "$param" == "all" ]; then
 	nclosed=0
-	info "executing: close"
+	info "executing: close $option"
 	if [ -e tcl-64Mb-usb.disk ]; then
 		gzip -9c tcl-64Mb-usb.disk >tcl-64Mb-usb.disk.gz
 		let nclosed++ || true
 	fi
-#	if [ -e tcl-8Gb-usb.disk ]; then
-#		gzip -9c tcl-8Gb-usb.disk >tcl-8Gb-usb.disk.gz
-#		let nclosed++ || true
-#	fi
+	if [ "$option" == "8Gb" ]; then
+		gzip -9c tcl-8Gb-usb.disk >tcl-8Gb-usb.disk.gz
+		let nclosed++ || true
+	fi
 	chown $SUDO_USER.$SUDO_USER *.disk.gz
 	if [[ $nclosed -lt 1 ]]; then
 		warning="SUGGEST: do it manually or clean"
@@ -549,8 +566,8 @@ if [ "$param" == "close" -o "$param" == "all" ]; then
 	fi
 fi
 
-if [ "$param" == "clean" -o "$param" == "all" ]; then
-	info "executing: clean"
+if [ "$param" == "clean" ]; then
+	info "executing: clean $option"
 	while sudo umount $tcldir; do
 		true
 	done 2>/dev/null
@@ -558,6 +575,9 @@ if [ "$param" == "clean" -o "$param" == "all" ]; then
 		true
 	fi 2>/dev/null
 	rm -f tcl-64Mb-skeleton.disk tcl-64Mb-usb.disk
+	if [ "$option" == "8Gb" ]; then
+		rm -f tcl-8Gb-usb.disk
+	fi
 	rm -rf $tcldir
 fi
 
