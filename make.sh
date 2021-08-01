@@ -132,14 +132,13 @@ function myscp() {
 }
 
 function waitforssh() {
-	info "executing: waitforssh"
-	k=0
-	sleep 1
+	info "executing: $FUNCNAME"
+	declare -i sec=$1
+	sleep $sec
 	while ! myssh 1 tc "whoami" | grep -qw "tc"; do
 		if ! pgrep qemu; then
 			return 1
 		fi >/dev/null
-		k=$[k+1]
 	done 2>/dev/null
 	return 0
 }
@@ -169,6 +168,9 @@ function tccopyall() {
 	for i in $copylist; do 
 		tcdircopy $i
 	done
+	if [ -e $tcldir/afterboot.sh ]; then
+		rm -f $tcldir/custom/afterboot.sh
+	fi
 	cat tinycore/{rootfs.gz,modules.gz} > $tcldir/boot/core.gz
 	echo -e "\ttransfer tinycore/{rootfs.gz,modules.gz} -> $tcldir/boot/core.gz"	
 	sync
@@ -399,10 +401,9 @@ if [ "$param" == "qemu" -o "$param" == "all" ]; then
 	sudo $qemuexec --cpu host --enable-kvm -m 256 -boot c -net nic \
 		-net bridge,br=brkvm -drive $drvboot -device sdhci-pci \
 		-device sdhci-pci -device sd-card,drive=sd -drive $drvdata &
-
 	info "executing: waiting for the qemu system start-up"
 	sshfingerprintclean
-	waitforssh
+	waitforssh 1
 fi
 
 if [ "$param" == "ssh-root" ]; then
