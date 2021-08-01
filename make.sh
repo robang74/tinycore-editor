@@ -145,6 +145,11 @@ function waitforssh() {
 
 function tcrootunlock() {
 	tcsshdconfig=/usr/local/etc/ssh/sshd_config
+	if ls -1 sshkeys.pub/*.pub >/dev/null 2>&1; then
+		if myssh 1 root "whoami" | grep -q root; then
+			return 0
+		fi
+	fi
 	if myssh 0 tc "sudo unlock.sh;
 		grep -qe '^PermitRootLogin yes' $tcsshdconfig || \
 			(sudo root-ssh.sh && echo DONE)" | grep -wq "DONE"; then
