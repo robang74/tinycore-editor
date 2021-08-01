@@ -380,7 +380,6 @@ if [ "$param" == "image" -a "$option" != "8GB" ] \
 	sudo losetup -D $devloop
 	chown $SUDO_USER.$SUDO_USER *.disk
 	rmdir $tcldir
-
 fi
 
 if [ "$param" == "all"   -a "$option" == "8GB" ] \
