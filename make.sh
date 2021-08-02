@@ -499,6 +499,13 @@ if [ "$param" == "ssh-copy" ]; then
 		echo -e "\ttransfer everything to $tcip:$tcdir"
 	realsync="sync; echo 1 >/proc/sys/kernel/sysrq; echo s >/proc/sysrq-trigger; sync"
 	myssh 0 root "test -e $tcdir/tce && tcz2tce.sh >/dev/null; $realsync"
+	cd ..
+	rm -rf $tcldir
+	echo
+	warn "WARNING: wait 1 minute before reboot or unplug your real USB stick"
+	warn "         otherwise its internal cache will mess up the filesystem"
+	echo
+fi
 
 	cd ..
 	rm -rf $tcldir
