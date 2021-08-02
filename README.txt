@@ -41,19 +41,19 @@
 
  6. You can launch a qemu test with a full image with this command:
 
-	./make.sh clean; ./make.sh qemu-test 8Gb
+	./make.sh clean; ./make.sh qemu-test 8GB
 
- 7. In case you want generate a new 64Mb USB disk image, do this:
+ 7. In case you want generate a new 64MB USB disk image, do this:
 
 	./make.sh clean; ./make.sh image && ./make.sh close
 
  8. To create your own real bootable USB disk, you can use this commands:
 
-	on windows: use rufus.exe with tcl-64Mb-usb.disk.gz
-	on linux  : zcat with tcl-64Mb-usb.disk.gz > $device
+	on windows: use rufus.exe with tcl-64MB-usb.disk.gz
+	on linux  : zcat with tcl-64MB-usb.disk.gz > $device
 
     At the first boot, it will create a secondary NTFS partition as large
-    as the entire USB disk space left free (USB disk size less 64 Mb)
+    as the entire USB disk space left free (USB disk size less 64 MB)
 
  9. At the first boot you can decide to have a TCE compliant distro with this:
 

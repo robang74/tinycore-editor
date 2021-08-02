@@ -29,12 +29,14 @@ if [ "$tcdev" == "" ]; then
 	exit 1
 fi
 
-if [ "$1" == "" ]; then
-	image="/mnt/sf_Shared/tcl-64Mb-usb.disk.gz"
+imgname=tcl-64M?-usb.disk.gz
+if [ "$1" == "" -a -d /mnt/sf_Shared ]; then
+	set -- /mnt/sf_Shared
+fi
+if [ -d "$1" -a -f $1/$imgname ]; then
+	image="$1/$imgname"
 elif [ -f "$1" ]; then
 	image="$1"
-elif [ -d "$1" ]; then
-	image="$1/tcl-64Mb-usb.disk.gz"
 else
 	echo
 	echo "ERROR: parameter is not a file not a directory"
@@ -59,7 +61,7 @@ if grep -qe "^$tcdev" /proc/mounts; then
 fi
 sync
 echo "Image is copying on $bkdev..."
-zcat "$image" >$bkdev
+zcat $image >$bkdev
 sync; sleep 1
 echo "Refreshing partition on $bkdev..."
 rrdiskptbl $bkdev

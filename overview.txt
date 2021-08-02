@@ -7,9 +7,9 @@
 
  To create the bootable usb key use this command:
 
-	LINUX: zcat tcl-64Mb-usb.disk.gz > /dev/sd${letter}
+	LINUX: zcat tcl-64MB-usb.disk.gz > /dev/sd${letter}
 
-	WINDOWS: rufus select tcl-64Mb-usb.disk.gz and write
+	WINDOWS: rufus select tcl-64MB-usb.disk.gz and write
 
  USB firt partition label: T1NYC0R3 (but you can change it in rcS)
 
@@ -24,13 +24,13 @@
  HOW TO BUILD THE IMAGE FROM SKELETON
 
  To create the new image: ./make.sh image
- After, to create the 8Gb image: ./make.sh image 8Gb
+ After, to create the 8GB image: ./make.sh image 8GB
  To compress the new images: ./make.sh close 
 
  HOW TO UPDATE THE IMAGE WITH QEMU
 
- To update the 64Mb usb image do: ./make.sh all
- After, to recreate the 8Gb image: ./make.sh all 8Gb
+ To update the 64MB usb image do: ./make.sh all
+ After, to recreate the 8GB image: ./make.sh all 8GB
 
  These procedure requires that qemu-system-i386 is installed
 
@@ -39,8 +39,8 @@
 
  ############ HOW TO MODIFY THE IMAGE ############
  
- zcat tcl-64Mb-usb.disk.gz >tcl-64Mb-usb.disk
- sudo losetup --partscan /dev/loop8 tcl-64Mb-usb.disk
+ zcat tcl-64MB-usb.disk.gz >tcl-64MB-usb.disk
+ sudo losetup --partscan /dev/loop8 tcl-64MB-usb.disk
  mkdir -p tcldisk
  sudo mount /dev/loop8p1 tcldisk
 
@@ -49,17 +49,17 @@
  sudo rm -f tcldisk/zero
  sudo umount tcldisk
  sudo losetup -D /dev/loop8
- gzip -9c tcl-64Mb-usb.disk >tcl-64Mb-usb.disk.gz
+ gzip -9c tcl-64MB-usb.disk >tcl-64MB-usb.disk.gz
 
 	
  ###### HOW TO CREATE AN INSTALLATION IMAGE ######
 
- zcat tcl-64Mb-usb.disk.gz > tcl-64Mb-usb.disk
- dd if=/dev/zero bs=1M count=7500 >>tcl-64Mb-usb.disk
- mv tcl-64Mb-usb.disk tcl-8Gb-usb.disk
+ zcat tcl-64MB-usb.disk.gz > tcl-64MB-usb.disk
+ dd if=/dev/zero bs=1M count=7500 >>tcl-64MB-usb.disk
+ mv tcl-64MB-usb.disk tcl-8GB-usb.disk
  echo -e "n\n p\n 2\n \n \n N\n t\n 2\n 7\n w" | \
- 	fdisk tcl-8Gb-usb.disk
- sudo losetup --partscan /dev/loop8 tcl-8Gb-usb.disk
+ 	fdisk tcl-8GB-usb.disk
+ sudo losetup --partscan /dev/loop8 tcl-8GB-usb.disk
  sudo mkfs -t ntfs -F -Q /dev/loop8p2
  mkdir usbkeyp2
  sudo mount /dev/loop8p2 usbkeyp2
@@ -71,7 +71,7 @@
 
  tcldisk=<your device>
  ntfspart=${tcldisk}2
- zcat tcl-64Mb-usb.disk.gz >$tcldisk
+ zcat tcl-64MB-usb.disk.gz >$tcldisk
  echo -e "n\n p\n 2\n \n \n N\n t\n 2\n 7\n w" | \
         sudo fdisk $tcldisk
  sudo mkfs -t ntfs -F -Q $ntfspart
