@@ -45,7 +45,7 @@ if ! fdisk -l $bkdev | grep -e "^$ntdev"; then
 
 	echo -e "n\n p\n 2\n \n \n N\n w"  | fdisk $bkdev >/dev/null 2>&1
 	sleep 1
-	partready ${bkdev}2
+	partready $ntdev
 	if ! fdisk -l $bkdev | grep -qe "^$ntdev "; then
 		echo
 		echo "ERROR: cannot create ntfs partition in $bkdev"
@@ -54,9 +54,8 @@ if ! fdisk -l $bkdev | grep -e "^$ntdev"; then
 	else
 		echo -e "t\n 2\n 7\n w" | fdisk $bkdev >/dev/null 2>&1
 		sleep 1
-		partready ${bkdev}2
+		partready $ntdev
 	fi
-	ntfslabel $ntdev NTFS 2>/dev/null || true
 
 	if [ -z "$ntdir" ]; then
 		ntdir=${ntdev/dev/mnt}
