@@ -442,7 +442,7 @@ fi
 if [ "$param" == "qemu" ]; then
 	info "executing: qemu $option"
 	warning="SUGGEST: target open or image to deploy the disk images"
-	if [ ! -e storage-32GB.disk ]; then	
+	if [ ! -e storage-32GB.disk ]; then
 		exit 1
 	elif [ "$option" != "8GB" -a ! -e tcl-64MB-usb.disk ]; then
 		exit 1
@@ -497,7 +497,9 @@ if [ "$param" == "ssh-copy" ]; then
 	myssh 0 root "tcz2tce.sh back"
 	myscp * root@$tcip:$tcdir && \
 		echo -e "\ttransfer everything to $tcip:$tcdir"
-	myssh 0 root "test -e $tcdir/tce && tcz2tce.sh >/dev/null; sync"
+	realsync="sync; echo 1 >/proc/sys/kernel/sysrq; echo s >/proc/sysrq-trigger; sync"
+	myssh 0 root "test -e $tcdir/tce && tcz2tce.sh >/dev/null; $realsync"
+
 	cd ..
 	rm -rf $tcldir
 fi
