@@ -17,9 +17,13 @@ grub-common
 grub-gfxpayload-lists
 grub-pc
 grub-pc-bin
+ifupdown
+ifupdown-extra
 initramfs-tools
 initramfs-tools-bin
 initramfs-tools-core
+iproute2
+isc-dhcp-client
 iw
 kbd
 keyboard-configuration
@@ -107,6 +111,7 @@ lz4
 memtest86+
 mime-support
 ncurses-term
+net-tools
 networkd-dispatcher
 openssh-client
 openssh-server
