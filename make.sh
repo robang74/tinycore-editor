@@ -146,6 +146,7 @@ function tcrootunlock() {
 	tcsshdconfig=/usr/local/etc/ssh/sshd_config
 	if ls -1 sshkeys.pub/*.pub >/dev/null 2>&1; then
 		if myssh 1 root "whoami" | grep -q root; then
+			myssh 0 root "unlock.sh"
 			return 0
 		fi
 	fi
