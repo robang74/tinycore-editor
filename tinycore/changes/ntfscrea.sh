@@ -35,7 +35,7 @@ ntdev=$(readlink /etc/sysconfig/ntdev)
 ntdir=$(devdir $ntdev)
 bkdev=${tcdev%1}
 
-if ! fdisk -l $bkdev | grep -e "^$ntdev"; then
+if ! fdisk -l $bkdev | grep -qe "^$ntdev"; then
 #
 # Updating the USB key with dd, creates some situations that should be addressed
 #
@@ -77,8 +77,7 @@ if ! fdisk -l $bkdev | grep -e "^$ntdev"; then
 	fi
 fi
 
-if mount | grep -q "$ntdev on"; then
-	ntdir=$(mount | grep -e "$ntdev on" | cut -d' ' -f3)
+if grep -qe "^$ntdev " /proc/mounts; then
 	echo
 	echo "ntfs partition is just mounted in $ntdir"
 	echo
