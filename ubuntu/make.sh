@@ -13,8 +13,9 @@ if [ "$1" == "rootfs" ]; then
 	user=$(whoami)
 
 	wget -c $repo/$distro
-	mkdir rootfs
-	sudo tar xzf $distro -C rootfs
+	if mkdir rootfs 2>/dev/null; then
+		sudo tar xzf $distro -C rootfs
+	fi
 	  
 	sudo mount -t proc proc rootfs/proc
 	sudo mount --rbind /sys rootfs/sys
@@ -40,15 +41,15 @@ elif [ "$1" == "chroot" ]; then
 	echo -e "root\nroot\n" | passwd
 	echo "nameserver 8.8.8.8" >/etc/resolv.conf
 	apt update
-	echo "
-	ATTENTION:
-
-		when asked on which disk grub should automatically installed
-		select none pressing ENTER then answer yes to grub installation
-
-		press ENTER to continue
-	"
-	read
+#	echo "
+#	ATTENTION:
+#
+#		when asked on which disk grub should automatically installed
+#		select none pressing ENTER then answer yes to grub installation
+#
+#		press ENTER to continue
+#	"
+#	read
 	export DEBIAN_FRONTEND=noninteractive
 	echo "$nointr" | debconf-set-selections
 	apt install -y $(cat debnames.txt)
@@ -72,7 +73,5 @@ elif [ "$1" == "chroot" ]; then
 	exit
 
 else
-	echo
-	echo "USAGE: $(basename $0) rootfs|chroot"
-	echo
+	$0 rootfs
 fi
