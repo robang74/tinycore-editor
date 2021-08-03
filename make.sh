@@ -485,6 +485,7 @@ if [ "$param" == "ssh-copy" ]; then
 		warning="SUGGEST: run '$myname clean' to remove existing disk folder"
 		exit 1
 	fi
+	cd tinycore; ./rootfs.sh update; cd -
 	sshfingerprintclean
 	tcrootunlock
 	sshgettcdir
