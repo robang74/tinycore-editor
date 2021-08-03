@@ -507,10 +507,6 @@ if [ "$param" == "ssh-copy" ]; then
 	echo
 fi
 
-	cd ..
-	rm -rf $tcldir
-fi
-
 if [ "$param" == "ssh-end" ]; then
 	info "executing: ssh-end $option"
 	sshfingerprintclean
