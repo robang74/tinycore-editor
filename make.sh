@@ -150,11 +150,8 @@ function tcrootunlock() {
 			return 0
 		fi
 	fi
-	if myssh 0 tc "sudo unlock.sh;
-		grep -qe '^PermitRootLogin yes' $tcsshdconfig || \
-			(sudo root-ssh.sh && echo DONE)" | grep -wq "DONE"; then
-		waitforssh
-	fi
+	myssh 0 tc "sudo unlock.sh; sudo root-ssh.sh"
+	waitforssh
 }
 
 function tcdircopy() {
