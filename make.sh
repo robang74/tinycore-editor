@@ -163,6 +163,9 @@ function tcdircopy() {
 
 function tccopyall() {
 	test -n "$tcldir"
+	cd tinycore
+	./rootfs.sh update
+	cd -
 	mkdir -p $tcldir/flags
 	mkdir -p $tcldir/custom
 	mkdir -p $tcldir/provides
@@ -339,7 +342,6 @@ if [ "$param" == "image" -a "$option" != "8GB" ]; then
 	fi
 	zcat tcl-64MB-skeleton.disk.gz >tcl-64MB-usb.disk
 	sync
-	cd tinycore; ./rootfs.sh update; cd -
 	sudo losetup --partscan $devloop tcl-64MB-usb.disk
 	if ! sudo fsck -fy ${devloop}p1; then
 		sudo fsck -fy ${devloop}p1
