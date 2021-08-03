@@ -73,11 +73,11 @@ function usage() {
 	echo -e "\t\tqemu-test"
 	echo -e "\t\tqemu [8GB]"
 	echo -e "\t\tssh-copy [ip]"
+	echo -e "\t\tssh-root [ip]"
 	echo -e "\t\tssh-end [8GB]"
 	echo -e "\t\tqemu-stop"
 	echo -e "\t\tclose [8GB]"
 	echo -e "\t\tclean [8GB]"
-	echo -e "\t\tssh-root [ip]"
 	echo
 }
 
