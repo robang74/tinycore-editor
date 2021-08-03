@@ -487,7 +487,6 @@ if [ "$param" == "ssh-copy" ]; then
 		warning="SUGGEST: run '$myname clean' to remove existing disk folder"
 		exit 1
 	fi
-	cd tinycore; ./rootfs.sh update; cd -
 	sshfingerprintclean
 	tcrootunlock
 	sshgettcdir
@@ -501,10 +500,6 @@ if [ "$param" == "ssh-copy" ]; then
 	myssh 0 root "test -e $tcdir/tce && tcz2tce.sh >/dev/null; $realsync"
 	cd ..
 	rm -rf $tcldir
-	echo
-	warn "WARNING: wait 1 minute before reboot or unplug your real USB stick"
-	warn "         otherwise its internal cache will mess up the filesystem"
-	echo
 fi
 
 if [ "$param" == "ssh-end" ]; then
