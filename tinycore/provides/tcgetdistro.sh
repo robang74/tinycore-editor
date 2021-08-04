@@ -62,6 +62,9 @@ else
 	realexit 1
 fi 2>/dev/null
 
+tcrepo=${ARCH:-$tcrepo32}
+tcrepo=${tcrepo/64/$tcrepo64}
+
 if [ "$1" != "quiet" ]; then
 	echo
 	info "Working folder: $WRKDIR"
@@ -74,7 +77,7 @@ fi
 #if [ ! -e rootfs.gz ]; then
 	info "Downloading rootfs.gz..."
 	echo
-	wget -c $tcrepo/$distro/rootfs.gz 2>&1
+	wget -c $tcrepo/$distro/rootfs$ARCH.gz -O rootfs.gz 2>&1
 #fi
 
 #if [ ! -e vmlinuz ]; then

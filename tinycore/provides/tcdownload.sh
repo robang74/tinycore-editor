@@ -52,6 +52,10 @@ else
 	echo
 	realexit 1
 fi
+
+tcrepo=${ARCH:-$tcrepo32}
+tcrepo=${tcrepo/64/$tcrepo64}
+
 echo
 for i in "$@"; do
 	info "Downloading $i ..."

@@ -44,6 +44,10 @@ else
 	echo
 	realexit 1
 fi
+
+tcrepo=${ARCH:-$tcrepo32}
+tcrepo=${tcrepo/64/$tcrepo64}
+
 cd $mypath
 
 echo

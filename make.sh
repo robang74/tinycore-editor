@@ -157,7 +157,7 @@ function tcrootunlock() {
 function tcdircopy() {
 	src=$(echo "$1" | cut -d: -f1)
 	dst=$(echo "$1" | cut -d: -f2)
-	eval sudo cp -rf $src $tcldir/$dst && \
+	eval sudo cp -rfL $src $tcldir/$dst && \
 		echo -e "\ttransfer $1" | sed "s,:, -> $tcdir/,"
 }
 

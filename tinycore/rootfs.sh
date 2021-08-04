@@ -40,6 +40,7 @@ if [ "$1" == "open" -o "$1" == "update" ]; then
 	echo -n "open : "
 	zcat ../rootfs.gz | sudo cpio -i
 	cat ../changes/rcS > etc/init.d/rcS
+	test -e lib64 || ln -sf lib lib64
 	cd ..
 fi
 
