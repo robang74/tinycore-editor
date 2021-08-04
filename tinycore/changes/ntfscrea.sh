@@ -7,12 +7,11 @@ function partready() {
 	part=$(basename $1)
 	if ! grep -qe "$part$" /proc/partitions; then
 		sleep 1
-		grep -qe "$part$" /proc/partitions
 	fi
 	if [ ! -b $1 ]; then
 		sleep 1
-		test -b $1
 	fi
+	grep -qe "$part$" /proc/partitions
 }
 
 function devdir() {
