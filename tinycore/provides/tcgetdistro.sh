@@ -44,6 +44,7 @@ WRKDIR="$PWD"
 
 if [ "$1" == "clean" ]; then
 	rm -f rootfs.gz modules.gz vmlinuz
+	rm -f changes/tccustom.tgz
 	rm -f tcz/*.tcz
 	echo
 	comp "COMPLETED: files cleaning in $PWD"
@@ -64,15 +65,19 @@ fi 2>/dev/null
 
 tcrepo=${ARCH:-$tcrepo32}
 tcrepo=${tcrepo/64/$tcrepo64}
+tcsize=${ARCH:-32}
 
 if [ "$1" != "quiet" ]; then
 	echo
-	info "Working folder: $WRKDIR"
-	info "Config files: tinycore.conf"
-	info "Architecture: '$ARCH'"
-	info "Version: $TC"
+	warn "Working folder: $WRKDIR"
+	warn "Config files: tinycore.conf"
+	warn "Architecture: x86 $tcsize bit"
+	warn "Version: $TC"
 	echo
 fi
+
+info "Selecting tccustom.tgz..."
+ln -sf tccustom$tcsize.tgz changes/tccustom.tgz
 
 #if [ ! -e rootfs.gz ]; then
 	info "Downloading rootfs.gz..."
