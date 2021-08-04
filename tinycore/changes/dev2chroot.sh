@@ -51,7 +51,9 @@ function mountdevdir() {
 	else
 		mount -o ro $1 $2
 	fi
+	ret=$?
 	FUNCNAME=$OLDFNAME
+	return $ret
 }
 
 function unmountall() {
