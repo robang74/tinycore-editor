@@ -9,7 +9,7 @@ function realexit() {
 }
 
 function atexit() {
-	perr "ERROR: $myname failed at line $1, abort"
+	perr "ERROR: $(basename $0) failed at line $1, abort"
 	echo
 	realexit 1
 }
@@ -30,8 +30,6 @@ function perr() {
 	echo -e "\e[1;31m$@\e[0m"
 }
 
-myname=$(basename $0)
-
 ###############################################################################
 
 PS4='DEBUG: $((LASTNO=$LINENO)): '
@@ -40,7 +38,6 @@ trap 'atexit $LASTNO' EXIT
 set -ex
 
 cd $(dirname $0)/..
-WRKDIR="$PWD"
 
 if [ "$1" == "clean" ]; then
 	rm -f rootfs.gz modules.gz vmlinuz
@@ -69,10 +66,10 @@ tcsize=${ARCH:-32}
 
 if [ "$1" != "quiet" ]; then
 	echo
-	warn "Working folder: $WRKDIR"
+	warn "Working folder: $PWD"
 	warn "Config files: tinycore.conf"
 	warn "Architecture: x86 $tcsize bit"
-	warn "Version: $TC"
+	warn "Version: $TC.x"
 	echo
 fi
 

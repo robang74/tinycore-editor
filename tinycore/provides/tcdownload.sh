@@ -31,6 +31,8 @@ function perr() {
 	echo -e "\e[1;31m$@\e[0m"
 }
 
+###############################################################################
+
 if [ "$1" == "" ]; then
 	echo
 	warn "USAGE: $(basename $0) name.tgz"
@@ -41,11 +43,12 @@ fi
 set -e
 trap 'atexit' EXIT
 i="tinycore.conf"
-mypath=$(dirname $0)
-if [ -f $mypath/tinycore.conf ]; then
-	source $mypath/tinycore.conf
-elif [ -f $mypath/../tinycore.conf ]; then
-	source $mypath/../tinycore.conf
+cd $(dirname $0)
+
+if [ -f tinycore.conf ]; then
+	source tinycore.conf
+elif [ -f ../tinycore.conf ]; then
+	source ../tinycore.conf
 else
 	echo
 	perr "ERROR: tinycore.conf is missing, abort"
@@ -55,6 +58,15 @@ fi
 
 tcrepo=${ARCH:-$tcrepo32}
 tcrepo=${tcrepo/64/$tcrepo64}
+tcsize=${ARCH:-32}
+
+if [ "$1" != "quiet" ]; then
+	echo
+	warn "Working folder: $PWD"
+	warn "Config files: tinycore.conf"
+	warn "Architecture: x86 $tcsize bit"
+	warn "Version: $TC.x"
+fi
 
 echo
 for i in "$@"; do
@@ -67,3 +79,4 @@ done
 comp "$(basename $0) completed successfully"
 echo
 realexit 0
+

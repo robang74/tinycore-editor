@@ -19,6 +19,7 @@ function perr() {
 	echo -e "\e[1;31m$@\e[0m"
 }
 
+###############################################################################
 
 if [ "$1" == "" -o "$2" != "" ]; then
 	echo
@@ -27,11 +28,12 @@ if [ "$1" == "" -o "$2" != "" ]; then
 	exit 1
 fi
 
-mypath=$(dirname $0)
-if [ -f $mypath/tinycore.conf ]; then
-	source $mypath/tinycore.conf
-elif [ -f $mypath/../tinycore.conf ]; then
-	source $mypath/../tinycore.conf
+cd $(dirname $0)
+
+if [ -f tinycore.conf ]; then
+	source tinycore.conf
+elif [ -f ../tinycore.conf ]; then
+	source ../tinycore.conf
 else
 	echo
 	perr "ERROR: tinycore.conf is missing, abort"
@@ -41,18 +43,26 @@ fi
 
 tcrepo=${ARCH:-$tcrepo32}
 tcrepo=${tcrepo/64/$tcrepo64}
+tcsize=${ARCH:-32}
+datafile=tc$TC-$tcsize.db
+search=$(echo "$1" | tr ' ' '~')
+found=$(zcat $datafile.gz | tr ' ' '~' | grep -e "$search")
 
-cd $mypath
-
-if [ ! -e tc${TC}.db.gz ]; then
+if [ ! -e $datafile.gz ]; then
 	echo
-	perr "ERROR: tc${TC}.db.gz does not exist, use tcupdatedb.sh"
+	perr "ERROR: $datafile.gz does not exist, use tcupdatedb.sh"
 	echo
 	exit 1
 fi
 
-search=$(echo "$1" | tr ' ' '~')
-found=$(zcat tc${TC}.db.gz | tr ' ' '~' | grep -e "$search")
+if [ "$1" != "quiet" ]; then
+	echo
+	warn "Working folder: $PWD"
+	warn "Config files: tinycore.conf"
+	warn "Architecture: x86 $tcsize bit"
+	warn "Version: $TC.x"
+fi
+
 echo
 for i in $found; do
 	info "$(echo $i | cut -d: -f1)"
