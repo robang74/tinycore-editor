@@ -70,9 +70,9 @@ if [ "$1" != "quiet" ]; then
 	warn "Config files: tinycore.conf"
 	warn "Architecture: x86 $tcsize bit"
 	warn "Version: $TC.x"
-	echo
 fi
 
+echo
 info "Selecting tccustom.tgz..."
 ln -sf tccustom$tcsize.tgz changes/tccustom.tgz
 

@@ -55,15 +55,13 @@ if [ ! -e $datafile.gz ]; then
 	exit 1
 fi
 
-if [ "$1" != "quiet" ]; then
-	echo
-	warn "Working folder: $PWD"
-	warn "Config files: tinycore.conf"
-	warn "Architecture: x86 $tcsize bit"
-	warn "Version: $TC.x"
-fi
-
 echo
+warn "Working folder: $PWD"
+warn "Config files: tinycore.conf"
+warn "Architecture: x86 $tcsize bit"
+warn "Version: $TC.x"
+echo
+
 for i in $found; do
 	info "$(echo $i | cut -d: -f1)"
 	echo "$i" | tr \; \\n | grep -e "$search";
