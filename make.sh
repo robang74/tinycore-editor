@@ -7,8 +7,7 @@ myip=10.0.2.15
 brip=10.0.2.16
 tcip=10.0.2.17
 netm=24
-ARCH=x86_64 #i386
-qemuexec=qemu-system-$ARCH
+qemuexec=qemu-system-x86_64 #i386
 tcdir="" #if not defined, it will be found
 devloop="" #if not defined, it will be found
 drvi8GB="format=raw,file=tcl-8GB-usb.disk"
@@ -48,13 +47,6 @@ tinycore/vmlinuz:boot/
 tcl-usb-boot-*able.gz:
 sshkeys.pub:
 "
-
-cd $(dirname $0)
-myname="$(basename $0)"
-param="$1"
-option="$2"
-shift
-shift
 
 ###############################################################################
 
@@ -238,6 +230,66 @@ function perr() {
 
 ###############################################################################
 
+cd $(dirname $0)
+myname="$(basename $0)"
+param="$1"
+option="$2"
+shift
+shift
+
+if [ "$USER" != "root" ]; then
+	set -m
+	if ! timeout 0.2 sudo -n true; then
+		echo
+		warn "WARNING: $myname requires root permissions"
+		echo
+	fi 2>/dev/null
+	sudo $0 $param $option
+	exit $?
+fi
+
+syslist="rootfs.gz modules.gz vmlinuz"
+trglist="ssh-copy image gpg"
+
+while [ -e tinycore/tinycore.conf ]; do
+	for i in $trglist; do
+		if [ "$param" == "$i" -o "$param" == "" ]; then
+			print=1
+			break;
+		fi
+	done
+	test "$print" != "1" && break
+	source tinycore/tinycore.conf
+	tcrepo=${ARCH:-$tcrepo32}
+	tcrepo=${tcrepo/64/$tcrepo64}
+	tcsize=${ARCH:-32}
+	echo
+	warn "Config files: tinycore/tinycore.conf"
+	warn "Architecture: x86 $tcsize bit"
+	warn "Version: $TC.x"
+	for i in $syslist; do
+		if [ ! -e tinycore/$i ]; then
+			echo
+			perr "ERROR: file tinycore/$i does not exist"
+			echo
+	 		warn "SUGGEST: run tinycore/provides/tcgetdistrofiles.sh"
+			echo
+			exit 1
+		fi
+	done
+	for i in $tczlist; do
+		if [ ! -e tinycore/tcz/$i ]; then
+			echo
+			perr "ERROR: file tinycore/tcz/$i does not exist"
+			echo
+	 		warn "SUGGEST: run tinycore/provides/tcgetdistrofiles.sh"
+			echo
+			exit 1
+		fi
+	done
+	break
+done
+
 eval $(grep -e "tcpassword=" tinycore/changes/afterboot.sh | head -n1)
 if [ "$tcpassword" == "" ]; then
 	echo
@@ -250,17 +302,6 @@ elif [ "$tcpassword" != "tinycore" ]; then
 	echo "         please check tinycore/changes/root-ssh.sh"
 	echo "         please check tinycore/changes/tccustom.tgz:/etc/motd"
 	echo
-fi
-
-if [ "$USER" != "root" ]; then
-	set -m
-	if ! timeout 0.2 sudo -n true; then
-		echo
-		warn "WARNING: $myname requires root permissions"
-		echo
-	fi 2>/dev/null
-	sudo $0 $param $option
-	exit $?
 fi
 
 if [ "$param" == "ssh-copy" -o  "$param" == "ssh-root" ]; then
