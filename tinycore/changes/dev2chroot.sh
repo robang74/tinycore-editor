@@ -82,6 +82,7 @@ function unmountall() {
 function exec2chroot() {
 	set +e
 	trap - EXIT
+	declare execss script
 	execss=/root/exec2chroot.sh
 	script=$rootdir/$execss
 	echo "sed -e 's,\\\.,,g' /etc/issue; cd $1; $2" > $script
@@ -91,7 +92,6 @@ function exec2chroot() {
 	rm -f $script
 	unmountall
 }
-
 
 function info() {
 	echo -e "\e[1;36m$@\e[0m"
