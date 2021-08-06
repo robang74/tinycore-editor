@@ -56,6 +56,8 @@ else
 	realexit 1
 fi
 
+cd - >/dev/null
+
 tcrepo=${ARCH:-$tcrepo32}
 tcrepo=${tcrepo/64/$tcrepo64}
 tcsize=${ARCH:-32}
