@@ -31,7 +31,8 @@ fi
 tcdev=$(readlink /etc/sysconfig/tcdev)
 tcdir=$(readlink /etc/sysconfig/tcdir)
 ntdev=$(readlink /etc/sysconfig/ntdev)
-ntdir=$(devdir $ntdev)
+ntdir=$(readlink /etc/sysconfig/ntdir)
+ntdir=${ntdir:-$(devdir $ntdev)}
 bkdev=${tcdev%1}
 
 if ! fdisk -l $bkdev | grep -qe "^$ntdev"; then
@@ -76,20 +77,20 @@ if ! fdisk -l $bkdev | grep -qe "^$ntdev"; then
 	fi
 fi
 
-if grep -qe "^$ntdev " /proc/mounts; then
-	echo
-	echo "ntfs partition is just mounted in $ntdir"
-	echo
-	exit 0
+if [ "$ntdev" != "" ]; then
+	if grep -qe "^$ntdev " /proc/mounts; then
+		echo
+		echo "ntfs partition is just mounted in $ntdir"
+		echo
+		exit 0
+	fi
+	if ! mount -t ntfs $ntdev $ntdir; then
+		echo
+		echo "ERROR: cannot mount ntfs partition in $ntdir"
+		echo
+		exit 1
+	fi 
 fi
-
-if ! mount -t ntfs $ntdev $ntdir; then
-	echo
-	echo "ERROR: cannot mount ntfs partition in $ntdir"
-	echo
-	exit 1
-fi
-
 echo
 echo "ntfs partition has been mounted in $ntdir"
 echo

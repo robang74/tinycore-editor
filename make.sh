@@ -31,6 +31,7 @@ qemu-stop
 close
 clean
 image
+iso
 "
 
 copylist="
@@ -70,6 +71,7 @@ function usage() {
 	echo -e "\t\tqemu-stop"
 	echo -e "\t\tclose [8GB]"
 	echo -e "\t\tclean [8GB]"
+	echo -e "\t\tiso"
 	echo
 }
 
@@ -353,6 +355,7 @@ trap 'atexit' EXIT
 set -e
 echo
 
+eval $(grep "^tclabel=" tinycore/changes/rcS)
 sshkeycln=yes
 warning=""
 tdone=0
@@ -383,6 +386,22 @@ if [ "$param" == "open" -a "$option" == "8GB" ]; then
 	sync
 fi
 
+if [ "$param" == "iso" ]; then
+	tdone=1
+	info "executing: iso"
+	rm -rf $tcldir
+	mkdir -p $tcldir
+	tccopyall
+	tar xzf tcl-boot-isolinux.tgz -C $tcldir
+	cat $tcldir/boot/syslinux/boot.msg >$tcldir/boot/isolinux/boot.msg
+	cat $tcldir/boot/syslinux/syslinux.cfg >$tcldir/boot/isolinux/isolinux.cfg
+	mkisofs -l -Jr -V "$tclabel" -no-emul-boot -boot-load-size 4 -boot-info-table \
+		-b boot/isolinux/isolinux.bin -c boot/isolinux/boot.cat -o tclinux.iso $tcldir
+	chown $SUDO_USER.$SUDO_USER tclinux.iso
+	rm -rf $tcldir
+	echo
+fi
+
 if [ "$param" == "image" -a "$option" != "8GB" ]; then
 	tdone=1
 	info "executing: image"
@@ -397,7 +416,6 @@ if [ "$param" == "image" -a "$option" != "8GB" ]; then
 	if ! sudo fsck -fy ${devloop}p1; then
 		sudo fsck -fy ${devloop}p1
 	fi
-	eval $(grep "^tclabel=" tinycore/changes/rcS)
 	dosfslabel ${devloop}p1 $tclabel
 	if ! blkid  --label $tclabel $devloop; then
 		echo
@@ -406,12 +424,13 @@ if [ "$param" == "image" -a "$option" != "8GB" ]; then
 		sudo losetup -D $devloop
 		exit 1
 	fi
+	rm -rf $tcldir
 	mkdir -p $tcldir
  	if ! sudo mount -o rw ${devloop}p1 $tcldir; then
 		rm -f tcl-64MB-usb.disk
 		sudo losetup -D $devloop
 		rmdir $tcldir
-		exit 1		
+		exit 1
 	fi
 	tccopyall
 	sudo dd if=/dev/zero of=$tcldir/zero >/dev/null 2>&1 || true

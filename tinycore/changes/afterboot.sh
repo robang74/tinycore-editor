@@ -59,7 +59,8 @@ infotime "Lookup for tinycore partitions..." ##################################
 tcdev=$(readlink /etc/sysconfig/tcdev)
 tcdir=$(readlink /etc/sysconfig/tcdir)
 ntdev=$(readlink /etc/sysconfig/ntdev)
-ntdir=$(devdir $ntdev)
+ntdir=$(readlink /etc/sysconfig/ntdir)
+ntdir=${ntdir:-$(devdir $ntdev)}
 
 if [ "$tcdev" == "" ]; then
 	echo
@@ -78,7 +79,6 @@ if [ "$ntdir" == "" ]; then
 	ntdir=${ntdev/dev/mnt}
 	mkdir -p $ntdir
 	mount -o ro -t ntfs $ntdev $ntdir || ntdir=""
-	
 fi
 
 if [ -d $tcdir/tcz ]; then
@@ -146,6 +146,7 @@ chown -R tc.staff /home/tc
 if [ "$ntdir" == "" ]; then
 	infotime "Restoring the NTFS partition..."
 	ntfs-usbdisk-partition-create.sh | grep -w ntfs
+	ntdir=$(devdir $ntdev)
 fi
 
 infotime "Upraising network and VLANs..." #####################################

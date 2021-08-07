@@ -17,7 +17,8 @@ fi
 tcdev=$(readlink /etc/sysconfig/tcdev)
 tcdir=$(readlink /etc/sysconfig/tcdir)
 ntdev=$(readlink /etc/sysconfig/ntdev)
-ntdir=$(devdir $ntdev)
+ntdir=$(readlink /etc/sysconfig/ntdir)
+ntdir=${ntdir:-$(devdir $ntdev)}
 
 if [ "$tcdir" == "" ]; then
 	tcdir=${tcdev/dev/mnt}
@@ -29,23 +30,19 @@ if [ "$ntdir" == "" ]; then
 	mkdir -p $ntdir
 fi
 
-if ! mount | grep -qe "^$tcdev .* (rw,"; then
-	if mount -o remount,rw $tcdir; then
-		echo "$tcdir (RW)"
-	fi 2>/dev/null
-else
+mount -o remount,rw $tcdir 2>/dev/null
+if grep -qe "^$tcdev .* rw," /proc/mounts; then
 	echo "$tcdir (RW)"
 fi
 
 mount -o remount,rw $ntdir 2>/dev/null
-if ! mount | grep -qe "^$ntdev .* (rw,"; then
-	if mount | grep -q $ntdir; then
-		sync
+if ! grep -qe "^$ntdev .* rw," /proc/mounts; then
+	if grep -q " $ntdir " /proc/mounts; then
 		umount $ntdir
 	fi 2>/dev/null
-	if ntfs-3g $ntdev $ntdir; then
-		echo "$ntdir (RW)"
-	fi 2>/dev/null
-else
+	ntfs-3g $ntdev $ntdir 2>/dev/null
+fi
+if ! grep -qe "^$ntdev .* rw," /proc/mounts; then
 	echo "$ntdir (RW)"
 fi
+

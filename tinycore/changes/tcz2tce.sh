@@ -11,8 +11,8 @@ if [ "$USER" != "root" ]; then
 fi
 
 readonly=0
-mntdir=$(tcldevdir.sh | cut -d: -f2)
-if mount | grep -qe "on $mntdir .* (ro,"; then
+mntdir=$(readlink /etc/sysconfig/tcdir)
+if grep -qe " $mntdir .* ro," /proc/mounts; then
 	mount -o remount,rw $mntdir
 	readonly=1
 fi

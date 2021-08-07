@@ -175,7 +175,8 @@ fi
 tcdev=$(readlink /etc/sysconfig/tcdev)
 tcdir=$(readlink /etc/sysconfig/tcdir)
 ntdev=$(readlink /etc/sysconfig/ntdev)
-ntdir=$(devdir $ntdev)
+ntdir=$(readlink /etc/sysconfig/ntdir)
+ntdir=${ntdir:-$(devdir $ntdev)}
 
 if [ "$datadir" == "" ]; then
 	datadir=$ntdir

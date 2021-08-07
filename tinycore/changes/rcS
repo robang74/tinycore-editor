@@ -50,7 +50,6 @@ tcdev=$(blkid --label $tclabel | cut -d: -f1)
 if [ "$tcdev" == "" ]; then
 	infotime "Searching for afterboot.sh: NOT FOUND"
 else
-	ln -sf ${tcdev%1}2 /etc/sysconfig/ntdev
 	ln -sf $tcdev /etc/sysconfig/tcdev
 	tcdir=$(devdir $tcdev)
 	if [ "$tcdir" == "" ]; then
@@ -60,6 +59,11 @@ else
 			tcdir=""
 		fi
 	fi
+	if [ "$tcdev" == "/dev/sr0" ]; then
+		ln -sf $tcdir/extra /etc/sysconfig/ntdir
+	else
+		ln -sf ${tcdev%1}2 /etc/sysconfig/ntdev
+	fi
 	infotime "Searching for afterboot.sh in $tcdev"
 	if [ "$tcdir" != "" ]; then
 		ln -sf $tcdir /etc/sysconfig/tcdir
@@ -67,7 +71,9 @@ else
 			echo
 			echo -e "\e[1;37m############# AFTER BOOT SCRIPT START #############\e[0m"
 			echo
-			$tcdir/afterboot.sh
+			cp $tcdir/afterboot.sh /tmp/afterboot.sh
+			chmod a+x /tmp/afterboot.sh
+			/tmp/afterboot.sh
 		fi
 	fi
 fi
