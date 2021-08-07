@@ -64,7 +64,7 @@ function usage() {
 	echo -e "\t\tqemu-init"
 	echo -e "\t\tqemu-test"
 	echo -e "\t\tqemu [8GB]"
-	echo -e "\t\tssh-copy [ip]"
+	echo -e "\t\tssh-copy [8GB] [ip]"
 	echo -e "\t\tssh-root [ip]"
 	echo -e "\t\tssh-end [8GB]"
 	echo -e "\t\tqemu-stop"
@@ -232,10 +232,6 @@ function perr() {
 
 cd $(dirname $0)
 myname="$(basename $0)"
-param="$1"
-option="$2"
-shift
-shift
 
 if [ "$USER" != "root" ]; then
 	set -m
@@ -244,9 +240,14 @@ if [ "$USER" != "root" ]; then
 		warn "WARNING: $myname requires root permissions"
 		echo
 	fi 2>/dev/null
-	sudo $0 $param $option
+	sudo $0 "$@"
 	exit $?
 fi
+
+param="$1"
+shift
+option="$1"
+shift
 
 syslist="rootfs.gz modules.gz vmlinuz"
 trglist="ssh-copy image gpg"
@@ -304,7 +305,12 @@ elif [ "$tcpassword" != "tinycore" ]; then
 	echo
 fi
 
-if [ "$param" == "ssh-copy" -o  "$param" == "ssh-root" ]; then
+if [ "$param" == "ssh-copy" -a "$option" == "8GB" ]; then
+	if isanipaddr $1; then
+		tcip=$1
+		shift
+	fi
+elif [ "$param" == "ssh-copy" -o  "$param" == "ssh-root" ]; then
 	if isanipaddr $option; then
 		tcip=$option
 		option=""
@@ -337,14 +343,15 @@ fi
 ###############################################################################
 
 trap 'atexit' EXIT
-
 set -e
+echo
 
 sshkeycln=yes
 warning=""
-echo
+tdone=0
 
 if [ "$param" == "open" -a "$option" != "8GB" ]; then
+	tdone=1
 	info "executing: open"
 	if [ -e tcl-64MB-usb.disk ]; then
 		warning="SUGGEST: run '$myname clean' to remove existing disk image"
@@ -359,6 +366,7 @@ if [ "$param" == "open" -a "$option" != "8GB" ]; then
 fi
 
 if [ "$param" == "open" -a "$option" == "8GB" ]; then
+	tdone=1
 	info "executing: open 8GB"
 	if [ -e tcl-8GB-usb.disk ]; then
 		warning="SUGGEST: run '$myname clean 8GB' to remove existing disk images"
@@ -373,6 +381,7 @@ if [ "$param" == "open" -a "$option" == "8GB" ]; then
 fi
 
 if [ "$param" == "image" -a "$option" != "8GB" ]; then
+	tdone=1
 	info "executing: image"
 	if [ -e tcl-64MB-usb.disk ]; then
 		warning="SUGGEST: run '$myname clean' to remove existing disk images"
@@ -418,6 +427,7 @@ if [ "$param" == "image" -a "$option" != "8GB" ]; then
 fi
 
 if [ "$param" == "image" -a "$option" == "8GB" ]; then
+	tdone=1
 	info "executing: image 8GB"
 	if [ ! -e tcl-64MB-usb.disk.gz -a ! -e tcl-64MB-usb.disk ]; then
 		$0 image
@@ -450,6 +460,7 @@ fi
 
 stayalive=no
 if [ "$param" == "qemu-init" ]; then
+	tdone=1
 	info "executing: qemu-init"
 	if ! ifconfig brkvm 2>/dev/null | grep -q "inet "; then
 		sudo brctl addbr brkvm
@@ -466,6 +477,7 @@ if [ "$param" == "qemu-init" ]; then
 fi
 
 if [ "$param" == "qemu-test" ]; then
+	tdone=1
 	if [ "$option" == "8GB" ]; then
 		if [ -e tcl-64MB-usb.disk ]; then
 			warn "WARNING: using current tcl-64MB-usb.disk"
@@ -480,6 +492,7 @@ if [ "$param" == "qemu-test" ]; then
 fi
 
 if [ "$param" == "qemu" ]; then
+	tdone=1
 	info "executing: qemu $option"
 	warning="SUGGEST: target open or image to deploy the disk images"
 	if [ ! -e storage-32GB.disk ]; then
@@ -511,6 +524,7 @@ if [ "$param" == "qemu" ]; then
 fi
 
 if [ "$param" == "ssh-root" ]; then
+	tdone=1
 	info "executing: ssh $tcip"
 	sshfingerprintclean
 	killsshafterqemu >/dev/null 2>&1 &
@@ -518,11 +532,24 @@ if [ "$param" == "ssh-root" ]; then
 	set +e
 	myssh 0 root
 	info "executing: ssh-root $tcip completed"
-#	trap - EXIT
-#	exit 0
 fi
 
-if [ "$param" == "ssh-copy" ]; then
+if [ "$param" == "ssh-copy" -a "$option" == "8GB" ]; then
+	tdone=1
+	info "executing: ssh-copy 8GB $tcip"
+	if [ ! -d ntfs ]; then
+		warning="SUGGEST: create ntfs folder to copy file in 8GB, abort"
+		exit 1
+	fi
+	sshfingerprintclean
+	tcrootunlock
+	sshgettcdir
+	ntdir=${tcdir%1}2
+	myscp ntfs/* root@$tcip:$ntdir
+fi
+
+if [ "$param" == "ssh-copy" -a "$option" != "8GB" ]; then
+	tdone=1
 	info "executing: ssh-copy $tcip"
 	if [ -e "$tcldir" ]; then
 		warning="SUGGEST: run '$myname clean' to remove existing disk folder"
@@ -544,6 +571,7 @@ if [ "$param" == "ssh-copy" ]; then
 fi
 
 if [ "$param" == "ssh-end" ]; then
+	tdone=1
 	info "executing: ssh-end $option"
 	sshfingerprintclean
 	tcrootunlock
@@ -571,6 +599,7 @@ sync; rm -f $tcdir/zero; shutdown"
 fi
 
 if [ "$param" == "qemu-stop" ]; then
+	tdone=1
 	info "executing: qemu-stop"
 	if pgrep qemu >/dev/null; then
 		warning="SUGGEST: qemu is just running, use it or kill it"
@@ -588,6 +617,7 @@ fi
 
 if [ "$param" == "close" ]; then
 	nclosed=0
+	tdone=1
 	info "executing: close $option"
 	if [ -e tcl-64MB-usb.disk ]; then
 		gzip -9c tcl-64MB-usb.disk >tcl-64MB-usb.disk.gz
@@ -605,6 +635,7 @@ if [ "$param" == "close" ]; then
 fi
 
 if [ "$param" == "clean" ]; then
+	tdone=1
 	info "executing: clean $option"
 	while sudo umount $tcldir; do
 		true
@@ -620,7 +651,9 @@ if [ "$param" == "clean" ]; then
 fi
 
 trap - EXIT
-[ "$option" != "" ] && option="$option "
-comp "executing: $myname $param ${option}succeded"
+if [ "$tdone" == "0" ]; then
+	usage; exit 1
+fi
+comp "executing: $myname $param ${option:+$option }succeded"
 echo
 
