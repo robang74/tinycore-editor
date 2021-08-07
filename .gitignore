@@ -11,3 +11,4 @@
 /ubuntu/system.tgz
 /ubuntu/rootfs
 /sshkeys.pub/*.pub
+/ntfs/*
