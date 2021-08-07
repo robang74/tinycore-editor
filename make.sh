@@ -63,14 +63,14 @@ function usage() {
 	echo -e "\t\topen [8GB]"
 	echo -e "\t\timage [8GB]"
 	echo -e "\t\tqemu-init"
-	echo -e "\t\tqemu-test"
+	echo -e "\t\tqemu-test [8GB]"
 	echo -e "\t\tqemu [8GB]"
-	echo -e "\t\tssh-copy [8GB] [ip]"
+	echo -e "\t\tssh-copy [8GB] [\$ipaddr]"
 	echo -e "\t\tssh-root [ip]"
 	echo -e "\t\tssh-end [8GB]"
 	echo -e "\t\tqemu-stop"
 	echo -e "\t\tclose [8GB]"
-	echo -e "\t\tclean [8GB]"
+	echo -e "\t\tclean [8GB | all]"
 	echo -e "\t\tiso"
 	echo
 }
@@ -330,7 +330,9 @@ if [ "$1" != "" ]; then
 	usage; exit 1
 fi
 
-if [ "$option" != "8GB" -a "$option" != "" ]; then
+if [ "$param" == "clean" -a "$option" == "all" ]; then
+	true
+elif [ "$option" != "8GB" -a "$option" != "" ]; then
 	usage; exit 1
 fi
 
@@ -668,6 +670,8 @@ if [ "$param" == "clean" ]; then
 	rm -f tcl-64MB-skeleton.disk tcl-64MB-usb.disk
 	if [ "$option" == "8GB" ]; then
 		rm -f tcl-8GB-usb.disk
+	elif [ "$option" == "all" ]; then
+		rm -f tcl-8GB-usb.disk storage-32GB.disk
 	fi
 	rm -rf $tcldir tclinux.iso
 fi
