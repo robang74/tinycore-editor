@@ -669,7 +669,7 @@ if [ "$param" == "clean" ]; then
 	if [ "$option" == "8GB" ]; then
 		rm -f tcl-8GB-usb.disk
 	fi
-	rm -rf $tcldir
+	rm -rf $tcldir tclinux.iso
 fi
 
 trap - EXIT
