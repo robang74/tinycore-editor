@@ -212,6 +212,13 @@ function killsshafterqemu() {
 	done
 }
 
+function storage_32GB_create()
+{
+	if [ ! -e storage-32GB.disk ]; then
+		dd if=/dev/zero bs=512 count=1 seek=61071359 of=storage-32GB.disk
+	fi
+}
+
 function info() {
 	echo -e "\e[1;36m$@\e[0m"
 }
@@ -357,9 +364,7 @@ if [ "$param" == "open" -a "$option" != "8GB" ]; then
 		warning="SUGGEST: run '$myname clean' to remove existing disk image"
 		exit 1
 	fi
-	if [ ! -e storage-32GB.disk ]; then
-		dd if=/dev/zero bs=512 count=1 seek=61071359 of=storage-32GB.disk
-	fi
+	storage_32GB_create
 	zcat tcl-64MB-usb.disk.gz >tcl-64MB-usb.disk
 	chown $SUDO_USER.$SUDO_USER *.disk
 	sync
@@ -372,9 +377,7 @@ if [ "$param" == "open" -a "$option" == "8GB" ]; then
 		warning="SUGGEST: run '$myname clean 8GB' to remove existing disk images"
 		exit 1
 	fi
-	if [ ! -e storage-32GB.disk ]; then
-		dd if=/dev/zero bs=512 count=1 seek=61071359 of=storage-32GB.disk
-	fi
+	storage_32GB_create
 	zcat tcl-8GB-usb.disk.gz >tcl-8GB-usb.disk
 	chown $SUDO_USER.$SUDO_USER *.disk
 	sync
@@ -387,9 +390,7 @@ if [ "$param" == "image" -a "$option" != "8GB" ]; then
 		warning="SUGGEST: run '$myname clean' to remove existing disk images"
 		exit 1
 	fi
-	if [ ! -e storage-32GB.disk ]; then
-		dd if=/dev/zero bs=512 count=1 seek=61071359 of=storage-32GB.disk
-	fi
+	storage_32GB_create
 	zcat tcl-64MB-skeleton.disk.gz >tcl-64MB-usb.disk
 	sync
 	sudo losetup --partscan $devloop tcl-64MB-usb.disk
@@ -495,9 +496,7 @@ if [ "$param" == "qemu" ]; then
 	tdone=1
 	info "executing: qemu $option"
 	warning="SUGGEST: target open or image to deploy the disk images"
-	if [ ! -e storage-32GB.disk ]; then
-		exit 1
-	elif [ "$option" != "8GB" -a ! -e tcl-64MB-usb.disk ]; then
+	if [ "$option" != "8GB" -a ! -e tcl-64MB-usb.disk ]; then
 		exit 1
 	elif [ "$option" == "8GB" -a ! -e tcl-8GB-usb.disk ]; then
 		exit 1
@@ -515,6 +514,7 @@ if [ "$param" == "qemu" ]; then
 		info "executing: qemu will boot from the 8GB image"
 		drvboot=$drvi8GB
 	fi
+	storage_32GB_create
 	sudo $qemuexec --cpu host --enable-kvm -m 256 -boot c -net nic \
 		-net bridge,br=brkvm -drive $drvboot -device sdhci-pci \
 		-device sdhci-pci -device sd-card,drive=sd -drive $drvdata &
@@ -545,7 +545,9 @@ if [ "$param" == "ssh-copy" -a "$option" == "8GB" ]; then
 	tcrootunlock
 	sshgettcdir
 	ntdir=${tcdir%1}2
-	myscp ntfs/* root@$tcip:$ntdir
+	echo -e "\ttransfering everything to $tcip:$ntdir..."
+	myscp ntfs/* root@$tcip:$ntdir && \
+		echo -e "\ttransfered everything to $tcip:$ntdir -- OK"
 fi
 
 if [ "$param" == "ssh-copy" -a "$option" != "8GB" ]; then
@@ -562,8 +564,9 @@ if [ "$param" == "ssh-copy" -a "$option" != "8GB" ]; then
 	cd $tcldir
 	chown -R $SUDO_USER.$SUDO_USER .
 	myssh 0 root "tcz2tce.sh back"
+	echo -e "\ttransfering everything to $tcip:$tcdir..."
 	myscp * root@$tcip:$tcdir && \
-		echo -e "\ttransfer everything to $tcip:$tcdir"
+		echo -e "\ttransfered everything to $tcip:$tcdir -- OK"
 	realsync="sync; echo 1 >/proc/sys/kernel/sysrq; echo s >/proc/sysrq-trigger; sync"
 	myssh 0 root "test -e $tcdir/tce && tcz2tce.sh >/dev/null; $realsync"
 	cd ..
