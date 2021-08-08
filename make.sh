@@ -219,6 +219,7 @@ function storage_32GB_create()
 {
 	if [ ! -e storage-32GB.disk ]; then
 		dd if=/dev/zero bs=512 count=1 seek=61071359 of=storage-32GB.disk
+		chown $SUDO_USER.$SUDO_USER storage-32GB.disk
 	fi
 }
 
@@ -379,7 +380,7 @@ if [ "$param" == "open" -a "$option" != "8GB" ]; then
 	fi
 	storage_32GB_create
 	zcat tcl-64MB-usb.disk.gz >tcl-64MB-usb.disk
-	chown $SUDO_USER.$SUDO_USER *.disk
+	chown $SUDO_USER.$SUDO_USER tcl-64MB-usb.disk
 	sync
 fi
 
@@ -392,7 +393,7 @@ if [ "$param" == "open" -a "$option" == "8GB" ]; then
 	fi
 	storage_32GB_create
 	zcat tcl-8GB-usb.disk.gz >tcl-8GB-usb.disk
-	chown $SUDO_USER.$SUDO_USER *.disk
+	chown $SUDO_USER.$SUDO_USER tcl-8GB-usb.disk
 	sync
 fi
 
