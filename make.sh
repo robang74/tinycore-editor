@@ -7,6 +7,7 @@ myip=10.0.2.15
 brip=10.0.2.16
 tcip=10.0.2.17
 netm=24
+qemumem=256
 qemuexec=qemu-system-x86_64 #i386
 tcdir="" #if not defined, it will be found
 devloop="" #if not defined, it will be found
@@ -544,11 +545,11 @@ if [ "$param" == "qemu" ]; then
 	fi
 	storage_32GB_create
 	if [ "$option" == "iso" ]; then
-		sudo $qemuexec --cpu host --enable-kvm -m 256 -boot d -net nic \
+		sudo $qemuexec --cpu host --enable-kvm -m $qemumem -boot d -net nic \
 			-net bridge,br=brkvm -cdrom tclinux.iso -device sdhci-pci \
 			-device sdhci-pci -device sd-card,drive=sd -drive $drvdata &
 	else
-		sudo $qemuexec --cpu host --enable-kvm -m 256 -boot c -net nic \
+		sudo $qemuexec --cpu host --enable-kvm -m $qemumem -boot c -net nic \
 			-net bridge,br=brkvm -drive $drvboot -device sdhci-pci \
 			-device sdhci-pci -device sd-card,drive=sd -drive $drvdata &
 	fi
