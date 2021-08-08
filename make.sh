@@ -61,16 +61,16 @@ function usage() {
 	echo
 	echo -e "\ttargets:"
 	echo -e "\t\topen [8GB]"
-	echo -e "\t\timage [8GB]"
+	echo -e "\t\timage [8GB|iso]"
 	echo -e "\t\tqemu-init"
-	echo -e "\t\tqemu-test [8GB]"
-	echo -e "\t\tqemu [8GB]"
+	echo -e "\t\tqemu-test [8GB|iso]"
+	echo -e "\t\tqemu [8GB|iso]"
 	echo -e "\t\tssh-copy [8GB] [\$ipaddr]"
-	echo -e "\t\tssh-root [ip]"
+	echo -e "\t\tssh-root [\$ipaddr]"
 	echo -e "\t\tssh-end [8GB]"
 	echo -e "\t\tqemu-stop"
 	echo -e "\t\tclose [8GB]"
-	echo -e "\t\tclean [8GB | all]"
+	echo -e "\t\tclean [8GB|all]"
 	echo -e "\t\tiso"
 	echo
 }
@@ -332,6 +332,13 @@ fi
 
 if [ "$param" == "clean" -a "$option" == "all" ]; then
 	true
+elif [ "$param" == "qemu" -a "$option" == "iso" ]; then
+	true
+elif [ "$param" == "image" -a "$option" == "iso" ]; then
+	param=iso
+	option=
+elif [ "$param" == "qemu-test" -a "$option" == "iso" ]; then
+	true
 elif [ "$option" != "8GB" -a "$option" != "" ]; then
 	usage; exit 1
 fi
@@ -393,12 +400,10 @@ if [ "$param" == "iso" ]; then
 	info "executing: iso"
 	rm -rf $tcldir
 	mkdir -p $tcldir
-	tccopyall
 	tar xzf tcl-boot-isolinux.tgz -C $tcldir
-	cat $tcldir/boot/syslinux/boot.msg >$tcldir/boot/isolinux/boot.msg
-	cat $tcldir/boot/syslinux/syslinux.cfg >$tcldir/boot/isolinux/isolinux.cfg
+	tccopyall
 	mkisofs -l -Jr -V "$tclabel" -no-emul-boot -boot-load-size 4 -boot-info-table \
-		-b boot/isolinux/isolinux.bin -c boot/isolinux/boot.cat -o tclinux.iso $tcldir
+		-b boot/syslinux/isolinux.bin -c boot/syslinux/boot.cat -o tclinux.iso $tcldir
 	chown $SUDO_USER.$SUDO_USER tclinux.iso
 	rm -rf $tcldir
 	echo
@@ -517,9 +522,11 @@ if [ "$param" == "qemu" ]; then
 	tdone=1
 	info "executing: qemu $option"
 	warning="SUGGEST: target open or image to deploy the disk images"
-	if [ "$option" != "8GB" -a ! -e tcl-64MB-usb.disk ]; then
-		exit 1
+	if [ "$option" == "iso" ]; then
+		test -e tclinux.iso || $0 iso
 	elif [ "$option" == "8GB" -a ! -e tcl-8GB-usb.disk ]; then
+		exit 1
+	elif [ "$option" != "8GB" -a ! -e tcl-64MB-usb.disk ]; then
 		exit 1
 	fi
 	warning=""
@@ -536,9 +543,15 @@ if [ "$param" == "qemu" ]; then
 		drvboot=$drvi8GB
 	fi
 	storage_32GB_create
-	sudo $qemuexec --cpu host --enable-kvm -m 256 -boot c -net nic \
-		-net bridge,br=brkvm -drive $drvboot -device sdhci-pci \
-		-device sdhci-pci -device sd-card,drive=sd -drive $drvdata &
+	if [ "$option" == "iso" ]; then
+		sudo $qemuexec --cpu host --enable-kvm -m 256 -boot d -net nic \
+			-net bridge,br=brkvm -cdrom tclinux.iso -device sdhci-pci \
+			-device sdhci-pci -device sd-card,drive=sd -drive $drvdata &
+	else
+		sudo $qemuexec --cpu host --enable-kvm -m 256 -boot c -net nic \
+			-net bridge,br=brkvm -drive $drvboot -device sdhci-pci \
+			-device sdhci-pci -device sd-card,drive=sd -drive $drvdata &
+	fi
 	info "executing: waiting for the qemu system start-up"
 	sshfingerprintclean
 	waitforssh 1
