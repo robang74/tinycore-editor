@@ -42,7 +42,7 @@ if ! grep -qe "^$ntdev .* rw," /proc/mounts; then
 	fi 2>/dev/null
 	ntfs-3g $ntdev $ntdir 2>/dev/null
 fi
-if ! grep -qe "^$ntdev .* rw," /proc/mounts; then
+if grep -qe "^$ntdev .* rw," /proc/mounts; then
 	echo "$ntdir (RW)"
 fi
 
