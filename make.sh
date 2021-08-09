@@ -408,6 +408,8 @@ if [ "$param" == "iso" ]; then
 	mkdir -p $tcldir
 	tar xzf tcl-boot-isolinux.tgz -C $tcldir
 	tccopyall
+	cp -arf ntfs $tcldir/extra
+	echo -e "\ttransfer ntfs -> $tcldir/extra"	
 	mkisofs -l -Jr -V "$tclabel" -no-emul-boot -boot-load-size 4 -boot-info-table \
 		-b boot/syslinux/isolinux.bin -c boot/syslinux/boot.cat -o tclinux.iso $tcldir
 	chown $SUDO_USER.$SUDO_USER tclinux.iso
