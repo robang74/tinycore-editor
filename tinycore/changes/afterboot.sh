@@ -196,6 +196,7 @@ done 2>/dev/null
 chown -R tc.staff /home/tc
 
 if [ "$tcpassword" != "" ]; then
+	echo -ne "\t" >&2
 	echo -e "$tcpassword\n$tcpassword" | passwd tc
 fi >/dev/null
 
@@ -226,24 +227,30 @@ if which sshd >/dev/null; then
 elif which dropbear >/dev/null; then
 	sshd=1
 	dbdir=/usr/local/etc/dropbear
+	echo -ne "\tdropbear converting host keys:"
 	dropbearconvert openssh dropbear \
-		$dstdir/ssh_host_dsa_key $dbdir/dropbear_dss_host_key
+		$dstdir/ssh_host_dsa_key $dbdir/dropbear_dss_host_key && \
+			echo -n " dsa"
 	dropbearconvert openssh dropbear \
-		$dstdir/ssh_host_rsa_key $dbdir/dropbear_rsa_host_key
+		$dstdir/ssh_host_rsa_key $dbdir/dropbear_rsa_host_key && \
+			echo -n " rsa"
 	dropbearconvert openssh dropbear \
-		$dstdir/ssh_host_ecdsa_key $dbdir/dropbear_ecdsa_host_key
+		$dstdir/ssh_host_ecdsa_key $dbdir/dropbear_ecdsa_host_key && \
+			echo -n " ecdsa"
 	dropbearconvert openssh dropbear \
-		$dstdir/ssh_host_ed25519_key $dbdir/dropbear_ed25519_host_key
+		$dstdir/ssh_host_ed25519_key $dbdir/dropbear_ed25519_host_key && \
+			echo -n " ed25519"
 	dropbear
+	echo
 fi 2>/dev/null
 
 if [ "$sshd" == "1" ]; then
 	echo
-	warn ">>> SSH user: tc, password: $tcpassword <<<"
+	warn "\t>>> SSH user: tc, password: $tcpassword <<<"
 	echo
 else
 	echo
-	warn "No SSH server found, service not available"
+	warn "\tNo SSH server found, service not available"
 	echo
 fi
 
