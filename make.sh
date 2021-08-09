@@ -289,7 +289,7 @@ while [ -e tinycore/tinycore.conf ]; do
 			echo
 			perr "ERROR: file tinycore/$i does not exist"
 			echo
-	 		warn "SUGGEST: run tinycore/provides/tcgetdistrofiles.sh"
+			warn "SUGGEST: run tinycore/provides/tcgetdistro.sh"
 			echo
 			exit 1
 		fi
@@ -299,7 +299,7 @@ while [ -e tinycore/tinycore.conf ]; do
 			echo
 			perr "ERROR: file tinycore/tcz/$i does not exist"
 			echo
-	 		warn "SUGGEST: run tinycore/provides/tcgetdistrofiles.sh"
+			warn "SUGGEST: run tinycore/provides/tcgetdistro.sh"
 			echo
 			exit 1
 		fi
