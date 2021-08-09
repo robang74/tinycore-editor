@@ -3,9 +3,24 @@
 # Autore: Roberto A. Foglietta <roberto.foglietta@altran.it>
 #
 
+function partready() {
+	part=$(basename $1)
+	if ! grep -qe "$part$" /proc/partitions; then
+		sleep 1
+	fi
+	if [ ! -b $1 ]; then
+		sleep 1
+	fi
+	grep -qe "$part$" /proc/partitions
+}
+
 function rrdiskptbl() {
 	echo "w" | fdisk $bkdev >/dev/null
-	sleep 1
+	partready ${bkdev}1
+}
+
+function devdir() {
+	sed -ne "s,^$1 \([^ ]*\) .*,\1,p" /proc/mounts | head -n1
 }
 
 export PATH=/home/tc/.local/bin:/usr/local/sbin:/usr/local/bin
@@ -20,6 +35,8 @@ fi
 
 tcdev=$(readlink /etc/sysconfig/tcdev)
 ntdev=$(readlink /etc/sysconfig/ntdev)
+ntdir=$(readlink /etc/sysconfig/ntdir)
+ntdir=${ntdir:-$(devdir $ntdev)}
 bkdev=${tcdev%1}
 
 if [ "$tcdev" == "" ]; then
@@ -29,9 +46,21 @@ if [ "$tcdev" == "" ]; then
 	exit 1
 fi
 
-imgname=tcl-64M?-usb.disk.gz
-if [ "$1" == "" -a -d /mnt/sf_Shared ]; then
-	set -- /mnt/sf_Shared
+imgname=tcl-64MB-usb.disk.gz
+dirlist="
+/mnt/sf_Shared
+/home/tc
+/root
+/
+$ntdir
+"
+if [ "$1" == "" ]; then
+	for i in $dirlist; do
+		if [ -e $i/$imgname ]; then
+			set -- $i/$imgname
+			break;
+		fi
+	done
 fi
 if [ -d "$1" -a -f $1/$imgname ]; then
 	image="$1/$imgname"
@@ -43,16 +72,17 @@ else
 	echo
 	exit 1
 fi
+echo "Image: $(realpath $image)"
 
 errot=0
-if grep -qe "^$ntdev" /proc/mounts; then
+if grep -qe "^$ntdev " /proc/mounts; then
 	if ! umount $ntdev; then
 		echo "ERROR: device $ntdev is busy"
 		echo
 		exit 1
 	fi
 fi
-if grep -qe "^$tcdev" /proc/mounts; then
+if grep -qe "^$tcdev " /proc/mounts; then
 	if ! mount -o remount,ro $tcdev; then
 		echo "ERROR: device $tcdev is busy"
 		echo
@@ -61,22 +91,28 @@ if grep -qe "^$tcdev" /proc/mounts; then
 fi
 sync
 echo "Image is copying on $bkdev..."
-zcat $image >$bkdev
+if ! zcat $image >$bkdev; then
+	echo "ERROR: device ${tcdev} not initialised"
+	echo
+	echo "Do not reboot, the system will fail"
+	echo "Fix the problem or repeat this procedure"
+	echo	
+fi
 sync; sleep 1
 echo "Refreshing partition on $bkdev..."
 rrdiskptbl $bkdev
-if ! fsck -yf $tcdev; then
-	if ! fsck -yf $tcdev; then
-		error=1
-	fi
-fi >/dev/null 2>&1
+#if ! fsck -yf $tcdev; then
+#	if ! fsck -yf $tcdev; then
+#		error=1
+#	fi
+#fi >/dev/null 2>&1
 ntfs-usbdisk-partition-create.sh
 
 if [ "$error" = "1" ]; then
 	echo "ERROR: root partition ${tcdev} is broken"
 	echo
-	echo "Reboot is require but it could go wrong"
-	echo "Fix the problem or repeat this preocedure"
+	echo "Reboot is require but it could fail"
+	echo "Fix the problem or repeat this procedure"
 	echo
 else
 	echo "Please reboot the system immediately"
