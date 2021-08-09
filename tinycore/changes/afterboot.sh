@@ -188,17 +188,6 @@ done
 
 infotime "Upraising SSH for {tc, $tcpassword}..." #############################
 
-function getsshconfigfile() {
-	find=/etc/ssh/sshd_config
-	ls -1d $find /usr/local/$find 2>/dev/null | head -n1
-}
-
-if ! tar xzf $tcdir/custom/sshdconfig.tgz -moC /; then
-	sshdconfig=$(getsshconfigfile)
-	cat $sshdconfig.orig >$sshdconfig
-	ssh-keygen -A
-fi 2>/dev/null
-
 for i in /root /home/tc; do
 	mkdir -p $i/.ssh
 	cat $tcdir/sshkeys.pub/*.pub > $i/.ssh/authorized_keys
@@ -207,11 +196,18 @@ for i in /root /home/tc; do
 done
 chown -R tc.staff /home/tc
 
-sshdconfig=$(getsshconfigfile)
-authstr=PubkeyAuthentication
-sed -ie "s,.*$authstr.*,$authstr yes," $sshdconfig
-if ! grep -qe "$authstr" $sshdconfig; then
-	echo "$authstr yes" >>$sshdconfig
+find=/etc/ssh/sshd_config.orig
+found=$(ls -1d $find /usr/local/$find 2>/dev/null | head -n1)
+sshdconfig=${found%%.orig}
+if ! tar xzf $tcdir/custom/sshdhostkeys.tgz -moC $(dirname $sshdconfig); then
+	ssh-keygen -A
+fi 2>/dev/null
+if cat $sshdconfig.orig >$sshdconfig; then
+	authstr=PubkeyAuthentication
+	sed -ie "s,.*$authstr.*,$authstr yes," $sshdconfig
+	if ! grep -qe "$authstr" $sshdconfig; then
+		echo "$authstr yes" >>$sshdconfig
+	fi
 fi
 
 if [ "$tcpassword" != "" ]; then
