@@ -3,6 +3,9 @@
 # Autore: Roberto A. Foglietta <roberto.foglietta@altran.it>
 #
 
+export PATH=/home/tc/.local/bin:/usr/local/sbin:/usr/local/bin
+export PATH=$PATH:/apps/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
 if [ "$USER" != "root" ]; then
 	echo
 	echo "This script requires being root, abort"

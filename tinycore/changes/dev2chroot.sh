@@ -3,9 +3,6 @@
 # Autore: Roberto A. Foglietta <roberto.foglietta@altran.it>
 #
 
-export PATH=/home/tc/.local/bin:/usr/local/sbin:/usr/local/bin
-export PATH=$PATH:/apps/bin:/usr/sbin:/usr/bin:/sbin:/bin
-
 function realexit() {
 	trap - EXIT
 	exit $1
@@ -116,6 +113,9 @@ function usage() {
 }
 
 ###############################################################################
+
+export PATH=/home/tc/.local/bin:/usr/local/sbin:/usr/local/bin
+export PATH=$PATH:/apps/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
 rootdir=/mnt/root
 myname=$(basename $0)

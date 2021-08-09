@@ -7,6 +7,9 @@ function devdir() {
 	sed -ne "s,^$1 \([^ ]*\) .*,\1,p" /proc/mounts | head -n1
 }
 
+export PATH=/home/tc/.local/bin:/usr/local/sbin:/usr/local/bin
+export PATH=$PATH:/apps/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
 if [ "$USER" != "root" ]; then
 	echo
 	echo "This script requires being root, abort"
