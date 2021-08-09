@@ -74,7 +74,7 @@ fi
 
 echo
 info "Selecting tccustom.tgz..."
-ln -sf tccustom$tcsize.tgz changes/tccustom.tgz
+ln -sf ../tccustom$tcsize.tgz changes/tccustom.tgz
 
 #if [ ! -e rootfs.gz ]; then
 	info "Downloading rootfs.gz..."
