@@ -43,7 +43,6 @@ resetbysf.sh:resetbysf.sh
 usbsetboot.sh:usbsetboot.sh
 dev2chroot.sh:dev2chroot.sh
 sysinstall.sh:system-install.sh
-usbcreate.sh:bootable-usbdisk-create.sh
 ntfscrea.sh:ntfs-usbdisk-partition-create.sh
 "
 
