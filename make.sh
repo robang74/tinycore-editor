@@ -159,7 +159,10 @@ function tcdircopy() {
 function tccopyall() {
 	test -n "$tcldir"
 	cd tinycore
+	./tccustom.sh
 	./rootfs.sh update
+	ln -sf ../tccustom$tcsize.tgz changes/tccustom.tgz
+	chown -R $SUDO_USER.$SUDO_USER tccustom*.tgz changes
 	cd -
 	mkdir -p $tcldir/flags
 	mkdir -p $tcldir/custom

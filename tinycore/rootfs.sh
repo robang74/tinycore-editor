@@ -3,8 +3,6 @@
 # Autore: Roberto A. Foglietta <roberto.foglietta@altran.it>
 #
 
-myname=$(basename $0)
-
 function usage() {
 	echo
 	echo "USAGE: $myname [open|close|clean|update]"
@@ -24,6 +22,8 @@ if [ "$USER" != "root" ]; then
 	exit $?
 fi
 
+tmpdir=rootfs.tmp
+myname=$(basename $0)
 cd $(dirname $0)
 WRKDIR="$PWD"
 
@@ -32,11 +32,11 @@ echo "Working folder is $WRKDIR"
 
 if [ "$1" == "open" -o "$1" == "update" ]; then
 	ok=1
-	if [ -d rootfs ]; then
-		errexit "directory rootfs found, abort"	
+	if [ -d $tmpdir ]; then
+		errexit "directory $tmpdir found, abort"
 	fi
-	mkdir rootfs
-	cd rootfs
+	mkdir $tmpdir
+	cd $tmpdir
 	echo -n "open : "
 	zcat ../rootfs.gz | sudo cpio -i
 	cat ../changes/rcS > etc/init.d/rcS
@@ -46,21 +46,21 @@ fi
 
 if [ "$1" == "close" -o "$1" == "update" ]; then
 	ok=1
-	if [ ! -d rootfs ]; then
-		errexit "directory rootfs NOT found, abort"	
+	if [ ! -d $tmpdir ]; then
+		errexit "directory $tmpdir NOT found, abort"
 	fi
-	cd rootfs
+	cd $tmpdir
 	echo -n "close: "
 	if sudo find . | sudo cpio -o -H newc | gzip > ../rootfs.gz; then
 		cd ..
-		rm -rf rootfs
+		rm -rf $tmpdir
 	fi
 	chown $SUDO_USER.$SUDO_USER rootfs.gz
 fi
 
 if [ "$1" == "clean" -o "$1" == "update" ]; then
 	ok=1
-	rm -rf rootfs
+	rm -rf $tmpdir
 	echo "clean: OK"
 fi
 

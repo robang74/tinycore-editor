@@ -72,10 +72,6 @@ if [ "$1" != "quiet" ]; then
 	warn "Version: $TC.x"
 fi
 
-echo
-info "Selecting tccustom.tgz..."
-ln -sf ../tccustom$tcsize.tgz changes/tccustom.tgz
-
 #if [ ! -e rootfs.gz ]; then
 	info "Downloading rootfs.gz..."
 	echo

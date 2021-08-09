@@ -4,6 +4,8 @@
 /tinycore/modules.gz
 /tinycore/provides/tc*.db.gz
 /tinycore/changes/tccustom.tgz
+/tinycore/tccustom32.tgz
+/tinycore/tccustom64.tgz
 /tinycore/tcz/*.tcz
 /tinycore/vmlinuz
 /tcl-*-usb.disk.gz

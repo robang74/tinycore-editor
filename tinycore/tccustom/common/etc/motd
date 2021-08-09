@@ -1,0 +1,21 @@
+
+      ( '>')         >>> user: tc - passwd: tinycore <<<
+     /) TC (\   Core is distributed with ABSOLUTELY NO WARRANTY.
+    (/-_--_-\)             www.tinycorelinux.net
+
+ List of customised commands which are available for root or by sudo:
+
+   broot		to became root
+   unlock.sh		to mount tinycore partitions in read-write
+   root-ssh.sh		to allow root logins via SSH -- DANGEROUS!
+   system-install.sh 	to install the target system on a disk
+   reboot|shutdown.sh	to reboot/shutdown the system using sysrq
+   dev2chroot.sh	to chroot into installed Ubuntu
+   usbsetboot.sh	to enable/disable the USB key boot
+   tcz2tce.sh		to change in TCE compliant or reverse
+
+   bootable-usbdisk-create.sh 		to create a bootable usb disk
+   ntfs-usbdisk-partition-create.sh 	to create ntfs partition
+
+   loadkmap < /usr/share/kmap/qwerty/it.kmap 	to load IT keyboard
+
