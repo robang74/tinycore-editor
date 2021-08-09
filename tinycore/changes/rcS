@@ -71,9 +71,7 @@ else
 			echo
 			echo -e "\e[1;37m############# AFTER BOOT SCRIPT START #############\e[0m"
 			echo
-			cp $tcdir/afterboot.sh /tmp/afterboot.sh
-			chmod a+x /tmp/afterboot.sh
-			/tmp/afterboot.sh
+			$tcdir/afterboot.sh
 		fi
 	fi
 fi

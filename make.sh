@@ -169,8 +169,10 @@ function tccopyall() {
 		tcdircopy $i
 	done
 	if [ -e $tcldir/afterboot.sh ]; then
+		chmod a+x $tcldir/afterboot.sh
 		rm -f $tcldir/custom/afterboot.sh
 	fi
+	chmod a+x $tcldir/custom/*.sh
 	cat tinycore/{rootfs.gz,modules.gz} > $tcldir/boot/core.gz
 	echo -e "\ttransfer tinycore/{rootfs.gz,modules.gz} -> $tcldir/boot/core.gz"	
 	sync
