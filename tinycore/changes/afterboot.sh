@@ -109,6 +109,7 @@ fi 2>/dev/null
 infotime "Customizing the system..." ##########################################
 
 tar xzf $tcdir/custom/tccustom.tgz -moC / >/dev/null 2>&1
+ldconfig
 
 . /etc/os-release
 echo "$PRETTY_NAME" >/etc/issue
