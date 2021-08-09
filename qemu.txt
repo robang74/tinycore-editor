@@ -53,7 +53,6 @@ cd ..
 cat rootfs.gz modules.gz | sshpass -p root ssh root@$tcip "dd of=$tcdir/boot/core.gz"
 sshpass -p root scp vmlinuz root@$tcip:$tcdir/boot
 cd ..
-sshpass -p root scp crea-usbkey.sh root@$tcip:$tcdir/custom/usbcreate.sh
 sshpass -p root ssh root@$tcip "dd if=/dev/zero of=$tcdir/zero; sync; rm -f $tcdir/zero; shutdown"
 
 ###########################################################################

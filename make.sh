@@ -44,7 +44,6 @@ tinycore/changes/afterboot.sh:
 tinycore/changes/{*.sh,*.tgz}:custom/
 tinycore/changes/syslinux.cfg:boot/syslinux/
 tinycore/changes/boot.msg:boot/syslinux/
-crea-usbkey.sh:custom/usbcreate.sh
 tinycore/vmlinuz:boot/
 tcl-usb-boot-*able.gz:
 sshkeys.pub:
