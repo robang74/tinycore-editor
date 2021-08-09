@@ -3,6 +3,18 @@
 # Autore: Roberto A. Foglietta <roberto.foglietta@altran.it>
 #
 
+function banner() {
+	echo
+	echo "#################################################################"
+	echo "#  WARNING: by now, this system is easily vulnerable by remote  #"
+	echo "#           please, reboot as soon as possible or if unsure     #"
+	echo "#################################################################"
+	echo
+	echo "            >>> SSH user: root,   password: root <<<"
+	echo "            >>> SSH user: tc, password: tinycore <<<"
+	echo
+}
+
 if [ "$USER" != "root" ]; then
 	echo
 	echo "This script requires being root, abort"
@@ -18,6 +30,11 @@ set -e
 echo
 echo -e "root\nroot\n" | passwd root >/dev/null
 
+if ! which sshd >/dev/null; then
+	banner
+	exit 0
+fi
+
 sed -i "s/#\(PermitRootLogin\) .*/\1 yes/"  /usr/local/etc/ssh/sshd_config
 
 sshd=$(which sshd)
@@ -28,13 +45,5 @@ else
 	kill -HUP $pid
 fi
 
-echo
-echo "#################################################################"
-echo "#  WARNING: by now, this system is easily vulnerable by remote  #"
-echo "#           please, reboot as soon as possible or if unsure     #"
-echo "#################################################################"
-echo
-echo "            >>> SSH user: root,   password: root <<<"
-echo "            >>> SSH user: tc, password: tinycore <<<"
-echo
+banner
 

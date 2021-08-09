@@ -137,8 +137,8 @@ for i in $copylist; do
 	src=$(echo "$i" | cut -d: -f1)
 	dst=$(echo "$i" | cut -d: -f2)
 	if ls $tcdir/custom/$src; then
-		cp -arf $tcdir/custom/$src /sbin/$dst 
-		chmod a+x /sbin/$dst
+		cp -arf $tcdir/custom/$src /bin/$dst
+		chmod a+x /bin/$dst
 	fi >/dev/null
 done
 chown -R tc.staff /home/tc
@@ -193,30 +193,60 @@ for i in /root /home/tc; do
 	cat $tcdir/sshkeys.pub/*.pub > $i/.ssh/authorized_keys
 	chmod 600 $i/.ssh/authorized_keys
 	chmod 700 $i/.ssh $i
-done
+done 2>/dev/null
 chown -R tc.staff /home/tc
-
-find=/etc/ssh/sshd_config.orig
-found=$(ls -1d $find /usr/local/$find 2>/dev/null | head -n1)
-sshdconfig=${found%%.orig}
-if ! tar xzf $tcdir/custom/sshdhostkeys.tgz -moC $(dirname $sshdconfig); then
-	ssh-keygen -A
-fi 2>/dev/null
-if cat $sshdconfig.orig >$sshdconfig; then
-	authstr=PubkeyAuthentication
-	sed -ie "s,.*$authstr.*,$authstr yes," $sshdconfig
-	if ! grep -qe "$authstr" $sshdconfig; then
-		echo "$authstr yes" >>$sshdconfig
-	fi
-fi
 
 if [ "$tcpassword" != "" ]; then
 	echo -e "$tcpassword\n$tcpassword" | passwd tc
 fi >/dev/null
-nohup $(which sshd) >/dev/null 2>&1 &
-echo
-warn ">>> SSH user: tc, password: $tcpassword <<<"
-echo
+
+find=/etc/ssh/sshd_config.orig
+found=$(ls -1d $find /usr/local/$find 2>/dev/null | head -n1)
+found=${found:-$find}
+sshdconfig=${found%%.orig}
+dstdir=$(dirname $sshdconfig)
+mkdir -p $dstdir
+if ! tar xzf $tcdir/custom/sshdhostkeys.tgz -moC $dstdir; then
+	ssh-keygen -A
+	ssh-keygen -m PEM -p -N '' -f $dstdir/ssh_host_dsa_key
+	ssh-keygen -m PEM -p -N '' -f $dstdir/ssh_host_rsa_key
+	ssh-keygen -m PEM -p -N '' -f $dstdir/ssh_host_ecdsa_key
+	ssh-keygen -m PEM -p -N '' -f $dstdir/ssh_host_ed25519_key
+fi >/dev/null
+
+if which sshd >/dev/null; then
+	sshd=1
+	if cat $sshdconfig.orig >$sshdconfig; then
+		authstr=PubkeyAuthentication
+		sed -ie "s,.*$authstr.*,$authstr yes," $sshdconfig
+		if ! grep -qe "$authstr" $sshdconfig; then
+			echo "$authstr yes" >>$sshdconfig
+		fi
+	fi
+	$(which sshd)
+elif which dropbear >/dev/null; then
+	sshd=1
+	dbdir=/usr/local/etc/dropbear
+	dropbearconvert openssh dropbear \
+		$dstdir/ssh_host_dsa_key $dbdir/dropbear_dss_host_key
+	dropbearconvert openssh dropbear \
+		$dstdir/ssh_host_rsa_key $dbdir/dropbear_rsa_host_key
+	dropbearconvert openssh dropbear \
+		$dstdir/ssh_host_ecdsa_key $dbdir/dropbear_ecdsa_host_key
+	dropbearconvert openssh dropbear \
+		$dstdir/ssh_host_ed25519_key $dbdir/dropbear_ed25519_host_key
+	dropbear
+fi 2>/dev/null
+
+if [ "$sshd" == "1" ]; then
+	echo
+	warn ">>> SSH user: tc, password: $tcpassword <<<"
+	echo
+else
+	echo
+	warn "No SSH server found, service not available"
+	echo
+fi
 
 ###############################################################################
 

@@ -6,7 +6,7 @@
 /tinycore/changes/tccustom.tgz
 /tinycore/tccustom32.tgz
 /tinycore/tccustom64.tgz
-/tinycore/tcz/*.tcz
+/tinycore/tcz/*
 /tinycore/vmlinuz
 /tcl-*-usb.disk.gz
 /ubuntu/ubuntu-base-20.04.2-base-amd64.tar.gz
