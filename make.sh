@@ -265,7 +265,7 @@ option="$1"
 shift
 
 syslist="rootfs.gz modules.gz vmlinuz"
-trglist="ssh-copy image gpg"
+trglist="ssh-copy image iso"
 
 while [ -e tinycore/tinycore.conf ]; do
 	for i in $trglist; do
