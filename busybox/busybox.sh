@@ -51,11 +51,13 @@ if [ "$1" == "open" -o "$1" == "all" ]; then
 		mv busybox-$version src
 		cd src
 		for i in ../patches/*.patch; do
+			echo -e "\nApplying $(basename $i)"
 			if ! timeout 1 patch -Np1 -i ../patches/$i; then
 				echo "************ Using -p0 **************"
 				patch -Np0 -i $i
 			fi
 		done
+		echo
 		cd ..
 	fi
 fi
@@ -109,9 +111,9 @@ if [ "$1" == "install" -o "$1" == "all" ]; then
 	cd rootfs
 	sudo cp -arf * $tcdir/$rtdir
 	$tcdir/rootfs.sh close
-	cd ..
+	cd ../..
 fi
-if [ "$1" == "update" -o "$1" == "all" ]; then
+if [ "$1" == "update" ]; then
 	done=1
 	cd src
 	if [ "$2" == "" -o "$2" == "nosuid" ]; then
