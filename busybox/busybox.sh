@@ -4,7 +4,7 @@
 #
 
 function usage() {
-	echo "USAGE: $myname [download|open|compile|install|close|clean|distclean]"
+	echo "USAGE: $myname [download|open|compile|install|close|all|clean|distclean]"
 	echo
 }
 
@@ -29,13 +29,37 @@ echo "Version: $version"
 echo
 
 if [ "$1" == "download" ]; then
+	done=1
 	wget -c $confsuid -O config.suid
 	wget -c $confnosuid -O config.nosuid
 	wget -c $source -O busybox.tar.bz2
-elif [ "$1" == "open" ]; then
-	tar xjf busybox.tar.bz2
-	mv busybox-$version src
-elif [ "$1" == "compile" ]; then
+	mkdir -p patches
+	for i in $patchlist; do
+		wget -c $tcbbsrc/$i -O patches/$i
+	done
+fi
+if [ "$1" == "open" -o "$1" == "all" ]; then
+	done=1
+	if [ ! -e busybox.tar.bz2 ]; then
+		echo
+		echo "ERROR: source archive not present, run $myname download"
+		echo
+		exit 1
+	fi
+	if [ ! -d src ]; then
+		tar xjf busybox.tar.bz2
+		mv busybox-$version src
+		cd src
+		for i in $patchlist; do
+			if ! timeout 1 patch -Np1 -i ../patches/$i; then
+				echo "************ Using -p0 **************"
+				patch -Np0 -i ../patches/$i
+			fi
+		done
+	fi
+fi
+if [ "$1" == "compile" -o "$1" == "all" ]; then
+	done=1
 	cd src
 
 	sudo rm -rf _install rootfs
@@ -63,7 +87,10 @@ elif [ "$1" == "compile" ]; then
 	cd ..
 
 	sudo rm -rf _install
-elif [ "$1" == "install" ]; then
+	cd ..
+fi
+if [ "$1" == "install" -o "$1" == "all" ]; then
+	done=1
 	rtdir=$($tcdir/rootfs.sh open | sed -ne "s,^opened folder: \(.*\),\1,p")
 	if [ "$rtdir" == "" -o ! -d "$tcdir/$rtdir" ]; then
 		echo
@@ -74,20 +101,28 @@ elif [ "$1" == "install" ]; then
 	cd src/rootfs
 	sudo cp -arf * $tcdir/$rtdir
 	$tcdir/rootfs.sh close
-elif [ "$1" == "close" ]; then
+fi
+if [ "$1" == "close" ]; then
+	done=1
 	cd src
 	sudo rm -rf _install rootfs
 	make clean
 	cd ..
 	mv src busybox-$version
 	tar cjf busybox.tar.bz2 busybox-$version
-elif [ "$1" == "clean" ]; then
+fi
+if [ "$1" == "clean" ]; then
+	done=1
 	sudo rm -rf src
-elif [ "$1" == "distclean" ]; then
-	sudo rm -rf src
+fi
+if [ "$1" == "distclean" ]; then
+	done=1
+	sudo rm -rf src patches
 	rm -f busybox.tar.bz2
 	rm -f config.suid config.nosuid
-else
+fi
+
+if [ "$done" != "1" ]; then
 	usage; exit 1
 fi
 

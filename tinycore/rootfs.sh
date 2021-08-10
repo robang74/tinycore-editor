@@ -5,7 +5,7 @@
 
 function usage() {
 	echo
-	echo "USAGE: $myname [open|close|clean|update]"
+	echo "USAGE: $myname [open|close|update|clean|distclean]"
 	echo
 }
 
@@ -61,10 +61,16 @@ if [ "$1" == "close" -o "$1" == "update" ]; then
 	chown $SUDO_USER.$SUDO_USER rootfs.gz
 fi
 
-if [ "$1" == "clean" -o "$1" == "update" ]; then
+if [ "$1" == "clean" -o "$1" == "update" -o "$1" == "distclean" ]; then
 	ok=1
 	rm -rf $tmpdir
 	echo "clean: OK"
+fi
+
+if [ "$1" == "distclean" ]; then
+	ok=1
+	rm -rf rootfs.gz
+	echo "distclean: OK"
 fi
 
 if [[ $ok -eq 0 ]]; then

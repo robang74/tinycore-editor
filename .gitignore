@@ -8,6 +8,16 @@
 /tinycore/tccustom64.tgz
 /tinycore/tcz/*
 /tinycore/vmlinuz
+/busybox/src
+/busybox/busybox.tar.bz2
+/busybox/config.nosuid
+/busybox/config.suid
+/busybox/patches/busybox-1.27.1-wget-make-default-timeout-configurable.patch
+/busybox/patches/busybox-1.29.3_root_path.patch
+/busybox/patches/busybox-1.31.1-vi.backward_search.patch
+/busybox/patches/busybox-1.33.0_modprobe.patch
+/busybox/patches/busybox-1.33.0_skip-loop-control.patch
+/busybox/patches/busybox-1.33.0_tc_depmod.patch
 /tcl-*-usb.disk.gz
 /ubuntu/ubuntu-base-20.04.2-base-amd64.tar.gz
 /ubuntu/system.tgz
