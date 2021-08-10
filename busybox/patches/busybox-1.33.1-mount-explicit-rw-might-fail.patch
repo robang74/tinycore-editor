@@ -1,0 +1,46 @@
+--- src.orig/util-linux/mount.c	2021-01-01 11:52:27.000000000 +0100
++++ src/util-linux/mount.c	2021-08-10 18:10:11.289670285 +0200
+@@ -317,6 +317,8 @@ enum {
+ #define HELPERS_ALLOWED 0
+ #endif
+ 
++static bool explicit_rw = 0;
++
+ 
+ // TODO: more "user" flag compatibility.
+ // "user" option (from mount manpage):
+@@ -574,6 +576,13 @@ static void append_mount_options(char **
+ 				if (!p) break;
+ 				p++;
+ 			}
++
++			if(!explicit_rw) {
++				if (!strncasecmp("rw", newopts, 2)) {
++					explicit_rw = 1;
++				}
++			}
++
+ 			p = xasprintf("%s,%.*s", *oldopts, len, newopts);
+ 			free(*oldopts);
+ 			*oldopts = p;
+@@ -739,7 +748,7 @@ static int mount_it_now(struct mntent *m
+ 			errno = errno_save;
+ 		}
+ 
+-		if (!rc || (vfsflags & MS_RDONLY) || (errno != EACCES && errno != EROFS))
++		if (!rc || (vfsflags & MS_RDONLY) || (errno != EACCES && errno != EROFS) || explicit_rw)
+ 			break;
+ 		if (!(vfsflags & MS_SILENT))
+ 			bb_error_msg("%s is write-protected, mounting read-only",
+@@ -2298,7 +2307,10 @@ int mount_main(int argc UNUSED_PARAM, ch
+ 
+ 	while (lst_o) append_mount_options(&cmdopts, llist_pop(&lst_o)); // -o
+ 	if (opt & OPT_r) append_mount_options(&cmdopts, "ro"); // -r
+-	if (opt & OPT_w) append_mount_options(&cmdopts, "rw"); // -w
++	if (opt & OPT_w) {
++		explicit_rw = 1;
++		append_mount_options(&cmdopts, "rw"); // -w
++	}
+ 	argv += optind;
+ 
+ 	// If we have no arguments, show currently mounted filesystems
