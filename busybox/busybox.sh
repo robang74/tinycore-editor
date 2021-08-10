@@ -35,11 +35,6 @@ function usage() {
 	echo
 }
 
-set -e
-
-cd $(dirname $0)
-myname=$(basename $0)
-
 if [ "$USER" != "root" ]; then
 	set -m
 	if ! timeout 0.2 sudo -n true; then
@@ -50,6 +45,12 @@ if [ "$USER" != "root" ]; then
 	sudo $0 "$@"
 	exit $?
 fi
+
+set -e
+
+mydir=$(dirname $0)
+myname=$(basename $0)
+cd $mydir
 
 tcdir=$(realpath ../tinycore)
 source $tcdir/tinycore.conf
@@ -93,15 +94,15 @@ if [ "$1" == "open" -o "$1" == "all" ]; then
 	if [ ! -d src ]; then
 		tar xjf busybox.tar.bz2
 		mv busybox-$version src
-		cd src
+	fi
+	if [ ! -e .patches_applied -a ! -e .patches_applied.close ]; then
+		cd $mydir/src
 		for i in ../patches/*.patch; do
 			err=0
 			warn "\nApplying $(basename $i)"
-			timeout 1 patch -Np1 -i ../patches/$i || err=$?
-			if [[ $err == 124 ]]; then
+			if ! timeout 1 patch -Np1 -i ../patches/$i; then
 				echo "************ Using -p0 **************"
-				timeout 1 patch -Np0 -i $i || err=$?
-				if [[ $err == 124 ]]; then
+				if ! timeout 1 patch -Np0 -i $i; then
 					perr "\nApplying $(basename $i) failed"
 					exit 1
 				fi
@@ -109,13 +110,14 @@ if [ "$1" == "open" -o "$1" == "all" ]; then
 		done
 		echo
 		cd ..
+		touch .patches_applied
 	fi
 fi
 if [ "$1" == "compile" -o "$1" == "all" ]; then
 	done=1
 	info "executing $1..."
 	echo
-	cd src
+	cd $mydir/src
 	warn "cleaning"
 	sudo rm -rf _install rootfs
 	make clean
@@ -150,7 +152,7 @@ fi
 if [ "$1" == "install" -o "$1" == "all" ]; then
 	done=1
 	info "executing $1..."
-	cd src
+	cd $mydir/src
 	if [ ! -d rootfs ]; then
 		echo
 		perr "ERROR: rootfs folder does not exist, run $myname compile"
@@ -174,7 +176,7 @@ fi
 if [ "$1" == "update" ]; then
 	done=1
 	info "executing $1..."
-	cd src
+	cd $mydir/src
 	if [ "$2" == "" -o "$2" == "nosuid" ]; then
 		ver=nosuid
 	elif [ "$2" == "suid" ]; then
@@ -206,24 +208,28 @@ fi
 if [ "$1" == "close" ]; then
 	done=1
 	info "executing $1..."
-	cd src
+	cd $mydir/src
 	sudo rm -rf _install rootfs
 	make clean
 	cd ..
 	mv src busybox-$version
 	tar cjf busybox.tar.bz2 busybox-$version
+	mv .patches_applied .patches_applied.close
 fi
 if [ "$1" == "clean" ]; then
 	done=1
 	info "executing $1..."
-	sudo rm -rf src
+	sudo rm -rf src .patches_applied
 fi
 if [ "$1" == "distclean" ]; then
 	done=1
 	info "executing $1..."
-	sudo rm -rf src patches
-	rm -f busybox.tar.bz2
+	rm -f busybox.tar.bz2 .patches_applied*
 	rm -f config.suid config.nosuid
+	sudo rm -rf src
+	cd patches
+	rm -f $patchlist
+	cd ..
 fi
 
 if [ "$done" != "1" ]; then

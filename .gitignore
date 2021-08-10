@@ -18,6 +18,8 @@
 /busybox/patches/busybox-1.33.0_modprobe.patch
 /busybox/patches/busybox-1.33.0_skip-loop-control.patch
 /busybox/patches/busybox-1.33.0_tc_depmod.patch
+/busybox/.patches_applied.close
+/busybox/.patches_applied
 /tcl-*-usb.disk.gz
 /ubuntu/ubuntu-base-20.04.2-base-amd64.tar.gz
 /ubuntu/system.tgz
