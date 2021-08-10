@@ -102,6 +102,12 @@
     options which is required or optimal for your system. When you reach the
     definitive boot configuration edit the tinycore/changes/syslinux.cfg
 
+16. It is possible to download and compile a specific version of busybox
+    In order to integrate busybox into root filesystem follow these steps:
+
+	busybox/busybox.sh download
+	busybox/busybox.sh all
+
 ###############################################################################
 
 https://github.com/pbatard/rufus/releases/download/v3.14/rufus-3.14.exe
