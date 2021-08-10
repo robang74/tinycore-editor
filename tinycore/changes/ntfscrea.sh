@@ -33,9 +33,10 @@ tcdir=$(readlink /etc/sysconfig/tcdir)
 ntdev=$(readlink /etc/sysconfig/ntdev)
 ntdir=$(readlink /etc/sysconfig/ntdir)
 ntdir=${ntdir:-$(devdir $ntdev)}
+ntdir=${ntdir:-${ntdev/dev/mnt}}
 bkdev=${tcdev%1}
 
-if ! fdisk -l $bkdev | grep -qe "^$ntdev"; then
+if ! fdisk -l $bkdev | grep -qe "^$ntdev "; then
 #
 # Updating the USB key with dd, creates some situations that should be addressed
 #
@@ -61,16 +62,16 @@ if ! fdisk -l $bkdev | grep -qe "^$ntdev"; then
 		ntdir=${ntdev/dev/mnt}
 		mkdir -p $ntdir
 	fi
-	mount -t ntfs $ntdev $ntdir
+	mount -t ntfs $ntdev $ntdir 2>/dev/null
 	if grep -qe "^$ntdev $ntdir " /proc/mounts; then
 		echo
 		echo "ntfs partition rescued, mounted in $ntdir"
 		echo
 		exit 0
-	fi 2>/dev/null
+	fi
 
 	echo "Formatting the ntfs partition..."
-	if ! mkfs -t ntfs -L NTFS -F -Q $ntdev >/dev/null; then
+	if ! mkfs.ntfs -L NTFS -F -Q $ntdev >/dev/null; then
 		echo
 		echo "ERROR: cannot format ntfs partition on $ntdev"
 		echo
