@@ -78,7 +78,7 @@ if [ "$ntdir" == "" ]; then
 	ntdir=${ntdev/dev/mnt}
 	mkdir -p $ntdir
 	mount -o ro -t ntfs $ntdev $ntdir || ntdir=""
-fi
+fi 2>/dev/null
 
 if [ -d $tcdir/tcz ]; then
 	infotime -n "Loading TCZ archives: "
