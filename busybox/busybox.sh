@@ -4,7 +4,7 @@
 #
 
 function usage() {
-	echo "USAGE: $myname [download|open|compile|install|close|all|clean|distclean]"
+	echo "USAGE: $myname [download|open|compile|install|update|close|all|clean|distclean]"
 	echo
 }
 
@@ -50,10 +50,10 @@ if [ "$1" == "open" -o "$1" == "all" ]; then
 		tar xjf busybox.tar.bz2
 		mv busybox-$version src
 		cd src
-		for i in $patchlist; do
+		for i in ../patches/*.patch; do
 			if ! timeout 1 patch -Np1 -i ../patches/$i; then
 				echo "************ Using -p0 **************"
-				patch -Np0 -i ../patches/$i
+				patch -Np0 -i $i
 			fi
 		done
 		cd ..
@@ -109,6 +109,7 @@ if [ "$1" == "install" -o "$1" == "all" ]; then
 	cd rootfs
 	sudo cp -arf * $tcdir/$rtdir
 	$tcdir/rootfs.sh close
+	cd ..
 fi
 if [ "$1" == "update" -o "$1" == "all" ]; then
 	done=1
