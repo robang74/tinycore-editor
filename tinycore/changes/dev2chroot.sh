@@ -69,7 +69,7 @@ function unmountall() {
 		umount $rootdir/var/log
 		umount $rootdir
 	fi 2>/dev/null
-	if mount | grep -qw $rootdir; then
+	if grep -qe " $rootdir " /proc/mounts; then
 		perr " KO\n"
 	else
 		comp " OK\n"
@@ -161,9 +161,9 @@ PS4='DEBUG: $((LASTNO=LINENO)): '
 exec 3>&2 2>$logfile; set -ex
 trap 'atexit $LASTNO' EXIT
 
-if mount | grep -qe " on $rootdir "; then
+if grep -qe " $rootdir " /proc/mounts; then
 	echo
-	perr "The $rootdir is just mounted, try again"
+	perr "The $rootdir is just mounted, abort"
 	echo
 	exit 1
 fi

@@ -61,7 +61,8 @@ if ! fdisk -l $bkdev | grep -qe "^$ntdev"; then
 		ntdir=${ntdev/dev/mnt}
 		mkdir -p $ntdir
 	fi
-	if mount -t ntfs $ntdev $ntdir; then
+	mount -t ntfs $ntdev $ntdir
+	if grep -qe "^$ntdev $ntdir " /proc/mounts; then
 		echo
 		echo "ntfs partition rescued, mounted in $ntdir"
 		echo
@@ -84,7 +85,8 @@ if [ "$ntdev" != "" ]; then
 		echo
 		exit 0
 	fi
-	if ! mount -t ntfs $ntdev $ntdir; then
+	mount -t ntfs $ntdev $ntdir
+	if ! grep -qe "^$ntdev $ntdir " /proc/mounts; then
 		echo
 		echo "ERROR: cannot mount ntfs partition in $ntdir"
 		echo

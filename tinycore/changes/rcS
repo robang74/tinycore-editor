@@ -55,7 +55,8 @@ else
 	if [ "$tcdir" == "" ]; then
 		tcdir=${tcdev/dev/mnt}
 		mkdir -p $tcdir
-		if ! mount -o ro $tcdev $tcdir; then
+		mount -o ro $tcdev $tcdir
+		if ! grep -qe "^$tcdev $tcdir " /proc/mounts; then
 			tcdir=""
 		fi
 	fi

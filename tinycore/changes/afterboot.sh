@@ -92,7 +92,7 @@ infotime "Mounting local drives in read only..." ##############################
 
 for i in a b c d; do
 	for j in 1 2; do
-		if mount | grep -q "/dev/sd$i$j on"; then
+		if grep -qe "^/dev/sd$i$j " /proc/mounts; then
 			mount -o remount,ro /mnt/sd$i$j
 		else
 			mkdir -p /mnt/sd$i$j
