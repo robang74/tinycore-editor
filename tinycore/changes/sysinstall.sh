@@ -179,13 +179,16 @@ ntdev=$(readlink /etc/sysconfig/ntdev)
 ntdir=$(readlink /etc/sysconfig/ntdir)
 ntdir=${ntdir:-$(devdir $ntdev)}
 
-if [ "$datadir" == "" ]; then
-	datadir=$ntdir
-fi
-
 usbdisk=${tcdev%1}
 if [ "$rstdisk" == "$usbdisk" ]; then
 	alert_exit 0 "Unsuitable block device usbdisk:${rstdisk}, abort" "Block devices check"
+fi
+
+if [ "$datadir" == "" ]; then
+	datadir=$ntdir
+	if [ "$datadir" == "" ]; then
+		alert_exit 0 "Data folder is unavailable, abort" "Data folder check"
+	fi
 fi
 
 ###############################################################################
