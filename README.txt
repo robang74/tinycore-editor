@@ -3,7 +3,9 @@
 #
 # Repository: https://github.com/robang74/tinycore-editor
 #
-# m-list: https://groups.google.com/g/tinycore-editor
+# Forum: https://github.com/robang74/tinycore-editor/discussions
+#
+# Google group: https://groups.google.com/g/tinycore-editor
 #
 ###############################################################################
 
