@@ -16,6 +16,10 @@ function devdir() {
 	sed -ne "s,^$1 \([^ ]*\) .*,\1,p" /proc/mounts | head -n1
 }
 
+function gettcdev() {
+	blkid | grep -e " LABEL=.$tclabel. " | cut -d: -f1 | head -n1
+}
+
 logfile=/var/log/tcboot.log
 tclabel=T1NYC0R3
 
@@ -31,7 +35,7 @@ fi
 # Wait for hardware be ready
 echo -e "\n\e[1;36mWait for $tclabel\e[0m"
 for i in $(seq 1 6); do
-	if blkid --label $tclabel; then
+	if gettcdev; then
 		break;
 	fi >/dev/null
 	sleep 1
@@ -46,7 +50,7 @@ done
 /etc/init.d/tc-config
 
 echo
-tcdev=$(blkid --label $tclabel | cut -d: -f1)
+tcdev=$(gettcdev)
 if [ "$tcdev" == "" ]; then
 	infotime "Searching for afterboot.sh: NOT FOUND"
 else
