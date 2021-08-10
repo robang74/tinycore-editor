@@ -92,6 +92,13 @@ if [ "$1" == "compile" -o "$1" == "all" ]; then
 fi
 if [ "$1" == "install" -o "$1" == "all" ]; then
 	done=1
+	cd src
+	if [ ! -d rootfs ]; then
+		echo
+		echo "ERROR: rootfs folder does not exist, run $myname compile"
+		echo
+		exit 1
+	fi
 	rtdir=$($tcdir/rootfs.sh open | sed -ne "s,^opened folder: \(.*\),\1,p")
 	if [ "$rtdir" == "" -o ! -d "$tcdir/$rtdir" ]; then
 		echo
@@ -99,9 +106,40 @@ if [ "$1" == "install" -o "$1" == "all" ]; then
 		echo
 		exit 1
 	fi
-	cd src/rootfs
+	cd rootfs
 	sudo cp -arf * $tcdir/$rtdir
 	$tcdir/rootfs.sh close
+fi
+if [ "$1" == "update" -o "$1" == "all" ]; then
+	done=1
+	cd src
+	if [ "$2" == "" -o "$2" == "nosuid" ]; then
+		ver=nosuid
+	elif [ "$2" == "suid" ]; then
+		ver=suid
+	else
+		echo
+		echo "USAGE: myname update [suid|nosuid]"
+		echo
+		exit 1
+	fi
+	if [ ! -d rootfs ]; then
+		echo
+		echo "ERROR: rootfs folder does not exist, run $myname compile"
+		echo
+		exit 1
+	fi
+	n=$(diff ../config.$ver .config | wc -l)
+	if [[ $n -gt 6 ]]; then
+		cat ../config.$ver >.config
+		make oldconfig
+	fi
+	eval $compile
+	ver=${ver/nosuid/}
+	ver=${ver/suid/.suid}
+	sudo dd if=busybox of=rootfs/bin/busybox$ver
+	cd ..
+	$0 install
 fi
 if [ "$1" == "close" ]; then
 	done=1
