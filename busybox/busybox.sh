@@ -3,8 +3,35 @@
 # Autore: Roberto A. Foglietta <roberto.foglietta@altran.it>
 #
 
+function info() {
+	echo -e "\e[1;36m$@\e[0m"
+}
+
+function comp() {
+	echo -e "\e[1;32m$@\e[0m"
+}
+
+function warn() {
+	echo -e "\e[1;33m$@\e[0m"
+}
+
+function perr() {
+	echo -e "\e[1;31m$@\e[0m"
+}
+
 function usage() {
-	echo "USAGE: $myname [download|open|compile|install|update|close|all|clean|distclean]"
+	info "USAGE: $myname \$target"
+	echo
+	echo -e "\t targets:"
+	echo -e "\t\t download"
+	echo -e "\t\t open"
+	echo -e "\t\t compile (from scratch)"
+	echo -e "\t\t install (into rootfs.gz)"
+	echo -e "\t\t update [suid|nosuid]"
+	echo -e "\t\t close"
+	echo -e "\t\t all"
+	echo -e "\t\t clean"
+	echo -e "\t\t distclean"
 	echo
 }
 
@@ -12,6 +39,18 @@ set -e
 
 cd $(dirname $0)
 myname=$(basename $0)
+
+if [ "$USER" != "root" ]; then
+	set -m
+	if ! timeout 0.2 sudo -n true; then
+		echo
+		warn "WARNING: $myname requires root permissions"
+		echo
+	fi 2>/dev/null
+	sudo $0 "$@"
+	exit $?
+fi
+
 tcdir=$(realpath ../tinycore)
 source $tcdir/tinycore.conf
 source busybox.conf
@@ -22,14 +61,18 @@ archtune=${arch/-m64/-mtune=generic}
 archtune=${archtune/-m32/-march=i486 -mtune=i686}
 compile="CPPFLAGS=$arch LDFLAGS=$arch $ccopts $ccxopts make -j$(nproc)"
 
-echo
-echo "Working folder is $PWD"
-echo "Architecture: x86 ${arch/-m/} bit"
-echo "Version: $version"
-echo
+if [ "$2" != "quiet" ]; then
+	echo
+	warn "Working folder is $PWD"
+	warn "Architecture: x86 ${arch/-m/} bit"
+	warn "Version: $version"
+	echo
+fi
 
 if [ "$1" == "download" ]; then
 	done=1
+	info "executing $1..."
+	echo
 	wget -c $confsuid -O config.suid
 	wget -c $confnosuid -O config.nosuid
 	wget -c $source -O busybox.tar.bz2
@@ -40,9 +83,10 @@ if [ "$1" == "download" ]; then
 fi
 if [ "$1" == "open" -o "$1" == "all" ]; then
 	done=1
+	info "executing $1..."
 	if [ ! -e busybox.tar.bz2 ]; then
 		echo
-		echo "ERROR: source archive not present, run $myname download"
+		perr "ERROR: source archive not present, run $myname download"
 		echo
 		exit 1
 	fi
@@ -51,10 +95,16 @@ if [ "$1" == "open" -o "$1" == "all" ]; then
 		mv busybox-$version src
 		cd src
 		for i in ../patches/*.patch; do
-			echo -e "\nApplying $(basename $i)"
-			if ! timeout 1 patch -Np1 -i ../patches/$i; then
+			err=0
+			warn "\nApplying $(basename $i)"
+			timeout 1 patch -Np1 -i ../patches/$i || err=$?
+			if [[ $err == 124 ]]; then
 				echo "************ Using -p0 **************"
-				patch -Np0 -i $i
+				timeout 1 patch -Np0 -i $i || err=$?
+				if [[ $err == 124 ]]; then
+					perr "\nApplying $(basename $i) failed"
+					exit 1
+				fi
 			fi
 		done
 		echo
@@ -63,20 +113,25 @@ if [ "$1" == "open" -o "$1" == "all" ]; then
 fi
 if [ "$1" == "compile" -o "$1" == "all" ]; then
 	done=1
+	info "executing $1..."
+	echo
 	cd src
-
+	warn "cleaning"
 	sudo rm -rf _install rootfs
 	make clean
-
+	warn "configure nosuid"
 	cat ../config.nosuid >.config
 	make oldconfig
+	warn "compile nosuid"
 	eval $compile install
 
 	mv _install rootfs
 	sudo chown -R root.root rootfs
 
+	warn "configure suid"
 	cat ../config.suid >.config
 	make oldconfig
+	warn "compile suid"
 	eval $compile install
 
 	cd _install
@@ -94,17 +149,20 @@ if [ "$1" == "compile" -o "$1" == "all" ]; then
 fi
 if [ "$1" == "install" -o "$1" == "all" ]; then
 	done=1
+	info "executing $1..."
 	cd src
 	if [ ! -d rootfs ]; then
 		echo
-		echo "ERROR: rootfs folder does not exist, run $myname compile"
+		perr "ERROR: rootfs folder does not exist, run $myname compile"
 		echo
 		exit 1
 	fi
-	rtdir=$($tcdir/rootfs.sh open | sed -ne "s,^opened folder: \(.*\),\1,p")
+	rtdir=$($tcdir/rootfs.sh open)
+	echo "$rtdir"
+	rtdir=$(echo "$rtdir" | sed -ne "s,^opened folder: \(.*\),\1,p")
 	if [ "$rtdir" == "" -o ! -d "$tcdir/$rtdir" ]; then
 		echo
-		echo "ERROR: $myname $1 failed, abort"
+		perr "ERROR: $myname $1 failed, abort"
 		echo
 		exit 1
 	fi
@@ -115,6 +173,7 @@ if [ "$1" == "install" -o "$1" == "all" ]; then
 fi
 if [ "$1" == "update" ]; then
 	done=1
+	info "executing $1..."
 	cd src
 	if [ "$2" == "" -o "$2" == "nosuid" ]; then
 		ver=nosuid
@@ -122,13 +181,13 @@ if [ "$1" == "update" ]; then
 		ver=suid
 	else
 		echo
-		echo "USAGE: myname update [suid|nosuid]"
+		warn "USAGE: myname update [suid|nosuid]"
 		echo
 		exit 1
 	fi
 	if [ ! -d rootfs ]; then
 		echo
-		echo "ERROR: rootfs folder does not exist, run $myname compile"
+		perr "ERROR: rootfs folder does not exist, run $myname compile"
 		echo
 		exit 1
 	fi
@@ -142,10 +201,11 @@ if [ "$1" == "update" ]; then
 	ver=${ver/suid/.suid}
 	sudo dd if=busybox of=rootfs/bin/busybox$ver
 	cd ..
-	$0 install
+	$0 install quiet
 fi
 if [ "$1" == "close" ]; then
 	done=1
+	info "executing $1..."
 	cd src
 	sudo rm -rf _install rootfs
 	make clean
@@ -155,10 +215,12 @@ if [ "$1" == "close" ]; then
 fi
 if [ "$1" == "clean" ]; then
 	done=1
+	info "executing $1..."
 	sudo rm -rf src
 fi
 if [ "$1" == "distclean" ]; then
 	done=1
+	info "executing $1..."
 	sudo rm -rf src patches
 	rm -f busybox.tar.bz2
 	rm -f config.suid config.nosuid
@@ -169,6 +231,6 @@ if [ "$done" != "1" ]; then
 fi
 
 echo
-echo "$myname $1 completed"
+comp "$myname $1 completed"
 echo
 
