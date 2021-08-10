@@ -58,21 +58,21 @@ function isanipaddr() {
 
 function usage() {
 	echo
-	info " USAGE: $myname target"
+	info "USAGE: $myname target"
 	echo
-	echo -e "\ttargets:"
-	echo -e "\t\topen [8GB]"
-	echo -e "\t\timage [8GB|iso]"
-	echo -e "\t\tqemu-init"
-	echo -e "\t\tqemu-test [8GB|iso]"
-	echo -e "\t\tqemu [8GB|iso]"
-	echo -e "\t\tssh-copy [8GB] [\$ipaddr]"
-	echo -e "\t\tssh-root [\$ipaddr]"
-	echo -e "\t\tssh-end [8GB]"
-	echo -e "\t\tqemu-stop"
-	echo -e "\t\tclose [8GB]"
-	echo -e "\t\tclean [8GB|all]"
-	echo -e "\t\tiso"
+	echo -e "\t targets:"
+	echo -e "\t\t open [8GB]"
+	echo -e "\t\t image [8GB|iso]"
+	echo -e "\t\t qemu-init"
+	echo -e "\t\t qemu-test [8GB|iso]"
+	echo -e "\t\t qemu [8GB|iso]"
+	echo -e "\t\t ssh-copy [8GB] [\$ipaddr]"
+	echo -e "\t\t ssh-root [\$ipaddr]"
+	echo -e "\t\t ssh-end [8GB]"
+	echo -e "\t\t qemu-stop"
+	echo -e "\t\t close [8GB]"
+	echo -e "\t\t clean [8GB|all]"
+	echo -e "\t\t iso"
 	echo
 }
 
