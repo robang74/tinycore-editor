@@ -56,6 +56,7 @@ if [ "$1" == "open" -o "$1" == "all" ]; then
 				patch -Np0 -i ../patches/$i
 			fi
 		done
+		cd ..
 	fi
 fi
 if [ "$1" == "compile" -o "$1" == "all" ]; then

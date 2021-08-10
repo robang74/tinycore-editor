@@ -6,8 +6,8 @@
 /tinycore/changes/tccustom.tgz
 /tinycore/tccustom32.tgz
 /tinycore/tccustom64.tgz
-/tinycore/tcz/*
 /tinycore/vmlinuz
+/tinycore/tcz/*
 /busybox/src
 /busybox/busybox.tar.bz2
 /busybox/config.nosuid
