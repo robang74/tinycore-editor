@@ -44,9 +44,9 @@ function mountdevdir() {
 		mount --bind $curdir $2
 		mount | grep -qe " on $2"
 	elif [ "$3" == "rw" ]; then
-		mount -o rw $1 $2
+		mount -w $1 $2
 	else
-		mount -o ro $1 $2
+		mount -r $1 $2
 	fi
 	ret=$?
 	FUNCNAME=$OLDFNAME
