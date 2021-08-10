@@ -2,7 +2,8 @@
 #
 # Autore: Roberto A. Foglietta <roberto.foglietta@altran.it>
 #
-  
+
+ifnm=eth0
 myip=10.0.2.15
 brip=10.0.2.16
 tcip=10.0.2.17
@@ -505,6 +506,13 @@ if [ "$param" == "qemu-init" ]; then
 		sudo touch /etc/qemu/bridge.conf
 		echo "allow brkvm" | sudo tee /etc/qemu/bridge.conf
 		sudo dnsmasq --interface=brkvm --bind-interfaces --dhcp-range=$tcip,$tcip
+		if ! iptables -nvL FORWARD | grep -qe " ACCEPT .* all .* brkvm *$ifnm"; then
+			iptables -A FORWARD -i brkvm -o $ifnm -j ACCEPT
+		fi
+		if ! iptables -t nat -nvL POSTROUTING | grep -qe " MASQUERADE *all .* \* *$ifnm "; then
+			iptables -t nat -A POSTROUTING -o $ifnm -j MASQUERADE
+		fi
+		sysctl -w net.ipv4.ip_forward=1
 		sshfingerprintclean
 	else
 		stayalive=yes
