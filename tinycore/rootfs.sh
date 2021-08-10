@@ -33,14 +33,17 @@ echo "Working folder is $WRKDIR"
 if [ "$1" == "open" -o "$1" == "update" ]; then
 	ok=1
 	if [ -d $tmpdir ]; then
-		errexit "directory $tmpdir found, abort"
+		echo "opened folder: $tmpdir"
+		echo
+		exit 0
 	fi
 	mkdir $tmpdir
 	cd $tmpdir
-	echo -n "open : "
-	zcat ../rootfs.gz | sudo cpio -i
+	echo -n "open data: "
+	zcat ../rootfs.gz | sudo cpio -i -H newc -d 2>&1
 	cat ../changes/rcS > etc/init.d/rcS
 	test -e lib64 || ln -sf lib lib64
+	echo "opened folder: $tmpdir"
 	cd ..
 fi
 
@@ -50,7 +53,7 @@ if [ "$1" == "close" -o "$1" == "update" ]; then
 		errexit "directory $tmpdir NOT found, abort"
 	fi
 	cd $tmpdir
-	echo -n "close: "
+	echo -n "close data: "
 	if sudo find . | sudo cpio -o -H newc | gzip > ../rootfs.gz; then
 		cd ..
 		rm -rf $tmpdir
