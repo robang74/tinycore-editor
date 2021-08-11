@@ -35,6 +35,10 @@ function usage() {
 	echo
 }
 
+function chownuser() {
+	chown -R $SUDO_USER.$SUDO_USER "$@"
+}
+
 if [ "$USER" != "root" ]; then
 	set -m
 	if ! timeout 0.2 sudo -n true; then
@@ -81,6 +85,7 @@ if [ "$1" == "download" ]; then
 	for i in $patchlist; do
 		wget -c $tcbbsrc/$i -O patches/$i
 	done
+	chownuser patches *suid *.bz2
 fi
 if [ "$1" == "open" -o "$1" == "all" ]; then
 	done=1
@@ -94,13 +99,14 @@ if [ "$1" == "open" -o "$1" == "all" ]; then
 	if [ ! -d src ]; then
 		tar xjf busybox.tar.bz2
 		mv busybox-$version src
+		chownuser src
 	fi
 	if [ ! -e .patches_applied -a ! -e .patches_applied.close ]; then
 		cd $mydir/src
 		for i in ../patches/*.patch; do
 			err=0
 			warn "\nApplying $(basename $i)"
-			if ! timeout 1 patch -Np1 -i ../patches/$i; then
+			if ! timeout 1 patch -Np1 -i $i; then
 				echo "************ Using -p0 **************"
 				if ! timeout 1 patch -Np0 -i $i; then
 					perr "\nApplying $(basename $i) failed"
@@ -111,6 +117,7 @@ if [ "$1" == "open" -o "$1" == "all" ]; then
 		echo
 		cd ..
 		touch .patches_applied
+		chownuser src .patches_applied
 	fi
 fi
 if [ "$1" == "compile" -o "$1" == "all" ]; then
@@ -126,9 +133,7 @@ if [ "$1" == "compile" -o "$1" == "all" ]; then
 	make oldconfig
 	warn "compile nosuid"
 	eval $compile install
-
 	mv _install rootfs
-	sudo chown -R root.root rootfs
 
 	warn "configure suid"
 	cat ../config.suid >.config
@@ -137,9 +142,7 @@ if [ "$1" == "compile" -o "$1" == "all" ]; then
 	eval $compile install
 
 	cd _install
-	sudo chown root.root bin/busybox
-	sudo chmod u+s bin/busybox
-	sudo mv bin/busybox bin/busybox.suid
+	mv bin/busybox bin/busybox.suid
 	for i in $(find . -type l); do
 		ln -sf /bin/busybox.suid $i
 	done
@@ -147,6 +150,7 @@ if [ "$1" == "compile" -o "$1" == "all" ]; then
 	cd ..
 
 	sudo rm -rf _install
+	chownuser .
 	cd ..
 fi
 if [ "$1" == "install" -o "$1" == "all" ]; then
@@ -169,7 +173,9 @@ if [ "$1" == "install" -o "$1" == "all" ]; then
 		exit 1
 	fi
 	cd rootfs
-	sudo cp -arf * $tcdir/$rtdir
+	chown -R root.root .
+	chmod u+s bin/busybox.suid
+	cp -arf * $tcdir/$rtdir
 	$tcdir/rootfs.sh close
 	cd ../..
 fi
@@ -201,7 +207,8 @@ if [ "$1" == "update" ]; then
 	eval $compile
 	ver=${ver/nosuid/}
 	ver=${ver/suid/.suid}
-	sudo dd if=busybox of=rootfs/bin/busybox$ver
+	dd if=busybox of=rootfs/bin/busybox$ver
+	chownuser .
 	cd ..
 	$0 install quiet
 fi
@@ -219,14 +226,14 @@ fi
 if [ "$1" == "clean" ]; then
 	done=1
 	info "executing $1..."
-	sudo rm -rf src .patches_applied
+	rm -rf src .patches_applied
 fi
 if [ "$1" == "distclean" ]; then
 	done=1
 	info "executing $1..."
 	rm -f busybox.tar.bz2 .patches_applied*
 	rm -f config.suid config.nosuid
-	sudo rm -rf src
+	rm -rf src
 	cd patches
 	rm -f $patchlist
 	cd ..
