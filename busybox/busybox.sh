@@ -66,9 +66,9 @@ source busybox.conf
 
 arch=${ARCH:--m32}
 arch=${arch/64/-m64}
-archtune=${arch/-m64/-mtune=generic}
-archtune=${archtune/-m32/-march=i486 -mtune=i686}
-compile="CPPFLAGS=$arch LDFLAGS=$arch $ccopts $ccxopts make -j$(nproc)"
+archtune=${arch/-m64/$cputune64}
+archtune=${archtune/-m32/$cputune32}
+compile="CFLAGS='$arch $archtune $ccopts' LDFLAGS=$arch make -j$(nproc)"
 
 if [ "$2" != "quiet" ]; then
 	echo
@@ -153,6 +153,7 @@ if [ "$1" == "compile" -o "$1" == "all" ]; then
 	done=1
 	cd $mydir
 	info "executing compile..."
+	warn "compile with: $compile"
 	if [ ! -d src ]; then
 		echo
 		perr "ERROR: src folder does not exist, run $myname open"
@@ -168,6 +169,7 @@ if [ "$1" == "compile" -o "$1" == "all" ]; then
 
 	warn "configure nosuid"
 	cat ../config.nosuid >.config
+	echo nosuid > .config.type
 	make oldconfig
 	warn "compile nosuid"
 	eval $compile install
@@ -280,6 +282,7 @@ if [ "$1" == "update" ]; then
 	cd $mydir
 	ctype=$(cat src/.config.type 2>/dev/null)
 	info "executing update${ctype+ $ctype}..."
+	warn "compile with: $compile"
 	case $ctype in
 	suid|nosuid|"")
 		;;
@@ -308,7 +311,7 @@ if [ "$1" == "update" ]; then
 	dd if=busybox of=rootfs/bin/busybox$ctype
 	chownuser .
 	cd ..
-	$0 install quiet
+	$mydir/$myname install quiet
 fi
 
 if [ "$1" == "close" ]; then
