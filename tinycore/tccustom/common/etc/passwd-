@@ -38,7 +38,7 @@ colord:x:118:124:colord colour management daemon,,,:/var/lib/colord:/usr/sbin/no
 sddm:x:119:125:Simple Desktop Display Manager:/var/lib/sddm:/bin/false
 geoclue:x:120:126::/var/lib/geoclue:/usr/sbin/nologin
 pulse:x:121:127:PulseAudio daemon,,,:/var/run/pulse:/usr/sbin/nologin
-lubuntuq7:x:1000:1001:lubuntuq7:/home/lubuntuq7:/usr/sbin/nologin
+user:x:1000:1001:user:/home/user:/usr/sbin/nologin
 systemd-coredump:x:999:999:systemd Core Dumper:/:/usr/sbin/nologin
 sshd:x:122:65534::/run/sshd:/usr/sbin/nologin
 vboxadd:x:998:1::/var/run/vboxadd:/bin/false

@@ -2,7 +2,7 @@ root:x:0:
 daemon:x:1:
 bin:x:2:
 sys:x:3:
-adm:x:4:syslog,lubuntuq7
+adm:x:4:syslog,user
 tty:x:5:syslog
 disk:x:6:
 lp:x:7:
@@ -15,12 +15,12 @@ kmem:x:15:
 dialout:x:20:
 fax:x:21:
 voice:x:22:
-cdrom:x:24:lubuntuq7
+cdrom:x:24:user
 floppy:x:25:
 tape:x:26:
-sudo:x:27:lubuntuq7
+sudo:x:27:user
 audio:x:29:pulse
-dip:x:30:lubuntuq7
+dip:x:30:user
 www-data:x:33:
 backup:x:34:
 operator:x:37:
@@ -32,7 +32,7 @@ shadow:x:42:
 utmp:x:43:
 video:x:44:
 sasl:x:45:
-plugdev:x:46:lubuntuq7
+plugdev:x:46:user
 staff:x:50:
 games:x:60:
 users:x:100:
@@ -55,7 +55,7 @@ tcpdump:x:115:
 rtkit:x:116:
 ssh:x:117:
 netdev:x:118:
-lpadmin:x:119:lubuntuq7
+lpadmin:x:119:user
 avahi:x:120:
 scanner:x:121:saned
 saned:x:122:
@@ -66,8 +66,8 @@ geoclue:x:126:
 pulse:x:127:
 pulse-access:x:128:
 lxd:x:129:
-sambashare:x:1000:lubuntuq7
-lubuntuq7:x:1001:
+sambashare:x:1000:user
+user:x:1001:
 systemd-coredump:x:999:
 vboxsf:x:998:
 mlocate:x:130:
