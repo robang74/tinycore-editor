@@ -58,6 +58,11 @@ if [ "$1" == "close" -o "$1" == "update" ]; then
 		cd ..
 		rm -rf $tmpdir
 	fi
+	if which advdef >/dev/null; then
+		advdef -z3 rootfs.gz
+	else
+		echo "Install advdef to compress further the rootfs.gz"
+	fi
 	chown $SUDO_USER.$SUDO_USER rootfs.gz
 fi
 
