@@ -23,15 +23,17 @@ function usage() {
 	info "USAGE: $myname \$target"
 	echo
 	echo -e "\t targets:"
-	echo -e "\t\t download"
-	echo -e "\t\t open"
-	echo -e "\t\t compile (from scratch)"
-	echo -e "\t\t install (into rootfs.gz)"
-	echo -e "\t\t update [suid|nosuid]"
-	echo -e "\t\t close"
-	echo -e "\t\t all"
-	echo -e "\t\t clean"
-	echo -e "\t\t distclean"
+	echo -e "\t\t download                  (retrieve source)"
+	echo -e "\t\t open [suid|nosuid]        (deploy source)"
+	echo -e "\t\t compile                   (from scratch)"
+	echo -e "\t\t install                   (into rootfs.gz)"
+	echo -e "\t\t editconfig                (change config)"
+	echo -e "\t\t saveconfig                (save config)"
+	echo -e "\t\t update                    (quick compile & install)"
+	echo -e "\t\t close                     (save the source)"
+	echo -e "\t\t all                       (open, compile & install)"
+	echo -e "\t\t clean                     (delete the source)"
+	echo -e "\t\t distclean                 (delete everything)"
 	echo
 }
 
@@ -54,7 +56,9 @@ set -e
 
 mydir=$(dirname $0)
 myname=$(basename $0)
+
 cd $mydir
+mydir=$PWD
 
 tcdir=$(realpath ../tinycore)
 source $tcdir/tinycore.conf
@@ -76,7 +80,8 @@ fi
 
 if [ "$1" == "download" ]; then
 	done=1
-	info "executing $1..."
+	cd $mydir
+	info "executing download..."
 	echo
 	wget -c $confsuid -O config.suid
 	wget -c $confnosuid -O config.nosuid
@@ -87,19 +92,32 @@ if [ "$1" == "download" ]; then
 	done
 	chownuser patches *suid *.bz2
 fi
+
 if [ "$1" == "open" -o "$1" == "all" ]; then
 	done=1
-	info "executing $1..."
+	cd $mydir
+	info "executing open${2+ $2}..."
 	if [ ! -e busybox.tar.bz2 ]; then
 		echo
 		perr "ERROR: source archive not present, run $myname download"
 		echo
 		exit 1
 	fi
+	if [ "$2" == "" -o "$2" == "all" ]; then
+		ctype=""
+	elif [ "$2" == "nosuid" ]; then
+		ctype="nosuid"
+	elif [ "$2" == "suid" ]; then
+		ctype="suid"
+	else
+		echo
+		warn "USAGE: $myname open [suid|nosuid]"
+		echo
+		exit 1
+	fi
 	if [ ! -d src ]; then
 		tar xjf busybox.tar.bz2
 		mv busybox-$version src
-		chownuser src
 	fi
 	if [ ! -e .patches_applied -a ! -e .patches_applied.close ]; then
 		cd $mydir/src
@@ -114,20 +132,40 @@ if [ "$1" == "open" -o "$1" == "all" ]; then
 				fi
 			fi
 		done
-		echo
 		cd ..
 		touch .patches_applied
-		chownuser src .patches_applied
+		chownuser .patches_applied
 	fi
+	cd $mydir/src
+	if [ "$ctype" != "" ]; then
+		cat ../config.$ctype >.config
+		if [ -e ../config.$ctype.patch ]; then
+			patch -Np1 -i ../config.$ctype.patch
+		fi
+	fi
+	echo $ctype > .config.type
+	cd ..
+	echo
+	chownuser src
 fi
+
 if [ "$1" == "compile" -o "$1" == "all" ]; then
 	done=1
-	info "executing $1..."
+	cd $mydir
+	info "executing compile..."
+	if [ ! -d src ]; then
+		echo
+		perr "ERROR: src folder does not exist, run $myname open"
+		echo
+		exit 1
+	fi
 	echo
-	cd $mydir/src
+	cd src
+
 	warn "cleaning"
 	sudo rm -rf _install rootfs
 	make clean
+
 	warn "configure nosuid"
 	cat ../config.nosuid >.config
 	make oldconfig
@@ -137,26 +175,34 @@ if [ "$1" == "compile" -o "$1" == "all" ]; then
 
 	warn "configure suid"
 	cat ../config.suid >.config
+	echo suid > .config.type
 	make oldconfig
 	warn "compile suid"
 	eval $compile install
-
 	cd _install
 	mv bin/busybox bin/busybox.suid
 	for i in $(find . -type l); do
 		ln -sf /bin/busybox.suid $i
 	done
+
 	sudo cp -arf * ../rootfs
 	cd ..
-
 	sudo rm -rf _install
 	chownuser .
 	cd ..
 fi
+
 if [ "$1" == "install" -o "$1" == "all" ]; then
 	done=1
-	info "executing $1..."
-	cd $mydir/src
+	cd $mydir
+	info "executing install..."
+	if [ ! -d src ]; then
+		echo
+		perr "ERROR: src folder does not exist, run $myname open"
+		echo
+		exit 1
+	fi
+	cd src
 	if [ ! -d rootfs ]; then
 		echo
 		perr "ERROR: rootfs folder does not exist, run $myname compile"
@@ -177,60 +223,125 @@ if [ "$1" == "install" -o "$1" == "all" ]; then
 	chmod u+s bin/busybox.suid
 	cp -arf * $tcdir/$rtdir
 	$tcdir/rootfs.sh close
-	cd ../..
+	chownuser ..	
+	cd ../..	
 fi
-if [ "$1" == "update" ]; then
+
+if [ "$1" == "editconfig" ]; then
 	done=1
-	info "executing $1..."
-	cd $mydir/src
-	if [ "$2" == "" -o "$2" == "nosuid" ]; then
-		ver=nosuid
-	elif [ "$2" == "suid" ]; then
-		ver=suid
-	else
+	cd $mydir
+	info "executing editconfig..."
+	if [ ! -d src ]; then
 		echo
-		warn "USAGE: myname update [suid|nosuid]"
+		perr "ERROR: src folder does not exist, run $myname open"
 		echo
 		exit 1
 	fi
+	cd src
+	make menuconfig
+	chownuser .
+	cd ..
+fi
+
+if [ "$1" == "saveconfig" ]; then
+	done=1
+	cd $mydir
+	ctype=$(cat src/.config.type 2>/dev/null)
+	info "executing saveconfig${ctype+ $ctype}..."
+	case $ctype in
+	suid|nosuid|"")
+		;;
+	default)
+		echo
+		perr "ERROR: src/.config.type value is unknown"
+		echo
+		exit 1
+	esac
+	if [ ! -d src ]; then
+		echo
+		perr "ERROR: src folder does not exist, run $myname open"
+		echo
+		exit 1
+	fi
+	mkdir -p orig
+	cat config.$ctype >orig/.config
+	if diff -pruN orig/.config src/.config >config.$ctype.patch; then
+		warn "Nothing to save, current config has not been modified"
+		rm -rf config.$ctype.patch
+		exit 0
+	fi
+	chownuser config.$ctype.patch
+	warn "New config has been saved in config.$ctype.patch"
+	rm -rf orig
+fi
+
+if [ "$1" == "update" ]; then
+	done=1
+	cd $mydir
+	ctype=$(cat src/.config.type 2>/dev/null)
+	info "executing update${ctype+ $ctype}..."
+	case $ctype in
+	suid|nosuid|"")
+		;;
+	default)
+		echo
+		perr "ERROR: src/.config.type value is unknown"
+		echo
+		exit 1
+	esac
+	if [ ! -d src ]; then
+		echo
+		perr "ERROR: src folder does not exist, run $myname open"
+		echo
+		exit 1
+	fi
+	cd src
 	if [ ! -d rootfs ]; then
 		echo
 		perr "ERROR: rootfs folder does not exist, run $myname compile"
 		echo
 		exit 1
 	fi
-	n=$(diff ../config.$ver .config | wc -l)
-	if [[ $n -gt 6 ]]; then
-		cat ../config.$ver >.config
-		make oldconfig
-	fi
 	eval $compile
-	ver=${ver/nosuid/}
-	ver=${ver/suid/.suid}
-	dd if=busybox of=rootfs/bin/busybox$ver
+	ctype=${ctype/nosuid/}
+	ctype=${ctype/suid/.suid}
+	dd if=busybox of=rootfs/bin/busybox$ctype
 	chownuser .
 	cd ..
 	$0 install quiet
 fi
+
 if [ "$1" == "close" ]; then
 	done=1
-	info "executing $1..."
-	cd $mydir/src
-	sudo rm -rf _install rootfs
+	cd $mydir
+	info "executing close..."
+	if [ ! -d src ]; then
+		echo
+		perr "ERROR: src folder does not exist, run $myname open"
+		echo
+		exit 1
+	fi
+	cd src
+	sudo rm -rf _install rootfs .config*
 	make clean
 	cd ..
 	mv src busybox-$version
 	tar cjf busybox.tar.bz2 busybox-$version
 	mv .patches_applied .patches_applied.close
+	rm -rf busybox-$version
 fi
+
 if [ "$1" == "clean" ]; then
 	done=1
-	info "executing $1..."
+	cd $mydir
+	info "executing clean..."
 	rm -rf src .patches_applied
 fi
+
 if [ "$1" == "distclean" ]; then
 	done=1
-	info "executing $1..."
+	cd $mydir
+	info "executing distclean..."
 	rm -f busybox.tar.bz2 .patches_applied*
 	rm -f config.suid config.nosuid
 	rm -rf src

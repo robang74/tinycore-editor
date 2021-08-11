@@ -110,6 +110,19 @@
 	busybox/busybox.sh download
 	busybox/busybox.sh all
 
+    Instead to edit the source and try the compiled new version do this after:
+
+	busybox/busybox.sh open [suid|nosuid]
+	busybox/busybox.sh editconfig
+	# change the source here
+	busybox/busybox.sh update
+	# test the new changes
+	busybox/busybox.sh saveconfig
+	busybox/busybox.sh close
+
+   The no|suid parameter let you choose if you want update in the rootfs.gz
+   the busybox binary or the busybox.suid binary which is root user suided
+
 ###############################################################################
 
 https://github.com/pbatard/rufus/releases/download/v3.14/rufus-3.14.exe
