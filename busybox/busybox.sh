@@ -23,17 +23,17 @@ function usage() {
 	info "USAGE: $myname \$target"
 	echo
 	echo -e "\t targets:"
-	echo -e "\t\t download                  (retrieve source)"
-	echo -e "\t\t open [suid|nosuid]        (deploy source)"
-	echo -e "\t\t compile                   (from scratch)"
-	echo -e "\t\t install                   (into rootfs.gz)"
-	echo -e "\t\t editconfig                (change config)"
-	echo -e "\t\t saveconfig                (save config)"
-	echo -e "\t\t update                    (quick compile & install)"
-	echo -e "\t\t close                     (save the source)"
-	echo -e "\t\t all                       (open, compile & install)"
-	echo -e "\t\t clean                     (delete the source)"
-	echo -e "\t\t distclean                 (delete everything)"
+	echo -e "\t\t download         (retrieve source)"
+	echo -e "\t\t open             (deploy source)"
+	echo -e "\t\t compile          (from scratch)"
+	echo -e "\t\t install          (into rootfs.gz)"
+	echo -e "\t\t editconfig       (change config)"
+	echo -e "\t\t saveconfig       (save config)"
+	echo -e "\t\t update           (quick compile & install)"
+	echo -e "\t\t close            (save the source)"
+	echo -e "\t\t all              (open, compile & install)"
+	echo -e "\t\t clean            (delete the source)"
+	echo -e "\t\t distclean        (delete everything)"
 	echo
 	realexit 1
 }
@@ -47,6 +47,15 @@ function checkfordir() {
 	fi
 }
 
+function setconfig() {
+	if [ "$1" != "" ]; then
+		cat ../config.$1 >.config
+		if [ -e ../config.$1.patch ]; then
+			patch -Np1 -i ../config.$1.patch
+		fi
+	fi
+}
+
 function chownuser() {
 	chown -R $SUDO_USER.$SUDO_USER "$@"
 }
@@ -56,12 +65,12 @@ function realexit() {
 	exit $1
 }
 
-function atexit() {
-	echo
-	perr "ERROR: $myname failed at line $1, abort"
-	echo
-	realexit 1
-}
+#function atexit() {
+#	echo
+#	perr "ERROR: $myname failed at line $1, abort"
+#	echo
+#	realexit 1
+#}
 
 ###############################################################################
 
@@ -84,7 +93,7 @@ mydir=$PWD
 
 tcdir=$(realpath ../tinycore)
 source $tcdir/tinycore.conf
-source busybox.conf
+source busybox.sh.conf
 
 arch=${ARCH:--m32}
 arch=${arch/64/-m64}
@@ -94,10 +103,12 @@ compile="CFLAGS='$arch $archtune $ccopts' LDFLAGS=$arch make -j$(nproc)"
 
 ###############################################################################
 
-PS4='DEBUG: $((LASTNO=$LINENO)): '
-exec 2> >(grep -ve "^D*EBUG: ")
-trap 'atexit $LASTNO' EXIT
-set -ex
+#PS4='DEBUG: $((LASTNO=$LINENO)): '
+#exec 2> >(grep -ve "^D*EBUG: ")
+#trap 'atexit $LASTNO' EXIT
+#set -ex
+
+set -e
 
 if [ "$2" != "quiet" ]; then
 	echo
@@ -166,12 +177,7 @@ if [ "$1" == "open" -o "$1" == "all" ]; then
 		chownuser .patches_applied
 	fi
 	cd $mydir/src
-	if [ "$ctype" != "" ]; then
-		cat ../config.$ctype >.config
-		if [ -e ../config.$ctype.patch ]; then
-			patch -Np1 -i ../config.$ctype.patch
-		fi
-	fi
+	setconfig $ctype
 	echo $ctype > .config.type
 	cd ..
 	echo
@@ -192,28 +198,13 @@ if [ "$1" == "compile" -o "$1" == "all" ]; then
 	make clean
 
 	warn "configure nosuid"
-	cat ../config.nosuid >.config
+	setconfig nosuid
 	echo nosuid > .config.type
 	make oldconfig
 	warn "compile nosuid"
 	eval $compile install
 	mv _install rootfs
 
-	warn "configure suid"
-	cat ../config.suid >.config
-	echo suid > .config.type
-	make oldconfig
-	warn "compile suid"
-	eval $compile install
-	cd _install
-	mv bin/busybox bin/busybox.suid
-	for i in $(find . -type l); do
-		ln -sf /bin/busybox.suid $i
-	done
-
-	sudo cp -arf * ../rootfs
-	cd ..
-	sudo rm -rf _install
 	chownuser .
 	cd ..
 fi
@@ -225,21 +216,40 @@ if [ "$1" == "install" -o "$1" == "all" ]; then
 	checkfordir src open
 	cd src
 	checkfordir rootfs compile
+#	set +x
 	rtdir=$($tcdir/rootfs.sh open)
 	echo "$rtdir"
 	rtdir=$(echo "$rtdir" | sed -ne "s,^opened folder: \(.*\),\1,p")
+#	set -x
 	if [ "$rtdir" == "" -o ! -d "$tcdir/$rtdir" ]; then
 		echo
 		perr "ERROR: $myname $1 failed, abort"
 		echo
 		realexit 1
 	fi
+
 	cd rootfs
+	mkdir -p etc
+	chmod u+s bin/busybox
+	cp -f ../../busybox.conf etc
 	chown -R root.root .
-	chmod u+s bin/busybox.suid
 	cp -arf * $tcdir/$rtdir
+
+	rm -f $tcdir/$rtdir/bin/busybox.suid
+	cd $tcdir/$rtdir
+	missing=$(ls -alR | grep busybox.suid || true)
+	if [ "$missing" != "" ]; then
+		echo
+		perr "ERROR: this missing applet(s) still refere to busybox.suid, abort"
+		echo
+		echo "$missing"
+		echo
+		realexit 1
+	fi
+	cd - >/dev/null
+
 	$tcdir/rootfs.sh close
-	chownuser ..	
+	chownuser .	
 	cd ../..	
 fi
 
@@ -249,7 +259,9 @@ if [ "$1" == "editconfig" ]; then
 	info "executing editconfig..."
 	checkfordir src open
 	cd src
+#	set +x
 	make menuconfig
+#	set -x
 	chownuser .
 	cd ..
 fi
@@ -304,7 +316,7 @@ if [ "$1" == "update" ]; then
 	checkfordir src open
 	cd src
 	checkfordir rootfs compile
-	eval $compile
+	eval $compile install
 	ctype=${ctype/nosuid/}
 	ctype=${ctype/suid/.suid}
 	dd if=busybox of=rootfs/bin/busybox$ctype
