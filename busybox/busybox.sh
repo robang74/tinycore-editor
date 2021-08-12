@@ -65,12 +65,13 @@ function realexit() {
 	exit $1
 }
 
-#function atexit() {
-#	echo
-#	perr "ERROR: $myname failed at line $1, abort"
-#	echo
-#	realexit 1
-#}
+function onerror() {
+	rc=$?
+	echo
+	perr "ERROR: $myname failed${2+ in $2()} at line $1, rc: $rc"
+	echo
+	realexit $rc
+}
 
 ###############################################################################
 
@@ -103,12 +104,10 @@ compile="CFLAGS='$arch $archtune $ccopts' LDFLAGS=$arch make -j$(nproc)"
 
 ###############################################################################
 
-#PS4='DEBUG: $((LASTNO=$LINENO)): '
-#exec 2> >(grep -ve "^D*EBUG: ")
-#trap 'atexit $LASTNO' EXIT
-#set -ex
+trap 'onerror $LINENO $FUNCNAME' ERR
+set -Ee
 
-set -e
+#false
 
 if [ "$2" != "quiet" ]; then
 	echo
@@ -194,7 +193,7 @@ if [ "$1" == "compile" -o "$1" == "all" ]; then
 	cd src
 
 	warn "cleaning"
-	sudo rm -rf _install rootfs
+	rm -rf _install rootfs
 	make clean
 
 	warn "configure nosuid"
@@ -316,8 +315,9 @@ if [ "$1" == "update" ]; then
 	esac
 	checkfordir src open
 	cd src
-	checkfordir rootfs compile
+	rm -rf _install rootfs
 	eval $compile install
+	mv _install rootfs
 	ctype=${ctype/nosuid/}
 	ctype=${ctype/suid/.suid}
 	dd if=busybox of=rootfs/bin/busybox$ctype
