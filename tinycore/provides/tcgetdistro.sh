@@ -9,6 +9,7 @@ function realexit() {
 }
 
 function atexit() {
+	echo
 	perr "ERROR: $(basename $0) failed at line $1, abort"
 	echo
 	realexit 1
