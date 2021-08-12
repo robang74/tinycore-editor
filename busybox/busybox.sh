@@ -100,7 +100,9 @@ arch=${ARCH:--m32}
 arch=${arch/64/-m64}
 archtune=${arch/-m64/$cputune64}
 archtune=${archtune/-m32/$cputune32}
-compile="CFLAGS='$arch $archtune $ccopts' LDFLAGS=$arch make -j$(nproc)"
+ compile="CFLAGS='$arch $archtune $ccopts' LDFLAGS='$arch' make -j$(nproc)" 		#624 KiB
+#compile="make CFLAGS='$arch $archtune $ccopts' LDFLAGS='$arch' -j$(nproc)" 		#1.1 MiB
+#compile="make LDFLAGS='$arch' CC='gcc -Os -pipe $arch $archtune $ccopts' -j$(nproc)"	#624 KiB
 
 ###############################################################################
 
@@ -202,6 +204,7 @@ if [ "$1" == "compile" -o "$1" == "all" ]; then
 	eval $compile install
 	mv _install rootfs
 
+	dd if=rootfs/bin/busybox >/dev/null
 	chownuser .
 	cd ..
 fi
@@ -295,7 +298,16 @@ fi
 if [ "$1" == "update" ]; then
 	done=1
 	cd $mydir
-	ctype=$(cat src/.config.type 2>/dev/null)
+	checkfordir src open
+	cd src
+	if [ ! -e .config.type -o ! -e .config ]; then
+		info "executing update..."
+		echo
+		perr "ERROR: run $myname compile first, abort"
+		echo
+		realexit 1
+	fi
+	ctype=$(cat .config.type 2>/dev/null)
 	info "executing update${ctype+ $ctype}..."
 	warn "compile with: $compile"
 	case $ctype in
@@ -307,9 +319,8 @@ if [ "$1" == "update" ]; then
 		echo
 		realexit 1
 	esac
-	checkfordir src open
-	cd src
 	rm -rf _install rootfs
+
 	eval $compile install
 	mv _install rootfs
 	ctype=${ctype/nosuid/}
