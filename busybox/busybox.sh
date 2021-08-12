@@ -35,11 +35,35 @@ function usage() {
 	echo -e "\t\t clean                     (delete the source)"
 	echo -e "\t\t distclean                 (delete everything)"
 	echo
+	realexit 1
+}
+
+function checkfordir() {
+	if [ ! -d "$1" ]; then
+		echo
+		perr "ERROR: src folder does not exist, run $myname $2"
+		echo
+		realexit 1
+	fi
 }
 
 function chownuser() {
 	chown -R $SUDO_USER.$SUDO_USER "$@"
 }
+
+function realexit() {
+	trap - EXIT
+	exit $1
+}
+
+function atexit() {
+	echo
+	perr "ERROR: $myname failed at line $1, abort"
+	echo
+	realexit 1
+}
+
+###############################################################################
 
 if [ "$USER" != "root" ]; then
 	set -m
@@ -51,8 +75,6 @@ if [ "$USER" != "root" ]; then
 	sudo $0 "$@"
 	exit $?
 fi
-
-set -e
 
 mydir=$(dirname $0)
 myname=$(basename $0)
@@ -69,6 +91,13 @@ arch=${arch/64/-m64}
 archtune=${arch/-m64/$cputune64}
 archtune=${archtune/-m32/$cputune32}
 compile="CFLAGS='$arch $archtune $ccopts' LDFLAGS=$arch make -j$(nproc)"
+
+###############################################################################
+
+PS4='DEBUG: $((LASTNO=$LINENO)): '
+exec 2> >(grep -ve "^D*EBUG: ")
+trap 'atexit $LASTNO' EXIT
+set -ex
 
 if [ "$2" != "quiet" ]; then
 	echo
@@ -101,7 +130,7 @@ if [ "$1" == "open" -o "$1" == "all" ]; then
 		echo
 		perr "ERROR: source archive not present, run $myname download"
 		echo
-		exit 1
+		realexit 1
 	fi
 	if [ "$2" == "" -o "$2" == "all" ]; then
 		ctype=""
@@ -113,7 +142,7 @@ if [ "$1" == "open" -o "$1" == "all" ]; then
 		echo
 		warn "USAGE: $myname open [suid|nosuid]"
 		echo
-		exit 1
+		realexit 1
 	fi
 	if [ ! -d src ]; then
 		tar xjf busybox.tar.bz2
@@ -128,7 +157,7 @@ if [ "$1" == "open" -o "$1" == "all" ]; then
 				echo "************ Using -p0 **************"
 				if ! timeout 1 patch -Np0 -i $i; then
 					perr "\nApplying $(basename $i) failed"
-					exit 1
+					realexit 1
 				fi
 			fi
 		done
@@ -154,12 +183,7 @@ if [ "$1" == "compile" -o "$1" == "all" ]; then
 	cd $mydir
 	info "executing compile..."
 	warn "compile with: $compile"
-	if [ ! -d src ]; then
-		echo
-		perr "ERROR: src folder does not exist, run $myname open"
-		echo
-		exit 1
-	fi
+	checkfordir src open
 	echo
 	cd src
 
@@ -198,19 +222,9 @@ if [ "$1" == "install" -o "$1" == "all" ]; then
 	done=1
 	cd $mydir
 	info "executing install..."
-	if [ ! -d src ]; then
-		echo
-		perr "ERROR: src folder does not exist, run $myname open"
-		echo
-		exit 1
-	fi
+	checkfordir src open
 	cd src
-	if [ ! -d rootfs ]; then
-		echo
-		perr "ERROR: rootfs folder does not exist, run $myname compile"
-		echo
-		exit 1
-	fi
+	checkfordir rootfs compile
 	rtdir=$($tcdir/rootfs.sh open)
 	echo "$rtdir"
 	rtdir=$(echo "$rtdir" | sed -ne "s,^opened folder: \(.*\),\1,p")
@@ -218,7 +232,7 @@ if [ "$1" == "install" -o "$1" == "all" ]; then
 		echo
 		perr "ERROR: $myname $1 failed, abort"
 		echo
-		exit 1
+		realexit 1
 	fi
 	cd rootfs
 	chown -R root.root .
@@ -233,12 +247,7 @@ if [ "$1" == "editconfig" ]; then
 	done=1
 	cd $mydir
 	info "executing editconfig..."
-	if [ ! -d src ]; then
-		echo
-		perr "ERROR: src folder does not exist, run $myname open"
-		echo
-		exit 1
-	fi
+	checkfordir src open
 	cd src
 	make menuconfig
 	chownuser .
@@ -257,20 +266,20 @@ if [ "$1" == "saveconfig" ]; then
 		echo
 		perr "ERROR: src/.config.type value is unknown"
 		echo
-		exit 1
+		realexit 1
 	esac
 	if [ ! -d src ]; then
 		echo
 		perr "ERROR: src folder does not exist, run $myname open"
 		echo
-		exit 1
+		realexit 1
 	fi
 	mkdir -p orig
 	cat config.$ctype >orig/.config
 	if diff -pruN orig/.config src/.config >config.$ctype.patch; then
 		warn "Nothing to save, current config has not been modified"
 		rm -rf config.$ctype.patch
-		exit 0
+		realexit 0
 	fi
 	chownuser config.$ctype.patch
 	warn "New config has been saved in config.$ctype.patch"
@@ -290,21 +299,11 @@ if [ "$1" == "update" ]; then
 		echo
 		perr "ERROR: src/.config.type value is unknown"
 		echo
-		exit 1
+		realexit 1
 	esac
-	if [ ! -d src ]; then
-		echo
-		perr "ERROR: src folder does not exist, run $myname open"
-		echo
-		exit 1
-	fi
+	checkfordir src open
 	cd src
-	if [ ! -d rootfs ]; then
-		echo
-		perr "ERROR: rootfs folder does not exist, run $myname compile"
-		echo
-		exit 1
-	fi
+	checkfordir rootfs compile
 	eval $compile
 	ctype=${ctype/nosuid/}
 	ctype=${ctype/suid/.suid}
@@ -318,12 +317,7 @@ if [ "$1" == "close" ]; then
 	done=1
 	cd $mydir
 	info "executing close..."
-	if [ ! -d src ]; then
-		echo
-		perr "ERROR: src folder does not exist, run $myname open"
-		echo
-		exit 1
-	fi
+	checkfordir src open
 	cd src
 	sudo rm -rf _install rootfs .config*
 	make clean
@@ -354,7 +348,7 @@ if [ "$1" == "distclean" ]; then
 fi
 
 if [ "$done" != "1" ]; then
-	usage; exit 1
+	usage
 fi
 
 echo
