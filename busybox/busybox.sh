@@ -354,4 +354,6 @@ fi
 echo
 comp "$myname $1 completed"
 echo
+realexit 0
+
 
