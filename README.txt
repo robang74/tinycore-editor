@@ -8,6 +8,19 @@
 # Google group: https://groups.google.com/g/tinycore-editor
 #
 ###############################################################################
+			QUICK START AFTER CLONE
+###############################################################################
+
+	./tinycore/provides/tcgetdistro.sh
+	./busybox/busybox.sh download
+	./busybox/busybox.sh all
+	./make.sh iso
+	./make.sh qemu-test (the changes done here will be saved with close)
+	./make.sh close	
+
+###############################################################################
+			HOW TO DEAL WITH THE SUITE
+###############################################################################
 
  This is a suite for quickly editing and testing a USB bootable disk based on 
  TinyCore Linux. It makes use of qemu and it should be installed in advance.
@@ -123,6 +136,8 @@
    The no|suid parameter let you choose if you want update in the rootfs.gz
    the busybox binary or the busybox.suid binary which is root user suided
 
+###############################################################################
+			USEFULL LINKS TO VISIT
 ###############################################################################
 
 https://github.com/pbatard/rufus/releases/download/v3.14/rufus-3.14.exe
