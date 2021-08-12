@@ -136,6 +136,15 @@
    The no|suid parameter let you choose if you want update in the rootfs.gz
    the busybox binary or the busybox.suid binary which is root user suided
 
+17. The following file contains the SSH host keys for the host:
+
+	tinycore/changes/sshdhostkeys.tgz
+
+    They are saved in PEM format to be compatible with dropbear. With these
+    file every instance will have the same host keys of the others. If this
+    is not what you want, simple delete that file. You can also change the
+    tarball content using host keys of your own choice.
+
 ###############################################################################
 			USEFULL LINKS TO VISIT
 ###############################################################################
