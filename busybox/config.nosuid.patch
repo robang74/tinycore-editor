@@ -1,12 +1,12 @@
---- orig/.config	2021-08-12 08:48:39.913716477 +0200
-+++ src/.config	2021-08-12 08:19:58.735464887 +0200
+--- orig/.config	2021-08-12 14:42:34.459536315 +0200
++++ src/.config	2021-08-12 14:42:25.827510795 +0200
 @@ -1,7 +1,7 @@
  #
  # Automatically generated make config: don't edit
 -# Busybox version: 1.33.0
 -# Sat Jan 16 14:17:25 2021
 +# Busybox version: 1.33.1
-+# Thu Aug 12 08:19:58 2021
++# Thu Aug 12 14:42:25 2021
  #
  CONFIG_HAVE_DOT_CONFIG=y
  
@@ -210,18 +210,6 @@
  # CONFIG_FEATURE_TRACEROUTE_USE_ICMP is not set
  # CONFIG_TUNCTL is not set
  # CONFIG_FEATURE_TUNCTL_UG is not set
-@@ -1098,9 +1106,9 @@ CONFIG_SV_DEFAULT_SERVICE_DIR=""
- CONFIG_SH_IS_ASH=y
- # CONFIG_SH_IS_HUSH is not set
- # CONFIG_SH_IS_NONE is not set
--# CONFIG_BASH_IS_ASH is not set
-+CONFIG_BASH_IS_ASH=y
- # CONFIG_BASH_IS_HUSH is not set
--CONFIG_BASH_IS_NONE=y
-+# CONFIG_BASH_IS_NONE is not set
- CONFIG_SHELL_ASH=y
- CONFIG_ASH=y
- CONFIG_ASH_OPTIMIZE_FOR_SIZE=y
 @@ -1163,7 +1171,7 @@ CONFIG_ASH_CMDCMD=y
  # Options common to all shells
  #
