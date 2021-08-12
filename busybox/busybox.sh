@@ -237,8 +237,7 @@ if [ "$1" == "install" -o "$1" == "all" ]; then
 
 	cd $tcdir/$rtdir
 	rm -f bin/busybox.suid
-	sed -i "s,busybox.suid,busybox," etc/init.d/busybox-aliases
-	sed -i "s,chmod u+s /bin/busybox.suid,chmod u+s," etc/init.d/tc-config
+	sed -i "s,busybox.suid,busybox," $(find etc/init.d -type f)
 	missing=$(ls -alR | grep busybox.suid || true)
 	if [ "$missing" != "" ]; then
 		echo
