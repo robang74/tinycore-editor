@@ -235,8 +235,10 @@ if [ "$1" == "install" -o "$1" == "all" ]; then
 	chown -R root.root .
 	cp -arf * $tcdir/$rtdir
 
-	rm -f $tcdir/$rtdir/bin/busybox.suid
 	cd $tcdir/$rtdir
+	rm -f bin/busybox.suid
+	sed -i "s,busybox.suid,busybox," etc/init.d/busybox-aliases
+	sed -i "s,chmod u+s /bin/busybox.suid,chmod u+s," etc/init.d/tc-config
 	missing=$(ls -alR | grep busybox.suid || true)
 	if [ "$missing" != "" ]; then
 		echo
