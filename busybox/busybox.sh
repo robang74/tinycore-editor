@@ -107,8 +107,6 @@ compile="CFLAGS='$arch $archtune $ccopts' LDFLAGS=$arch make -j$(nproc)"
 trap 'onerror $LINENO $FUNCNAME' ERR
 set -Ee
 
-#false
-
 if [ "$2" != "quiet" ]; then
 	echo
 	warn "Working folder is $PWD"
@@ -215,11 +213,9 @@ if [ "$1" == "install" -o "$1" == "all" ]; then
 	checkfordir src open
 	cd src
 	checkfordir rootfs compile
-#	set +x
 	rtdir=$($tcdir/rootfs.sh open)
 	echo "$rtdir"
 	rtdir=$(echo "$rtdir" | sed -ne "s,^opened folder: \(.*\),\1,p")
-#	set -x
 	if [ "$rtdir" == "" -o ! -d "$tcdir/$rtdir" ]; then
 		echo
 		perr "ERROR: $myname $1 failed, abort"
@@ -259,9 +255,7 @@ if [ "$1" == "editconfig" ]; then
 	info "executing editconfig..."
 	checkfordir src open
 	cd src
-#	set +x
 	make menuconfig
-#	set -x
 	chownuser .
 	cd ..
 fi
