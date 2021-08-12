@@ -60,6 +60,7 @@ if [ "$1" == "close" -o "$1" == "update" ]; then
 	fi
 	if which advdef >/dev/null; then
 		advdef -z3 rootfs.gz
+		rm -f rootfs.gz.tmp*
 	else
 		echo "Install advdef to compress further the rootfs.gz"
 	fi
