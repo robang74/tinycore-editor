@@ -208,15 +208,18 @@ sshdconfig=${found%%.orig}
 dstdir=$(dirname $sshdconfig)
 mkdir -p $dstdir
 if ! tar xzf $tcdir/custom/sshdhostkeys.tgz -moC $dstdir; then
-	ssh-keygen -A
-	ssh-keygen -m PEM -p -N '' -f $dstdir/ssh_host_dsa_key
-	ssh-keygen -m PEM -p -N '' -f $dstdir/ssh_host_rsa_key
-	ssh-keygen -m PEM -p -N '' -f $dstdir/ssh_host_ecdsa_key
-	ssh-keygen -m PEM -p -N '' -f $dstdir/ssh_host_ed25519_key
-fi >/dev/null
+	keygen="-R"
+fi 2>/dev/null
 
 if which sshd >/dev/null; then
 	sshd=1
+	if [ "$keygen" != "" ]; then
+		ssh-keygen -A
+		ssh-keygen -m PEM -p -N '' -f $dstdir/ssh_host_dsa_key
+		ssh-keygen -m PEM -p -N '' -f $dstdir/ssh_host_rsa_key
+		ssh-keygen -m PEM -p -N '' -f $dstdir/ssh_host_ecdsa_key
+		ssh-keygen -m PEM -p -N '' -f $dstdir/ssh_host_ed25519_key
+	fi
 	if cat $sshdconfig.orig >$sshdconfig; then
 		authstr=PubkeyAuthentication
 		sed -ie "s,.*$authstr.*,$authstr yes," $sshdconfig
@@ -228,21 +231,19 @@ if which sshd >/dev/null; then
 elif which dropbear >/dev/null; then
 	sshd=1
 	dbdir=/usr/local/etc/dropbear
-	echo -ne "\tdropbear converting host keys:"
-	dropbearconvert openssh dropbear \
-		$dstdir/ssh_host_dsa_key $dbdir/dropbear_dss_host_key && \
-			echo -n " dsa"
-	dropbearconvert openssh dropbear \
-		$dstdir/ssh_host_rsa_key $dbdir/dropbear_rsa_host_key && \
-			echo -n " rsa"
-	dropbearconvert openssh dropbear \
-		$dstdir/ssh_host_ecdsa_key $dbdir/dropbear_ecdsa_host_key && \
-			echo -n " ecdsa"
-	dropbearconvert openssh dropbear \
-		$dstdir/ssh_host_ed25519_key $dbdir/dropbear_ed25519_host_key && \
-			echo -n " ed25519"
-	dropbear
-	echo
+	if [ "$keygen" == "" ]; then
+		echo -ne "\tdropbear converting host keys:"
+		dropbearconvert openssh dropbear $dstdir/ssh_host_dsa_key \
+			$dbdir/dropbear_dss_host_key && echo -n " dsa"
+		dropbearconvert openssh dropbear $dstdir/ssh_host_rsa_key \
+			$dbdir/dropbear_rsa_host_key && echo -n " rsa"
+		dropbearconvert openssh dropbear $dstdir/ssh_host_ecdsa_key \
+			$dbdir/dropbear_ecdsa_host_key && echo -n " ecdsa"
+		dropbearconvert openssh dropbear $dstdir/ssh_host_ed25519_key \
+			$dbdir/dropbear_ed25519_host_key && echo -n " ed25519"
+		echo
+	fi
+	dropbear $keygen
 fi 2>/dev/null
 
 if [ "$sshd" == "1" ]; then
