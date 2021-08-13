@@ -1,5 +1,5 @@
---- src/shell/ash.c	2021-08-13 18:01:57.819256250 +0200
-+++ src.new5/shell/ash.c	2021-08-13 17:59:30.368868972 +0200
+--- src/shell/ash.c	2021-08-13 20:02:42.335581245 +0200
++++ src.new8/shell/ash.c	2021-08-13 20:02:00.593283352 +0200
 @@ -2135,6 +2135,7 @@ struct globals_var {
  	struct var varinit[ARRAY_SIZE(varinit_data)];
  	int lineno;
@@ -94,20 +94,25 @@
  
  	/* First expand the arguments. */
  	TRACE(("evalcommand(0x%lx, %d) called\n", (long)cmd, flags));
-@@ -10399,9 +10394,12 @@ evalcommand(union node *cmd, int flags)
+@@ -10399,9 +10394,17 @@ evalcommand(union node *cmd, int flags)
  	if(status && trap[NSIG]) {
  		static bool recursive = 0;
  		if(!recursive) {
++			int savelineno = lineno;
 +			doingtrap = 1;
  			recursive = 1;
  			evalstring(trap[NSIG], 0);
 +			status = exitstatus; //RAF: this fix the trap ERR patch
  			recursive = 0;
 +			doingtrap = 0;
++			if (eflag) {
++				lineno = savelineno;
++				exitshell();
++			}
  		}
  	}
  
-@@ -11021,7 +11019,7 @@ setinputstring(char *string)
+@@ -11021,7 +11024,7 @@ setinputstring(char *string)
  	g_parsefile->next_to_pgetc = string;
  	g_parsefile->left_in_line = strlen(string);
  	g_parsefile->buf = NULL;
@@ -116,3 +121,13 @@
  	INT_ON;
  }
  
+@@ -14197,7 +14200,9 @@ exitshell(void)
+ 	if (p) {
+ 		trap[0] = NULL;
+ 		evalskip = 0;
++		doingtrap = 1;
+ 		evalstring(p, 0);
++		doingtrap = 0;
+ 		evalskip = SKIPFUNCDEF;
+ 		/*free(p); - we'll exit soon */
+ 	}
