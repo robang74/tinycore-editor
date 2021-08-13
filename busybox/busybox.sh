@@ -135,6 +135,7 @@ fi
 
 if [ "$1" == "checklib" -o "$1" == "all" ]; then
 	done=1
+	info "executing checklib..."
 	hver=$(ldd --version | head -n1)
 	hnver=${hver//.}
 	hnver=${hnver: -3}
@@ -148,8 +149,19 @@ if [ "$1" == "checklib" -o "$1" == "all" ]; then
 	harch=${harch/i?86/32}
 	harch=${harch/x86_64/64}
 	garch=${ARCH:-32}
+	echo
 	warn "glibc host : $hver ($harch bit)"
 	warn "glibc guest: $gver ($garch bit)"
+	if [[ $harch -eq $garch && $gnver -ge $hnver ]]; then
+		comp "glibc check: chrooting is permited"
+		rc=0
+	else
+		perr "glibc check: chrooting is not permited"
+		rc=1
+	fi
+	if [ "$1" != "all" ]; then
+		echo; exit $rc
+	fi
 fi
 
 if [ "$1" == "open" -o "$1" == "all" ]; then
