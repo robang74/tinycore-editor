@@ -61,6 +61,10 @@ function chownuser() {
 	chown -R $SUDO_USER.$SUDO_USER "$@"
 }
 
+function usermake() {
+	su $SUDO_USER bash -c "make -j$(nproc) $1"
+}
+
 function realexit() {
 	trap - EXIT
 	exit $1
@@ -101,9 +105,9 @@ arch=${ARCH:--m32}
 arch=${arch/64/-m64}
 archtune=${arch/-m64/$cputune64}
 archtune=${archtune/-m32/$cputune32}
- compile="CFLAGS='$arch $archtune $ccopts' LDFLAGS='$arch' make -j$(nproc)" 		#624 KiB
-#compile="make CFLAGS='$arch $archtune $ccopts' LDFLAGS='$arch' -j$(nproc)" 		#1.1 MiB
-#compile="make LDFLAGS='$arch' CC='gcc -Os -pipe $arch $archtune $ccopts' -j$(nproc)"	#624 KiB
+export CFLAGS="$arch $archtune $ccopts"
+export LDFLAGS="$arch"
+compile="CFLAGS='$CFLAGS' LDFLAGS='$LDFLAGS' make -j$(nproc)"
 
 ###############################################################################
 
@@ -231,13 +235,12 @@ if [ "$1" == "compile" -o "$1" == "all" ]; then
 	warn "configure nosuid"
 	setconfig nosuid
 	echo nosuid > .config.type
-	make oldconfig
+	usermake oldconfig
 	warn "compile nosuid"
-	eval $compile install
+	usermake install
 	mv _install rootfs
 
 	dd if=rootfs/bin/busybox >/dev/null
-	chownuser .
 	cd ..
 fi
 
@@ -290,7 +293,7 @@ if [ "$1" == "editconfig" ]; then
 	info "executing editconfig..."
 	checkfordir src open
 	cd src
-	make menuconfig
+	usermake menuconfig
 	chownuser .
 	cd ..
 fi
@@ -353,12 +356,11 @@ if [ "$1" == "update" ]; then
 	esac
 	rm -rf _install rootfs
 
-	eval $compile install
+	usermake install
 	mv _install rootfs
 	ctype=${ctype/nosuid/}
 	ctype=${ctype/suid/.suid}
 	dd if=busybox of=rootfs/bin/busybox$ctype
-	chownuser .
 	cd ..
 	$mydir/$myname install quiet
 fi
