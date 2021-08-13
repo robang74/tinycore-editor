@@ -24,6 +24,7 @@ function usage() {
 	echo
 	echo -e "\t targets:"
 	echo -e "\t\t download         (retrieve source)"
+	echo -e "\t\t checklib         (check GLIBC version)"
 	echo -e "\t\t open             (deploy source)"
 	echo -e "\t\t compile          (from scratch)"
 	echo -e "\t\t install          (into rootfs.gz)"
@@ -130,6 +131,25 @@ if [ "$1" == "download" ]; then
 		wget -c $tcbbsrc/$i -O patches/$i
 	done
 	chownuser patches *suid *.bz2
+fi
+
+if [ "$1" == "checklib" -o "$1" == "all" ]; then
+	done=1
+	hver=$(ldd --version | head -n1)
+	hnver=${hver//.}
+	hnver=${hnver: -3}
+	$tcdir/rootfs.sh open >/dev/null
+	libc=$tcdir/rootfs.tmp/lib/libc.so.6
+	gver=$(strings $libc | grep "GNU C Library")
+	gnver=${gver//.}
+	gnver=${gnver: -3}
+	$tcdir/rootfs.sh clean >/dev/null
+	harch=$(uname -m)
+	harch=${harch/i?86/32}
+	harch=${harch/x86_64/64}
+	garch=${ARCH:-32}
+	warn "glibc host : $hver ($harch bit)"
+	warn "glibc guest: $gver ($garch bit)"
 fi
 
 if [ "$1" == "open" -o "$1" == "all" ]; then
