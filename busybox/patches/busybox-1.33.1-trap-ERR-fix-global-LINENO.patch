@@ -1,0 +1,118 @@
+--- src/shell/ash.c	2021-08-13 18:01:57.819256250 +0200
++++ src.new5/shell/ash.c	2021-08-13 17:59:30.368868972 +0200
+@@ -2135,6 +2135,7 @@ struct globals_var {
+ 	struct var varinit[ARRAY_SIZE(varinit_data)];
+ 	int lineno;
+ 	char linenovar[sizeof("LINENO=") + sizeof(int)*3];
++	bool doingtrap;
+ };
+ extern struct globals_var *BB_GLOBAL_CONST ash_ptr_to_globals_var;
+ #define G_var (*ash_ptr_to_globals_var)
+@@ -2145,6 +2146,7 @@ extern struct globals_var *BB_GLOBAL_CON
+ #define varinit       (G_var.varinit      )
+ #define lineno        (G_var.lineno       )
+ #define linenovar     (G_var.linenovar    )
++#define doingtrap	  (G_var.doingtrap    )
+ #define vifs      varinit[0]
+ #if ENABLE_ASH_MAIL
+ # define vmail    varinit[1]
+@@ -2179,6 +2181,7 @@ extern struct globals_var *BB_GLOBAL_CON
+ 	} \
+ 	strcpy(linenovar, "LINENO="); \
+ 	vlineno.var_text = linenovar; \
++	doingtrap = 0; \
+ } while (0)
+ 
+ /*
+@@ -2316,7 +2319,7 @@ lookupvar(const char *name)
+ 			v->var_func(NULL);
+ #endif
+ 		if (!(v->flags & VUNSET)) {
+-			if (v == &vlineno && v->var_text == linenovar) {
++			if (v->var_text == linenovar) {
+ 				fmtstr(linenovar+7, sizeof(linenovar)-7, "%d", lineno);
+ 			}
+ 			return var_end(v->var_text);
+@@ -9091,6 +9094,7 @@ dotrap(void)
+ 	if (!pending_sig)
+ 		return;
+ 
++	doingtrap = 1;
+ 	status = savestatus;
+ 	last_status = status;
+ 	if (status < 0) {
+@@ -9127,6 +9131,7 @@ dotrap(void)
+ 			exitstatus = status;
+ 	}
+ 
++	doingtrap = 0;
+ 	savestatus = last_status;
+ 	TRACE(("dotrap returns\n"));
+ }
+@@ -9176,8 +9181,6 @@ evaltree(union node *n, int flags)
+ 		goto setstatus;
+ 	case NREDIR:
+ 		errlinno = lineno = n->nredir.linno;
+-		if (funcline)
+-			lineno -= funcline - 1;
+ 		expredir(n->nredir.redirect);
+ 		pushredir(n->nredir.redirect);
+ 		status = redirectsafe(n->nredir.redirect, REDIR_PUSH);
+@@ -9333,8 +9336,6 @@ evalfor(union node *n, int flags)
+ 	int status = 0;
+ 
+ 	errlinno = lineno = n->ncase.linno;
+-	if (funcline)
+-		lineno -= funcline - 1;
+ 
+ 	arglist.list = NULL;
+ 	arglist.lastp = &arglist.list;
+@@ -9365,8 +9366,6 @@ evalcase(union node *n, int flags)
+ 	int status = 0;
+ 
+ 	errlinno = lineno = n->ncase.linno;
+-	if (funcline)
+-		lineno -= funcline - 1;
+ 
+ 	arglist.list = NULL;
+ 	arglist.lastp = &arglist.list;
+@@ -9400,8 +9399,6 @@ evalsubshell(union node *n, int flags)
+ 	int status;
+ 
+ 	errlinno = lineno = n->nredir.linno;
+-	if (funcline)
+-		lineno -= funcline - 1;
+ 
+ 	expredir(n->nredir.redirect);
+ 	if (!backgnd && (flags & EV_EXIT) && !may_have_traps)
+@@ -10142,8 +10139,6 @@ evalcommand(union node *cmd, int flags)
+ 	int vlocal;
+ 
+ 	errlinno = lineno = cmd->ncmd.linno;
+-	if (funcline)
+-		lineno -= funcline - 1;
+ 
+ 	/* First expand the arguments. */
+ 	TRACE(("evalcommand(0x%lx, %d) called\n", (long)cmd, flags));
+@@ -10399,9 +10394,12 @@ evalcommand(union node *cmd, int flags)
+ 	if(status && trap[NSIG]) {
+ 		static bool recursive = 0;
+ 		if(!recursive) {
++			doingtrap = 1;
+ 			recursive = 1;
+ 			evalstring(trap[NSIG], 0);
++			status = exitstatus; //RAF: this fix the trap ERR patch
+ 			recursive = 0;
++			doingtrap = 0;
+ 		}
+ 	}
+ 
+@@ -11021,7 +11019,7 @@ setinputstring(char *string)
+ 	g_parsefile->next_to_pgetc = string;
+ 	g_parsefile->left_in_line = strlen(string);
+ 	g_parsefile->buf = NULL;
+-	g_parsefile->linno = 1;
++	g_parsefile->linno = (doingtrap) ? lineno : 1;
+ 	INT_ON;
+ }
+ 
