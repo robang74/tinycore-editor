@@ -33,6 +33,8 @@ qemu-stop
 close
 clean
 image
+download
+busybox
 iso
 "
 
@@ -72,6 +74,7 @@ function usage() {
 	echo -e "\t\t qemu-stop"
 	echo -e "\t\t close [8GB]"
 	echo -e "\t\t clean [8GB|all]"
+	echo -e "\t\t download"
 	echo -e "\t\t iso"
 	echo
 }
@@ -379,6 +382,19 @@ eval $(grep "^tclabel=" tinycore/changes/rcS)
 sshkeycln=yes
 warning=""
 tdone=0
+
+if [ "$param" == "download" ]; then
+	tdone=1
+	info "executing: download"
+	tinycore/provides/tcgetdistro.sh
+	busybox/busybox.sh download
+fi
+
+if [ "$param" == "busybox" ]; then
+	tdone=1
+	info "executing: busybox"
+	busybox/busybox.sh all
+fi
 
 if [ "$param" == "open" -a "$option" != "8GB" ]; then
 	tdone=1

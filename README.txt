@@ -11,12 +11,9 @@
 			QUICK START AFTER CLONE
 ###############################################################################
 
-	./tinycore/provides/tcgetdistro.sh
-	./busybox/busybox.sh download
-	./busybox/busybox.sh all
-	./make.sh iso
-	./make.sh qemu-test (the changes done here will be saved with close)
-	./make.sh close	
+	./make.sh download
+	./make.sh busybox
+	./make.sh qemu-test iso
 
 ###############################################################################
 			HOW TO DEAL WITH THE SUITE

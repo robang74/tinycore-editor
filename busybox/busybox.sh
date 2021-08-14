@@ -137,7 +137,18 @@ if [ "$1" == "download" ]; then
 	chownuser patches *suid *.bz2
 fi
 
-if [ "$1" == "checklib" -o "$1" == "all" ]; then
+if [ "$1" == "all" ]; then
+	done=1
+	cd $mydir
+	info "executing all..."
+	./busybox.sh open
+	if ! ./busybox.sh update; then
+		./busybox.sh compile
+	fi
+	./busybox.sh install
+fi
+
+if [ "$1" == "checklib" ]; then
 	done=1
 	info "executing checklib..."
 	hver=$(ldd --version | head -n1)
@@ -168,7 +179,7 @@ if [ "$1" == "checklib" -o "$1" == "all" ]; then
 	fi
 fi
 
-if [ "$1" == "open" -o "$1" == "all" ]; then
+if [ "$1" == "open" ]; then
 	done=1
 	cd $mydir
 	info "executing open${2+ $2}..."
@@ -219,7 +230,7 @@ if [ "$1" == "open" -o "$1" == "all" ]; then
 	chownuser src
 fi
 
-if [ "$1" == "compile" -o "$1" == "all" ]; then
+if [ "$1" == "compile" ]; then
 	done=1
 	cd $mydir
 	info "executing compile..."
@@ -244,7 +255,7 @@ if [ "$1" == "compile" -o "$1" == "all" ]; then
 	cd ..
 fi
 
-if [ "$1" == "install" -o "$1" == "all" ]; then
+if [ "$1" == "install" ]; then
 	done=1
 	cd $mydir
 	info "executing install..."
