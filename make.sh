@@ -176,8 +176,12 @@ function tccopyall() {
 		rm -f $tcldir/custom/afterboot.sh
 	fi
 	chmod a+x $tcldir/custom/*.sh
-	cat tinycore/{rootfs.gz,modules.gz} > $tcldir/boot/core.gz
-	echo -e "\ttransfer tinycore/{rootfs.gz,modules.gz} -> $tcldir/boot/core.gz"	
+	cat tinycore/{rootfs.gz,modules.gz} > $tcldir/boot/core.gz && \
+		echo -e "\ttransfer tinycore/{rootfs.gz,modules.gz} -> $tcldir/boot/core.gz"
+	if [ -e busybox/.patches_applied -o -e busybox/.patches_applied.close ]; then
+		cp -arf busybox/patches $tcldir && \
+			echo -e "\ttransfer busybox/patches -> $tcldir"
+	fi 
 	sync
 }
 
