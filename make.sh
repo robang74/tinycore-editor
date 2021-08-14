@@ -75,6 +75,7 @@ function usage() {
 	echo -e "\t\t close [8GB]"
 	echo -e "\t\t clean [8GB|all]"
 	echo -e "\t\t download"
+	echo -e "\t\t busybox"
 	echo -e "\t\t iso"
 	echo
 }
