@@ -144,7 +144,7 @@ if [ "$1" == "all" ]; then
 	./busybox.sh open
 	if ! ./busybox.sh update; then
 		./busybox.sh compile
-	fi
+	fi | grep -v "compile first"
 	./busybox.sh install
 fi
 
