@@ -295,16 +295,17 @@ if [ "$1" == "install" ]; then
 	fi
 
 	cd rootfs
-	mkdir -p etc
+	mkdir -p etc bin
 	chmod u+s bin/busybox
 	cp -f ../../busybox.conf etc
+	cp -f ../../busybox.suid bin
+	chmod a+x bin/busybox.suid
 	chown -R root.root .
 	cp -arf * $tcdir/$rtdir
 
 	cd $tcdir/$rtdir
-	rm -f bin/busybox.suid
 	sed -i "s,busybox.suid,busybox," $(find etc/init.d -type f)
-	missing=$(ls -alR | grep busybox.suid || true)
+	missing=$(ls -alR | grep -e " -> busybox.suid" || true)
 	if [ "$missing" != "" ]; then
 		echo
 		perr "ERROR: this missing applet(s) still refere to busybox.suid, abort"

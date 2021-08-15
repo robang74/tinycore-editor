@@ -1,0 +1,7 @@
+#!/bin/ash
+myname=$(basename $0)
+if [ "$myname" == "busybox.suid" ]; then
+	busybox "$@"
+else
+	busybox $myname "$@"
+fi
