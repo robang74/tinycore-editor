@@ -38,9 +38,9 @@ function chownuser() {
 
 function download() {
 	if which curl >/dev/null; then
-		eval curl -C - $1 -o $2
+		curl -C - $1 -o $2
 	elif which wget >/dev/null; then
-		eval wget -c $1 -O $2
+		wget -c $1 -O $2
 	else
 		echo
 		perr "ERROR: no curl nor wget is installed, abort"
@@ -120,7 +120,7 @@ if [ "$SUDO_USER" != "" ]; then
 fi
 mkdir -p tcz
 cd tcz
-for i in $tczlist; do
+for i in $(eval echo $tczlist); do
 #	if [ ! -e $i ]; then
 		info "Downloading $i..."
 		echo
