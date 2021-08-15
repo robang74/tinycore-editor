@@ -112,7 +112,9 @@ cd $mydir
 mydir=$PWD
 
 tcdir=$(realpath ../tinycore)
-source $tcdir/tinycore.conf
+cd $tcdir
+source tinycore.conf
+cd - >/dev/null
 source busybox.sh.conf
 
 arch=${ARCH:--m32}

@@ -29,6 +29,15 @@ function devdir() {
 	sed -ne "s,^$1 \([^ ]*\) .*,\1,p" /proc/mounts | head -n1
 }
 
+function tceload() {
+	test -z "$1" && return 1
+	tczlist=$(echo "$@" | tr \\n ' ')
+	su tc -c "tce-load -i $tczlist" | \
+		grep -v "is already installed!" | \
+			tr \\n ' ' | grep . || \
+				echo "no extra tcz!"
+}
+
 ###############################################################################
 
 tcpassword="tinycore"
@@ -81,11 +90,16 @@ if [ "$ntdir" == "" ]; then
 fi 2>/dev/null
 
 if [ -d $tcdir/tcz ]; then
+	cd $tcdir/tcz
+	tczlist=$(ls -1 *.tcz)
+	if echo "$tczlist" | grep -q ca-certificates.tcz; then
+		tczlist=$(echo "$tczlist" | grep -v ca-certificates.tcz)
+		cacert="ca-certificates.tcz"
+	fi
 	infotime -n "Loading TCZ archives: "
-	su - tc -c "tce-load -i $tcdir/tcz/*.tcz" | \
-		grep -v "is already installed!" | \
-			tr \\n ' ' | grep . || \
-				echo "no extra tcz!"
+	tceload $tczlist
+	tceload $cacert >/dev/null &
+	cd - >/dev/null
 fi
 
 infotime "Mounting local drives in read only..." ##############################
@@ -266,4 +280,7 @@ else
 	infotime "Loading Italian keyboard map..."
 	loadkmap < /usr/share/kmap/qwerty/it.kmap
 fi 2>/dev/null
+
+infotime "Waiting for background jobs..."
+while pgrep tce-load; do sleep 0.2; done >/dev/null 2>&1
 

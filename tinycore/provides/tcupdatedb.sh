@@ -40,7 +40,9 @@ cd $(dirname $0)
 if [ -f tinycore.conf ]; then
 	source tinycore.conf
 elif [ -f ../tinycore.conf ]; then
-	source ../tinycore.conf
+	cd ..
+	source tinycore.conf
+	cd - >/dev/null
 else
 	echo
 	perr "ERROR: tinycore.conf is missing, abort"

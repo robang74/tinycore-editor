@@ -185,7 +185,7 @@ function tccopyall() {
 	cat tinycore/{rootfs.gz,modules.gz} > $tcldir/boot/core.gz && \
 		echo -e "\ttransfer tinycore/{rootfs.gz,modules.gz} -> $tcldir/boot/core.gz"
 	if [ -e busybox/.patches_applied -o -e busybox/.patches_applied.close ]; then
-		cp -arf busybox/patches $tcldir && \
+		cp -rf busybox/patches $tcldir && \
 			echo -e "\ttransfer busybox/patches -> $tcldir"
 	fi 
 	sync
@@ -291,7 +291,9 @@ while [ -e tinycore/tinycore.conf ]; do
 		fi
 	done
 	test "$print" != "1" && break
-	source tinycore/tinycore.conf
+	cd tinycore
+	source tinycore.conf
+	cd ..
 	tcrepo=${ARCH:-$tcrepo32}
 	tcrepo=${tcrepo/64/$tcrepo64}
 	tcsize=${ARCH:-32}
@@ -395,8 +397,7 @@ if [ "$param" == "download" ]; then
 	tdone=1
 	info "executing: download"
 	if which tce-load >/dev/null; then
-		tczlist="wget mkisofs-tools bridge-utils iproute2 dnsmasq iptables"
-		su - tc -c "tce-load -wi $tczlist"
+		su tc -c "tce-load -wi wget"
 	fi
 	tinycore/provides/tcgetdistro.sh
 	busybox/busybox.sh download
@@ -492,6 +493,8 @@ if [ "$param" == "image" -a "$option" != "8GB" ]; then
 	sudo losetup -D $devloop
 	chownuser *.disk
 	rmdir $tcldir
+	echo
+	sync
 fi
 
 if [ "$param" == "image" -a "$option" == "8GB" ]; then
@@ -523,6 +526,7 @@ if [ "$param" == "image" -a "$option" == "8GB" ]; then
 		losetup -D $devloop
 	fi
 	chownuser tcl-8GB-usb.disk
+	echo
 	sync
 fi
 
