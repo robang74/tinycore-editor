@@ -33,7 +33,7 @@ function tceload() {
 	test -z "$1" && return 1
 	su tc -c "tce-load -i $*" | \
 		grep -v "is already installed!" | \
-			tr \\n ' ' | grep . || \
+			tr \\n ' ' | grep .. || \
 				echo "no extra tcz!"
 }
 
@@ -90,7 +90,7 @@ fi 2>/dev/null
 
 if [ -d $tcdir/tcz ]; then
 	cd $tcdir/tcz
-	tczlist=$(ls -1 *.tcz)
+	tczlist=$(ls -1 *.tcz 2>/dev/null)
 	calast="ca-certificates.tcz"
 	if echo "$tczlist" | grep -q "$calast"; then
 		tczlist=$(echo "$tczlist" | grep -v "$calast")
