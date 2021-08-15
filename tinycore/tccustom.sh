@@ -17,6 +17,9 @@ for i in 32 64; do
 	cd $tmpdir
 	tar czf ../tccustom$i.tgz .
 	cd ..
+	if which advdef >/dev/null; then
+		advdef -z3 tccustom$i.tgz
+	fi
 done
 rm -rf $tmpdir
 
