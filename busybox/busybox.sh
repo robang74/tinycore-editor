@@ -58,7 +58,8 @@ function setconfig() {
 }
 
 function chownuser() {
-	chown -R $SUDO_USER.$SUDO_USER "$@"
+	guid=$(grep -e "^$SUDO_USER:" /etc/passwd | cut -d: -f3-4)
+	chown -R $guid "$@"
 }
 
 function usermake() {
@@ -68,6 +69,19 @@ function usermake() {
 function realexit() {
 	trap - EXIT
 	exit $1
+}
+
+function download() {
+	if which curl >/dev/null; then
+		curl -C - $1 -o $2
+	elif which wget >/dev/null; then
+		wget -c $1 -O $2
+	else
+		echo
+		perr "ERROR: no curl nor wget is installed, abort"
+		echo
+		realexit 1
+	fi
 }
 
 function onerror() {
@@ -126,13 +140,19 @@ if [ "$1" == "download" ]; then
 	done=1
 	cd $mydir
 	info "executing download..."
+	if which tce-load >/dev/null; then
+		tczlist="wget patch make linux-5.10_api_headers"
+		tczlist+=" gcc glibc_base-dev libtirpc-dev"
+		tczlist+=" glibc_add_lib advcomp"
+		su - tc -c "tce-load -wi $tczlist"
+	fi | grep -ve "already installed" | tr \\n ' '
 	echo
-	wget -c $confsuid -O config.suid
-	wget -c $confnosuid -O config.nosuid
-	wget -c $source -O busybox.tar.bz2
+	download $confsuid config.suid
+	download $confnosuid config.nosuid
+	download $source busybox.tar.bz2
 	mkdir -p patches
 	for i in $patchlist; do
-		wget -c $tcbbsrc/$i -O patches/$i
+		download $tcbbsrc/$i patches/$i
 	done
 	chownuser patches *suid *.bz2
 fi

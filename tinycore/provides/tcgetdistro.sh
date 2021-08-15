@@ -31,6 +31,24 @@ function perr() {
 	echo -e "\e[1;31m$@\e[0m"
 }
 
+function chownuser() {
+	guid=$(grep -e "^$SUDO_USER:" /etc/passwd | cut -d: -f3-4)
+	chown -R $guid "$@"
+}
+
+function download() {
+	if which curl >/dev/null; then
+		curl -C - $1 -o $2
+	elif which wget >/dev/null; then
+		wget -c $1 -O $2
+	else
+		echo
+		perr "ERROR: no curl nor wget is installed, abort"
+		echo
+		realexit 1
+	fi
+}
+
 ###############################################################################
 
 PS4='DEBUG: $((LASTNO=$LINENO)): '
@@ -73,28 +91,30 @@ if [ "$1" != "quiet" ]; then
 	warn "Version: $TC.x"
 fi
 
+if which tce-load >/dev/null; then
+	su - tc -c "tce-load -wi wget"
+fi
+
 #if [ ! -e rootfs.gz ]; then
 	info "Downloading rootfs.gz..."
 	echo
-	wget -c $tcrepo/$distro/rootfs$ARCH.gz -O rootfs.gz 2>&1
+	download $tcrepo/$distro/rootfs$ARCH.gz rootfs.gz 2>&1
 #fi
 
 #if [ ! -e vmlinuz ]; then
 	info "Downloading vmlinuz..."
 	echo
-	wget -c $tcrepo/$distro/vmlinuz$ARCH -O vmlinuz 2>&1
+	download $tcrepo/$distro/vmlinuz$ARCH vmlinuz 2>&1
 #fi
 
 #if [ ! -e modules.gz ]; then
 	info "Downloading modules.gz..."
 	echo
-	wget -c $tcrepo/$distro/modules$ARCH.gz -O modules.gz 2>&1
+	download $tcrepo/$distro/modules$ARCH.gz modules.gz 2>&1
 #fi
 
 if [ "$SUDO_USER" != "" ]; then
-	for i in vmlinuz rootfs.gz modules.gz; do
-		chown $SUDO_USER.$SUDO_USER $i
-	done
+	chownuser vmlinuz rootfs.gz modules.gz
 fi
 mkdir -p tcz
 cd tcz
@@ -102,12 +122,12 @@ for i in $tczlist; do
 #	if [ ! -e $i ]; then
 		info "Downloading $i..."
 		echo
-		wget -c $tcrepo/$tczall/$i 2>&1
+		download $tcrepo/$tczall/$i $i 2>&1
 #	fi
 done
 cd ..
 if [ "$SUDO_USER" != "" ]; then
-	chown -R $SUDO_USER.$SUDO_USER tcz
+	chownuser tcz
 fi
 
 trap - EXIT

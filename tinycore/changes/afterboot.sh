@@ -96,7 +96,7 @@ for i in a b c d; do
 			mount -o remount,ro /mnt/sd$i$j
 		else
 			mkdir -p /mnt/sd$i$j
-			mount -o ro /dev/sd$i$j /mnt/sd$i$j
+			mount -r /dev/sd$i$j /mnt/sd$i$j
 		fi
 	done
 done 2>/dev/null

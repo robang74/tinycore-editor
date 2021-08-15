@@ -16,6 +16,11 @@ function errexit() {
 	exit 1
 }
 
+function chownuser() {
+	guid=$(grep -e "^$SUDO_USER:" /etc/passwd | cut -d: -f3-4)
+	chown -R $guid "$@"
+}
+
 ok=0
 if [ "$USER" != "root" ]; then
 	sudo $0 "$@"
@@ -64,7 +69,7 @@ if [ "$1" == "close" -o "$1" == "update" ]; then
 	else
 		echo "Install advdef to compress further the rootfs.gz"
 	fi
-	chown $SUDO_USER.$SUDO_USER rootfs.gz
+	chownuser rootfs.gz
 fi
 
 if [ "$1" == "clean" -o "$1" == "update" -o "$1" == "distclean" ]; then

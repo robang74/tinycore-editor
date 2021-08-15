@@ -9,7 +9,9 @@ brip=10.0.2.16
 tcip=10.0.2.17
 netm=24
 qemumem=256
-qemuexec=qemu-system-x86_64 #i386
+qemuncpu=$[($(nproc)+1)/2]
+qemuopts="--cpu host --enable-kvm -smp $qemuncpu"
+qemuexec="qemu-system-x86_64" #i386
 tcdir="" #if not defined, it will be found
 devloop="" #if not defined, it will be found
 drvi8GB="format=raw,file=tcl-8GB-usb.disk"
@@ -166,7 +168,7 @@ function tccopyall() {
 	./tccustom.sh
 	./rootfs.sh update
 	ln -sf ../tccustom$tcsize.tgz changes/tccustom.tgz
-	chown -R $SUDO_USER.$SUDO_USER tccustom*.tgz changes
+	chownuser tccustom*.tgz changes
 	cd -
 	mkdir -p $tcldir/flags
 	mkdir -p $tcldir/custom
@@ -232,8 +234,13 @@ function storage_32GB_create()
 {
 	if [ ! -e storage-32GB.disk ]; then
 		dd if=/dev/zero bs=512 count=1 seek=61071359 of=storage-32GB.disk
-		chown $SUDO_USER.$SUDO_USER storage-32GB.disk
+		chownuser storage-32GB.disk
 	fi
+}
+
+function chownuser() {
+	guid=$(grep -e "^$SUDO_USER:" /etc/passwd | cut -d: -f3-4)
+	chown -R $guid "$@"
 }
 
 function info() {
@@ -387,6 +394,10 @@ tdone=0
 if [ "$param" == "download" ]; then
 	tdone=1
 	info "executing: download"
+	if which tce-load >/dev/null; then
+		tczlist="wget mkisofs-tools bridge-utils iproute2 dnsmasq iptables"
+		su - tc -c "tce-load -wi $tczlist"
+	fi
 	tinycore/provides/tcgetdistro.sh
 	busybox/busybox.sh download
 fi
@@ -406,7 +417,7 @@ if [ "$param" == "open" -a "$option" != "8GB" ]; then
 	fi
 	storage_32GB_create
 	zcat tcl-64MB-usb.disk.gz >tcl-64MB-usb.disk
-	chown $SUDO_USER.$SUDO_USER tcl-64MB-usb.disk
+	chownuser tcl-64MB-usb.disk
 	sync
 fi
 
@@ -419,7 +430,7 @@ if [ "$param" == "open" -a "$option" == "8GB" ]; then
 	fi
 	storage_32GB_create
 	zcat tcl-8GB-usb.disk.gz >tcl-8GB-usb.disk
-	chown $SUDO_USER.$SUDO_USER tcl-8GB-usb.disk
+	chownuser tcl-8GB-usb.disk
 	sync
 fi
 
@@ -434,7 +445,7 @@ if [ "$param" == "iso" ]; then
 	echo -e "\ttransfer ntfs -> $tcldir/extra"	
 	mkisofs -l -Jr -V "$tclabel" -no-emul-boot -boot-load-size 4 -boot-info-table \
 		-b boot/syslinux/isolinux.bin -c boot/syslinux/boot.cat -o tclinux.iso $tcldir
-	chown $SUDO_USER.$SUDO_USER tclinux.iso
+	chownuser tclinux.iso
 	rm -rf $tcldir
 	echo
 fi
@@ -479,7 +490,7 @@ if [ "$param" == "image" -a "$option" != "8GB" ]; then
 		sleep 1
 	done 2>/dev/null
 	sudo losetup -D $devloop
-	chown $SUDO_USER.$SUDO_USER *.disk
+	chownuser *.disk
 	rmdir $tcldir
 fi
 
@@ -511,7 +522,7 @@ if [ "$param" == "image" -a "$option" == "8GB" ]; then
 		mkfs -t ntfs -L NTFS -F -Q ${devloop}p2 >/dev/null
 		losetup -D $devloop
 	fi
-	chown $SUDO_USER.$SUDO_USER tcl-8GB-usb.disk
+	chownuser tcl-8GB-usb.disk
 	sync
 fi
 
@@ -519,12 +530,19 @@ stayalive=no
 if [ "$param" == "qemu-init" ]; then
 	tdone=1
 	info "executing: qemu-init"
+	if ! ifconfig $ifnm | grep -qe "inet .*$myip"; then
+		echo
+		perr "ERROR: network configuration is wrong, edit make.conf"
+		echo
+		realexit 1
+	fi 2>/dev/null
 	if ! ifconfig brkvm 2>/dev/null | grep -q "inet "; then
-		sudo brctl addbr brkvm
-		sudo ip addr add $brip/$netm dev brkvm
-		sudo ip link set brkvm up
-		sudo mkdir -p /etc/qemu
-		sudo touch /etc/qemu/bridge.conf
+		brctl addbr brkvm
+		ip addr add $brip/$netm dev brkvm
+		ip link set brkvm up
+		mkdir -p /etc/qemu
+		mkdir -p /var/lib/misc
+		touch /etc/qemu/bridge.conf
 		echo "allow brkvm" | sudo tee /etc/qemu/bridge.conf
 		sudo dnsmasq --interface=brkvm --bind-interfaces --dhcp-range=$tcip,$tcip
 		if ! iptables -nvL FORWARD | grep -qe " ACCEPT .* all .* brkvm *$ifnm"; then
@@ -581,11 +599,11 @@ if [ "$param" == "qemu" ]; then
 	fi
 	storage_32GB_create
 	if [ "$option" == "iso" ]; then
-		sudo $qemuexec --cpu host --enable-kvm -m $qemumem -boot d -net nic \
+		sudo $qemuexec $qemuopts -m $qemumem -boot d -net nic \
 			-net bridge,br=brkvm -cdrom tclinux.iso -device sdhci-pci \
 			-device sdhci-pci -device sd-card,drive=sd -drive $drvdata &
 	else
-		sudo $qemuexec --cpu host --enable-kvm -m $qemumem -boot c -net nic \
+		sudo $qemuexec $qemuopts -m $qemumem -boot c -net nic \
 			-net bridge,br=brkvm -drive $drvboot -device sdhci-pci \
 			-device sdhci-pci -device sd-card,drive=sd -drive $drvdata &
 	fi
@@ -633,7 +651,7 @@ if [ "$param" == "ssh-copy" -a "$option" != "8GB" ]; then
 	sshgettcdir
 	tccopyall
 	cd $tcldir
-	chown -R $SUDO_USER.$SUDO_USER .
+	chownuser .
 	myssh 0 root "tcz2tce.sh back"
 	echo -e "\ttransfering everything to $tcip:$tcdir..."
 	myscp * root@$tcip:$tcdir && \
@@ -701,7 +719,7 @@ if [ "$param" == "close" ]; then
 		gzip -9c tcl-8GB-usb.disk >tcl-8GB-usb.disk.gz
 		let nclosed++ || true
 	fi
-	chown $SUDO_USER.$SUDO_USER *.disk.gz
+	chownuser *.disk.gz
 	if [[ $nclosed -lt 1 ]]; then
 		warning="SUGGEST: do it manually or clean"
 		exit 1
