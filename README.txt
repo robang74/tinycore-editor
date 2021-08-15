@@ -148,6 +148,8 @@
 
 https://github.com/pbatard/rufus/releases/download/v3.14/rufus-3.14.exe
 
+http://forum.tinycorelinux.net/index.php?topic=18682.0
+
 http://tinycorelinux.net/corebook.pdf
 
 http://tinycorelinux.net
