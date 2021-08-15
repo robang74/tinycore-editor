@@ -1,0 +1,15 @@
+size=128
+dd if=/dev/zero bs=1M count=$size of=${size}MB.disk
+losetup -P /dev/loop0 ${size}MB.disk
+echo -e "n\n \n \n \n \n t\n b\n a\n w" | fdisk /dev/loop0
+sleep 1
+mkfs.vfat /dev/loop0p1
+mkdir -p tmp
+mount /dev/loop0p1 tmp
+tar xvzf tcl-boot-syslinux.tgz -moC tmp
+umount tmp
+syslinux -d /boot/syslinux -i /dev/loop0p1
+zcat tcl-usb-boot-enable.gz >/dev/loop0
+losetup -D /dev/loop0
+gzip -9c ${size}MB.disk >tcl-skeleton.disk.gz
+rm -f ${size}MB.disk
