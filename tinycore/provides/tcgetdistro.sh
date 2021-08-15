@@ -38,9 +38,9 @@ function chownuser() {
 
 function download() {
 	if which curl >/dev/null; then
-		curl -C - $1 -o $2
+		eval curl -C - $1 -o $2
 	elif which wget >/dev/null; then
-		wget -c $1 -O $2
+		eval wget -c $1 -O $2
 	else
 		echo
 		perr "ERROR: no curl nor wget is installed, abort"
