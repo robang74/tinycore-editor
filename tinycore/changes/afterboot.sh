@@ -31,8 +31,7 @@ function devdir() {
 
 function tceload() {
 	test -z "$1" && return 1
-	tczlist=$(echo "$@" | tr \\n ' ')
-	su tc -c "tce-load -i $tczlist" | \
+	su tc -c "tce-load -i $*" | \
 		grep -v "is already installed!" | \
 			tr \\n ' ' | grep . || \
 				echo "no extra tcz!"
@@ -92,9 +91,10 @@ fi 2>/dev/null
 if [ -d $tcdir/tcz ]; then
 	cd $tcdir/tcz
 	tczlist=$(ls -1 *.tcz)
-	if echo "$tczlist" | grep -q ca-certificates.tcz; then
-		tczlist=$(echo "$tczlist" | grep -v ca-certificates.tcz)
-		cacert="ca-certificates.tcz"
+	calast="ca-certificates.tcz"
+	if echo "$tczlist" | grep -q "$calast"; then
+		tczlist=$(echo "$tczlist" | grep -v "$calast")
+		cacert="$calast"
 	fi
 	infotime -n "Loading TCZ archives: "
 	tceload $tczlist
