@@ -5,7 +5,7 @@ for i in {1..7}; do
 	src/busybox ash tests/test$i.sh
 	echo "#############################################"
 	echo
-done | grep -ve "trap:" >tests/bbash.txt
+done >tests/bbash.txt
 
 for i in {1..7}; do
 	echo "################## TEST $i ##################"
