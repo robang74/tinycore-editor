@@ -44,20 +44,13 @@ function download() {
 		rc=0
 		shift
 	fi
-	if which curl >/dev/null; then
-		opt=${opt:--f}
-		opt=${opt/-c/-C -}
-		if ! curl --retry 0 $opt $1 -o $2 2>&1; then
-			echo -n >$2
-			return $rc
-		fi
-	elif which wget >/dev/null; then
+	if which wget >/dev/null; then
 		if ! wget --tries=1 $opt $1 -O $2 2>&1; then
 			return $rc
 		fi
 	else
 		echo
-		perr "ERROR: no curl nor wget is installed, abort"
+		perr "ERROR: no wget is installed, abort"
 		echo
 		realexit 1
 	fi
@@ -74,8 +67,8 @@ cd $(dirname $0)/..
 
 if [ "$1" == "clean" ]; then
 	rm -f rootfs.gz modules.gz vmlinuz
+	rm -f tcz/*.tcz tcz/*.tcz.dep
 	rm -f changes/tccustom.tgz
-	rm -f tcz/*.tcz
 	echo
 	comp "COMPLETED: files cleaning in $PWD"
 	echo
@@ -83,21 +76,20 @@ if [ "$1" == "clean" ]; then
 fi
 
 if [ -f tinycore.conf ]; then
-	source tinycore.conf
+	cd .
 elif [ -f ../tinycore.conf ]; then
 	cd ..
-	source tinycore.conf
-	cd - >/dev/null
 else
 	echo
 	perr "ERROR: tinycore.conf is missing, abort"
 	echo
 	realexit 1
-fi 2>/dev/null
-
-tcrepo=${ARCH:-$tcrepo32}
-tcrepo=${tcrepo/64/$tcrepo64}
-tcsize=${ARCH:-32}
+fi 
+source tinycore.conf
+set +x
+tczlist=$(gettczlist)
+set -x
+cd - >/dev/null
 
 if [ "$1" != "quiet" ]; then
 	echo
@@ -136,7 +128,7 @@ if [ "$SUDO_USER" != "" ]; then
 fi
 mkdir -p tcz
 cd tcz
-for i in $(eval echo $tczlist); do
+for i in $tczlist; do
 	info "Downloading $i..."
 	echo
 	download $tcrepo/$tczall/$i $i

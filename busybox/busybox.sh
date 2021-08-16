@@ -92,20 +92,13 @@ function download() {
 		shift
 		test -e "$2" && return
 	fi
-	if which curl >/dev/null; then
-		opt=${opt:--f}
-		opt=${opt/-c/-C -}
-		if ! curl --retry 0 $opt $1 -o $2 2>&1; then
-			echo -n >$2
-			return $rc
-		fi
-	elif which wget >/dev/null; then
+	if which wget >/dev/null; then
 		if ! wget --tries=1 $opt $1 -O $2 2>&1; then
 			return $rc
 		fi
 	else
 		echo
-		perr "ERROR: no curl nor wget is installed, abort"
+		perr "ERROR: no wget is installed, abort"
 		echo
 		realexit 1
 	fi

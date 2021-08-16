@@ -55,7 +55,7 @@ function download() {
 
 if [ "$1" == "" ]; then
 	echo
-	warn "USAGE: $(basename $0) [-d \$dirname] name.tgz"
+	warn "USAGE: $(basename $0) name.tgz"
 	echo
 	exit 1
 fi
@@ -92,22 +92,23 @@ if ! which curl >/dev/null; then
 fi
 
 for i in "$@"; do
-	if [ "$setdir" == "1" ]; then
-		cd $i || usage
-		setdir=0
-		continue
-	fi
-	if [ "$i" == "-d" ]; then
-		setdir=1
-		continue
-	fi
-	info "Downloading $i ..."
+	info "Checking $i ..."
 	if ! echo $i | grep -qe "\.tcz$"; then
 		i="$i.tcz"
 	fi
-	download $tcrepo/$tczall/$i $i
-	i="$i.dep"
-	download -ne $tcrepo/$tczall/$i $i
+	rm -f /tmp/$i.dep
+	download -ne $tcrepo/$tczall/$i.dep /tmp/$i.dep
+	deps=$(cat /tmp/$i.dep 2>/dev/null || true)
+	for j in $deps; do
+		download -ne $tcrepo/$tczall/$j.dep /tmp/$j.dep
+		deps+=$(cat /tmp/$i.dep)
+	done
+	deps=$(echo "$deps" | sort | uniq)
+	deps=$(echo "$deps" | tr \\n ' ')
+	echo
+	warn "package: $i"
+	warn "dependecies: $deps"
+	echo
 done
 comp "$(basename $0) completed successfully"
 echo

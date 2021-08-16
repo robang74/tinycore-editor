@@ -291,12 +291,12 @@ while [ -e tinycore/tinycore.conf ]; do
 		fi
 	done
 	test "$print" != "1" && break
+
 	cd tinycore
 	source tinycore.conf
-	cd ..
-	tcrepo=${ARCH:-$tcrepo32}
-	tcrepo=${tcrepo/64/$tcrepo64}
-	tcsize=${ARCH:-32}
+	tczlist=$(gettczlist)
+	cd - >/dev/null
+
 	echo
 	warn "Config files: tinycore/tinycore.conf"
 	warn "Architecture: x86 $tcsize bit"
@@ -311,7 +311,7 @@ while [ -e tinycore/tinycore.conf ]; do
 			exit 1
 		fi
 	done
-	for i in $(eval echo $tczlist); do
+	for i in $tczlist; do
 		if [ ! -e tinycore/tcz/$i ]; then
 			echo
 			perr "ERROR: file tinycore/tcz/$i does not exist"

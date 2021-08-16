@@ -40,9 +40,7 @@ cd $(dirname $0)
 if [ -f tinycore.conf ]; then
 	source tinycore.conf
 elif [ -f ../tinycore.conf ]; then
-	cd ..
-	source tinycore.conf
-	cd - >/dev/null
+	source ../tinycore.conf
 else
 	echo
 	perr "ERROR: tinycore.conf is missing, abort"
@@ -50,9 +48,6 @@ else
 	realexit 1
 fi
 
-tcrepo=${ARCH:-$tcrepo32}
-tcrepo=${tcrepo/64/$tcrepo64}
-tcsize=${ARCH:-32}
 datafile=tc$TC-$tcsize.db
 
 echo
