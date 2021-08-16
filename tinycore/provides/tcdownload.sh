@@ -31,11 +31,38 @@ function perr() {
 	echo -e "\e[1;31m$@\e[0m"
 }
 
+function download() {
+	rc=1
+	opt=-c
+	if [ "$1" == "-ne" ]; then
+		opt=
+		rc=0
+		shift
+	fi
+	if which curl >/dev/null; then
+		opt=${opt:--f}
+		opt=${opt/-c/-C -}
+		if ! curl --retry 0 $opt $1 -o $2 2>&1; then
+			echo -n >$2
+			return $rc
+		fi
+	elif which wget >/dev/null; then
+		if ! wget --tries=1 $opt $1 -O $2 2>&1; then
+			return $rc
+		fi
+	else
+		echo
+		perr "ERROR: no curl nor wget is installed, abort"
+		echo
+		realexit 1
+	fi
+}
+
 ###############################################################################
 
 if [ "$1" == "" ]; then
 	echo
-	warn "USAGE: $(basename $0) name.tgz"
+	warn "USAGE: $(basename $0) [-d \$dirname] name.tgz"
 	echo
 	exit 1
 fi
@@ -72,11 +99,22 @@ warn "Version: $TC.x"
 echo
 
 for i in "$@"; do
+	if [ "$setdir" == "1" ]; then
+		cd $i || usage
+		setdir=0
+		continue
+	fi
+	if [ "$i" == "-d" ]; then
+		setdir=1
+		continue
+	fi
 	info "Downloading $i ..."
 	if ! echo $i | grep -qe "\.tcz$"; then
 		i="$i.tcz"
 	fi
-	wget -c $tcrepo/$tczall/$i
+	download $tcrepo/$tczall/$i $i
+	i="$i.dep"
+	download -ne $tcrepo/$tczall/$i $i
 done
 comp "$(basename $0) completed successfully"
 echo

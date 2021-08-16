@@ -72,10 +72,24 @@ function realexit() {
 }
 
 function download() {
+	rc=1
+	opt=-c
+	if [ "$1" == "-ne" ]; then
+		opt=
+		rc=0
+		shift
+	fi
 	if which curl >/dev/null; then
-		curl -C - $1 -o $2
+		opt=${opt:--f}
+		opt=${opt/-c/-C -}
+		if ! curl --retry 0 $opt $1 -o $2 2>&1; then
+			echo -n >$2
+			return $rc
+		fi
 	elif which wget >/dev/null; then
-		wget -c $1 -O $2
+		if ! wget --tries=1 $opt $1 -O $2 2>&1; then
+			return $rc
+		fi
 	else
 		echo
 		perr "ERROR: no curl nor wget is installed, abort"
@@ -151,7 +165,9 @@ if [ "$1" == "download" ]; then
 	echo
 	download $confsuid config.suid
 	download $confnosuid config.nosuid
-	download $source busybox.tar.bz2
+	if [ ! -e busybox.tar.bz2 ]; then
+		download -ne $source busybox.tar.bz2
+	fi
 	mkdir -p patches
 	for i in $patchlist; do
 		download $tcbbsrc/$i patches/$i

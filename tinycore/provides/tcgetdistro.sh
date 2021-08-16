@@ -37,10 +37,24 @@ function chownuser() {
 }
 
 function download() {
+	rc=1
+	opt=-c
+	if [ "$1" == "-ne" ]; then
+		opt=
+		rc=0
+		shift
+	fi
 	if which curl >/dev/null; then
-		curl -C - $1 -o $2
+		opt=${opt:--f}
+		opt=${opt/-c/-C -}
+		if ! curl --retry 0 $opt $1 -o $2 2>&1; then
+			echo -n >$2
+			return $rc
+		fi
 	elif which wget >/dev/null; then
-		wget -c $1 -O $2
+		if ! wget --tries=1 $opt $1 -O $2 2>&1; then
+			return $rc
+		fi
 	else
 		echo
 		perr "ERROR: no curl nor wget is installed, abort"
@@ -100,19 +114,19 @@ fi
 #if [ ! -e rootfs.gz ]; then
 	info "Downloading rootfs.gz..."
 	echo
-	download $tcrepo/$distro/rootfs$ARCH.gz rootfs.gz 2>&1
+	download $tcrepo/$distro/rootfs$ARCH.gz rootfs.gz
 #fi
 
 #if [ ! -e vmlinuz ]; then
 	info "Downloading vmlinuz..."
 	echo
-	download $tcrepo/$distro/vmlinuz$ARCH vmlinuz 2>&1
+	download $tcrepo/$distro/vmlinuz$ARCH vmlinuz
 #fi
 
 #if [ ! -e modules.gz ]; then
 	info "Downloading modules.gz..."
 	echo
-	download $tcrepo/$distro/modules$ARCH.gz modules.gz 2>&1
+	download $tcrepo/$distro/modules$ARCH.gz modules.gz
 #fi
 
 if [ "$SUDO_USER" != "" ]; then
@@ -121,11 +135,25 @@ fi
 mkdir -p tcz
 cd tcz
 for i in $(eval echo $tczlist); do
-#	if [ ! -e $i ]; then
-		info "Downloading $i..."
-		echo
-		download $tcrepo/$tczall/$i $i 2>&1
-#	fi
+	info "Downloading $i..."
+	echo
+	download $tcrepo/$tczall/$i $i
+	i="$i.dep"
+	download -ne $tcrepo/$tczall/$i $i
+done
+dep=1
+while [ "$dep" == "1" ]; do
+	dep=0
+	for i in $(cat *.tcz.dep); do
+		if [ ! -e $i ]; then
+			info "Downloading dependency $i..."
+			echo
+			download $tcrepo/$tczall/$i $i
+			i="$i.dep"
+			download -ne $tcrepo/$tczall/$i $i
+			dep=1
+		fi
+	done
 done
 cd ..
 if [ "$SUDO_USER" != "" ]; then
@@ -133,6 +161,7 @@ if [ "$SUDO_USER" != "" ]; then
 fi
 
 trap - EXIT
+echo
 comp "COMLETED: files are ready in $PWD"
 echo
 
