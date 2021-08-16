@@ -396,8 +396,10 @@ tdone=0
 if [ "$param" == "download" ]; then
 	tdone=1
 	info "executing: download"
-	if which tce-load >/dev/null; then
-		su tc -c "tce-load -wi wget"
+	if ! which curl >/dev/null; then
+		if which tce-load >/dev/null; then
+			su tc -c "tce-load -wi wget"
+		fi
 	fi
 	tinycore/provides/tcgetdistro.sh
 	busybox/busybox.sh download

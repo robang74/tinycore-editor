@@ -98,6 +98,12 @@ warn "Architecture: x86 $tcsize bit"
 warn "Version: $TC.x"
 echo
 
+if ! which curl >/dev/null; then
+	if which tce-load >/dev/null; then
+		su tc -c "tce-load -wi wget"
+	fi
+fi
+
 for i in "$@"; do
 	if [ "$setdir" == "1" ]; then
 		cd $i || usage
