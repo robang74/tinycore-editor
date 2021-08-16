@@ -48,12 +48,24 @@ function checkfordir() {
 	fi
 }
 
+function checkconfig() {
+	case $1 in
+	suid|nosuid)
+		;;
+	default)
+		echo
+		perr "ERROR: src/.config.type value is unknown"
+		echo
+		realexit 1
+	esac
+}
+
 function setconfig() {
-	if [ "$1" != "" ]; then
-		cat ../config.$1 >.config
-		if [ -e ../config.$1.patch ]; then
-			patch -Np1 -i ../config.$1.patch
-		fi
+	checkconfig $1
+	echo $1 > .config.type
+	cat ../config.$1 >.config
+	if [ -e ../config.$1.patch ]; then
+		patch -Np1 -i ../config.$1.patch
 	fi
 }
 
@@ -78,6 +90,7 @@ function download() {
 		opt=
 		rc=0
 		shift
+		test -e "$2" && return
 	fi
 	if which curl >/dev/null; then
 		opt=${opt:--f}
@@ -163,14 +176,12 @@ if [ "$1" == "download" ]; then
 		su - tc -c "tce-load -wi $tczlist"
 	fi | grep -ve "already installed" | tr \\n ' '
 	echo
-	download $confsuid config.suid
-	download $confnosuid config.nosuid
-	if [ ! -e busybox.tar.bz2 ]; then
-		download -ne $source busybox.tar.bz2
-	fi
+	download -ne $confsuid config.suid
+	download -ne $confnosuid config.nosuid
+	download -ne $source busybox.tar.bz2
 	mkdir -p patches
 	for i in $patchlist; do
-		download $tcbbsrc/$i patches/$i
+		download -ne $tcbbsrc/$i patches/$i
 	done
 	chownuser patches *suid *.bz2
 fi
@@ -180,10 +191,11 @@ if [ "$1" == "all" ]; then
 	cd $mydir
 	info "executing all..."
 	./busybox.sh open
-	if ! ./busybox.sh update; then
-		./busybox.sh compile
-	fi | grep -v "compile first"
-	./busybox.sh install
+	./busybox.sh update
+#	if ! ./busybox.sh update; then
+#		./busybox.sh compile
+#	fi | grep -v "compile first"
+#	./busybox.sh install
 fi
 
 if [ "$1" == "checklib" ]; then
@@ -228,7 +240,7 @@ if [ "$1" == "open" ]; then
 		realexit 1
 	fi
 	if [ "$2" == "" -o "$2" == "all" ]; then
-		ctype=""
+		ctype="nosuid"
 	elif [ "$2" == "nosuid" ]; then
 		ctype="nosuid"
 	elif [ "$2" == "suid" ]; then
@@ -240,10 +252,12 @@ if [ "$1" == "open" ]; then
 		realexit 1
 	fi
 	if [ ! -d src ]; then
+		mod=1
 		tar xjf busybox.tar.bz2
 		mv busybox-$version src
 	fi
 	if [ ! -e .patches_applied -a ! -e .patches_applied.close ]; then
+		mod=1
 		cd $mydir/src
 		for i in ../patches/*.patch; do
 			err=0
@@ -260,10 +274,13 @@ if [ "$1" == "open" ]; then
 		touch .patches_applied
 		chownuser .patches_applied
 	fi
-	cd $mydir/src
-	setconfig $ctype
-	echo $ctype > .config.type
-	cd ..
+	if [ "$mod" == "1" ]; then
+		cd $mydir/src
+		echo
+		warn "select configure $ctype"
+		setconfig $ctype
+		cd ..
+	fi
 	echo
 	chownuser src
 fi
@@ -283,7 +300,6 @@ if [ "$1" == "compile" ]; then
 
 	warn "configure nosuid"
 	setconfig nosuid
-	echo nosuid > .config.type
 	usermake oldconfig
 	warn "compile nosuid"
 	usermake install
@@ -353,15 +369,7 @@ if [ "$1" == "saveconfig" ]; then
 	cd $mydir
 	ctype=$(cat src/.config.type 2>/dev/null)
 	info "executing saveconfig${ctype+ $ctype}..."
-	case $ctype in
-	suid|nosuid|"")
-		;;
-	default)
-		echo
-		perr "ERROR: src/.config.type value is unknown"
-		echo
-		realexit 1
-	esac
+	checkconfig $ctype
 	if [ ! -d src ]; then
 		echo
 		perr "ERROR: src folder does not exist, run $myname open"
@@ -395,15 +403,7 @@ if [ "$1" == "update" ]; then
 	ctype=$(cat .config.type 2>/dev/null)
 	info "executing update${ctype+ $ctype}..."
 	warn "compile with: $compile"
-	case $ctype in
-	suid|nosuid|"")
-		;;
-	default)
-		echo
-		perr "ERROR: src/.config.type value is unknown"
-		echo
-		realexit 1
-	esac
+	checkconfig $ctype
 	rm -rf _install rootfs
 
 	usermake install
