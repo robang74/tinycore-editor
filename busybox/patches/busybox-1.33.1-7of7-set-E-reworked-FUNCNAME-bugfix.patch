@@ -1,0 +1,74 @@
+--- src.orig/shell/ash.c	2021-08-16 12:46:23.704492716 +0200
++++ src/shell/ash.c	2021-08-16 13:01:22.766580095 +0200
+@@ -443,8 +443,6 @@ struct globals_misc {
+ # define debug optlist[17 + BASH_PIPEFAIL]
+ #endif
+ 
+-#define errexit ((eflag && !funcline) || Eflag)
+-
+ 	/* trap handler commands */
+ 	/*
+ 	 * Sigmode records the current value of the signal handlers for the various
+@@ -9211,7 +9209,7 @@ evaltree(union node *n, int flags)
+ 	case NCMD:
+ 		evalfn = evalcommand;
+  checkexit:
+-		if (errexit && !(flags & EV_TESTED))
++		if (eflag && !(flags & EV_TESTED))
+ 			checkexit = ~0;
+ 		goto calleval;
+ 	case NFOR:
+@@ -9760,6 +9758,7 @@ evalfun(struct funcnode *func, int argc,
+ 	shellparam.malloced = 0;
+ 	func->count++;
+ 	funcname = strdup(func->n.ndefun.text);
++//	printf("function name changed\n");
+ 	funcline = func->n.ndefun.linno;
+ 	INT_ON;
+ 	shellparam.nparam = argc - 1;
+@@ -9771,9 +9770,16 @@ evalfun(struct funcnode *func, int argc,
+ 	evaltree(func->n.ndefun.body, flags & EV_TESTED);
+  funcdone:
+ 	INT_OFF;
+-	if(funcname)
+-		free(funcname);
+-	funcname = savefuncname;
++	if(exitstatus && eflag) {
++//		savefuncname = NULL;
++//		printf("avoid to resore the funcname\n");
++		/* memmory leak is not a problem, we are exiting */
++	} else {
++//		printf("function name restore\n");
++		if(funcname)
++			free(funcname);
++		funcname = savefuncname;
++	}
+ 	funcline = savefuncline;
+ 	freefunc(func);
+ 	freeparam(&shellparam);
+@@ -10415,7 +10421,7 @@ evalcommand(union node *cmd, int flags)
+ 	FORCE_INT_ON;
+ 
+  out:
+-	if(status && trap[NSIG]) {
++	if((status && trap[NSIG]) && (Eflag || (!Eflag && !funcline))){
+ 		static bool recursive = 0;
+ 		if(!recursive) {
+ 			int savelineno = lineno;
+@@ -10425,7 +10431,7 @@ evalcommand(union node *cmd, int flags)
+ 			status = exitstatus; //RAF: this fix the trap ERR patch
+ 			recursive = 0;
+ 			doingtrap = 0;
+-			if (errexit) {
++			if (eflag) {
+ 				lineno = savelineno;
+ 				exitshell();
+ 			}
+@@ -14220,6 +14226,7 @@ exitshell(void)
+ #endif
+ 	savestatus = exitstatus;
+ 	TRACE(("pid %d, exitshell(%d)\n", getpid(), savestatus));
++//	printf("pid %d, exitshell(%d)\n", getpid(), savestatus);
+ 	if (setjmp(loc.loc))
+ 		goto out;
+ 	exception_handler = &loc;
