@@ -13,7 +13,7 @@ function onerror() {
 	rc=$?
 #	echo
 	perr "ERROR: $(basename $0) failed${2+ in $2()} at line $1, rc: $rc" 
-	echo "onerror() at line $LINENO == 16"
+	echo "$FUNCNAME() at line $LINENO == 16"
 #	echo
 #	realexit $rc
 }

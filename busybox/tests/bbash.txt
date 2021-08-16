@@ -1,0 +1,71 @@
+################## TEST 1 ##################
+ciao! at line 29 == 29
+hello at line 22 == 22
+[1;31mERROR: test1.sh failed at line 30, rc: 1[0m
+onerror() at line 16 == 16
+mytest should have failed at line 30
+pippo
+[1;31mERROR: test1.sh failed at line 34, rc: 1[0m
+onerror() at line 16 == 16
+exit in () at line 34 == 34 with pippo but not pluto
+#############################################
+
+################## TEST 2 ##################
+ciao! at line 29 == 29
+hello at line 22 == 22
+[1;31mERROR: test2.sh failed at line 30, rc: 1[0m
+onerror() at line 16 == 16
+mytest should have failed at line 30
+pippo
+[1;31mERROR: test2.sh failed at line 34, rc: 1[0m
+onerror() at line 16 == 16
+exit at line 34 == 34 with pippo but not pluto
+#############################################
+
+################## TEST 3 ##################
+ciao! at line 29 == 29
+hello at line 22 == 22
+exit at line 30 == 30 with pippo but not pluto
+#############################################
+
+################## TEST 4 ##################
+ciao! at line 29 == 29
+hello by mytest() at line 22 == 22
+exit in mytest() at line 30 == 30 with pippo but not pluto
+#############################################
+
+################## TEST 5 ##################
+funcname in script: '' == ''
+ciao! at line 29 == 29
+hello at line 22 == 22
+[1;31mERROR: test5.sh failed at line 30, rc: 1[0m
+onerror() at line 16 == 16
+mytest should have failed at line 30
+pippo
+[1;31mERROR: test5.sh failed at line 34, rc: 1[0m
+onerror() at line 16 == 16
+this is a multi-line trap which begins at line 9 == 9
+exit at line 34 == 34 with pippo but not pluto
+this is a multi-line trap which ends at line 9 == 11
+#############################################
+
+################## TEST 6 ##################
+ciao! at line 29 == 29
+hello by mytest() at line 22 == 22
+exit in () at line 30 == 30 with pippo but not pluto
+#############################################
+
+################## TEST 7 ##################
+ciao! at line 29 == 29
+hello by mytest() at line 22 == 22
+pippo
+hello by mytest() at line 22 == 22
+[1;31mERROR: test7.sh failed in mytest() at line 23, rc: 1[0m
+onerror() at line 16 == 16
+mytest should have failed at line 30 and it will again at line 36
+hello by mytest() at line 22 == 22
+[1;31mERROR: test7.sh failed in mytest() at line 23, rc: 1[0m
+onerror() at line 16 == 16
+exit in mytest() at line 23 == 23 with pippo but not pluto
+#############################################
+

@@ -28,7 +28,7 @@ trap 'echo exit at line $LINENO == 34 with pippo but not pluto' EXIT
 
 echo "ciao! at line $LINENO == 29"
 mytest
-echo "mytest should have failed at line 23"
+echo "mytest should have failed at line 30"
 echo "pippo"
 set -e
 false
