@@ -41,7 +41,6 @@ iso
 "
 
 copylist="
-tinycore/tcz:
 tinycore/flags:
 tinycore/tinycore.conf:provides/
 tinycore/provides/tc[udpm]*.sh:provides/
@@ -163,6 +162,16 @@ function tcdircopy() {
 		echo -e "\ttransfer $1" | sed "s,:, -> $tcdir/,"
 }
 
+get_tczlist_full() {
+	declare deps i
+	for i in $tczlist; do
+		i=${i/.tcz/}.tcz
+		i=${i/KERNEL/$KERN-tinycore$ARCH}
+		deps+=" $(tcdepends.sh $i | grep -e "^$i:" | tr -d :)"
+	done
+	for i in $deps; do echo $i; done | sort | uniq
+}
+
 function tccopyall() {
 	test -n "$tcldir"
 	cd tinycore
@@ -184,11 +193,23 @@ function tccopyall() {
 	fi
 	chmod a+x $tcldir/custom/*.sh
 	cat tinycore/{rootfs.gz,modules.gz} > $tcldir/boot/core.gz && \
-		echo -e "\ttransfer tinycore/{rootfs.gz,modules.gz} -> $tcldir/boot/core.gz"
+		echo -e "\ttransfer tinycore/{rootfs.gz,modules.gz} -> /$tcldir/boot/core.gz"
 	if [ -e busybox/.patches_applied -o -e busybox/.patches_applied.close ]; then
 		cp -rf busybox/patches $tcldir && \
-			echo -e "\ttransfer busybox/patches -> $tcldir"
-	fi 
+			echo -e "\ttransfer busybox/patches -> /$tcldir/"
+	fi
+	if [ "$1" == "tce" ]; then
+		tczdir=$tcldir/tce/optional
+		mkdir -p $tcldir/tce
+		echo "$tczlist" >$tcldir/tce/onboot.lst
+	else
+		tczdir=$tcldir/tcz
+	fi
+	mkdir -p $tczdir
+	for i in $(get_tczlist_full); do
+		cp -f tinycore/tcz/{$i,$i.dep} $tczdir
+	done
+	echo -e "\ttransfer tinycore/tcz/{selected *.tcz,*tcz.dep} -> /$tczdir/"
 	sync
 }
 
@@ -264,6 +285,7 @@ function perr() {
 
 cd $(dirname $0)
 myname="$(basename $0)"
+export PATH="$PATH:$PWD/tinycore/provides"
 
 if [ "$USER" != "root" ]; then
 	set -m
@@ -316,8 +338,11 @@ while [ -e tinycore/tinycore.conf ]; do
 			exit 1
 		fi
 	done
+	cd tinycore/tcz
 	for i in $tczlist; do
-		if [ ! -e tinycore/tcz/$i ]; then
+		i=${i/.tcz/}.tcz
+		i=${i/KERNEL/$KERN-tinycore$ARCH}
+		if [ ! -e $i ]; then
 			echo
 			perr "ERROR: file tinycore/tcz/$i does not exist"
 			echo
@@ -325,14 +350,10 @@ while [ -e tinycore/tinycore.conf ]; do
 			echo
 			exit 1
 		fi
-	done
-	cd tinycore/tcz
-	for i in *.tcz; do
 		for j in $(cat $i.dep); do
-			if ! echo $j | grep -qe "\.tcz$"; then
-				j="$j.tcz"
-			fi
-			if [ ! -e $j ]; then
+			j=${j/.tcz/}.tcz
+			j=${j/KERNEL/$KERN-tinycore$ARCH}
+			if ! ls $j >/dev/null 2>&1; then
 				echo
 				perr "ERROR: $i missing $j in tcz, abort"
 				echo
@@ -458,9 +479,9 @@ if [ "$param" == "iso" ]; then
 	rm -rf $tcldir
 	mkdir -p $tcldir
 	tar xzf tcl-boot-isolinux.tgz -C $tcldir
-	tccopyall
+	tccopyall iso
 	cp -arf ntfs $tcldir/extra
-	echo -e "\ttransfer ntfs -> $tcldir/extra"	
+	echo -e "\ttransfer ntfs -> /$tcldir/extra/"
 	mkisofs -l -Jr -V "$tclabel" -no-emul-boot -boot-load-size 4 -boot-info-table \
 		-b boot/syslinux/isolinux.bin -c boot/syslinux/boot.cat -o tclinux.iso $tcldir
 	chownuser tclinux.iso

@@ -21,6 +21,9 @@ function perr() {
 
 ###############################################################################
 
+export PATH=/home/tc/.local/bin:/usr/local/sbin:/usr/local/bin
+export PATH=$PATH:/apps/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
 if [ "$1" == "" -o "$2" != "" ]; then
 	echo
 	warn "USAGE: $(basename $0) \"string\""

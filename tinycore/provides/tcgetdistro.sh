@@ -10,7 +10,7 @@ function realexit() {
 
 function atexit() {
 	echo
-	perr "ERROR: $(basename $0) failed at line $1, abort"
+	perr "ERROR: $(basename $0) failed${2+ in $2()} at line $1, abort"
 	echo
 	realexit 1
 }
@@ -43,6 +43,7 @@ function download() {
 		opt=
 		rc=0
 		shift
+		test -e $2 && return 0
 	fi
 	if which wget >/dev/null; then
 		if ! wget --tries=1 $opt $1 -O $2 2>&1; then
@@ -56,14 +57,23 @@ function download() {
 	fi
 }
 
+get_tczlist_full() {
+	declare deps i
+	for i in $tczlist; do
+		i=${i/.tcz/}.tcz
+		i=${i/KERNEL/$KERN-tinycore$ARCH}
+		deps+=" $(tcdepends.sh $i | grep -e "^$i:" | tr -d :)"
+	done
+	for i in $deps; do echo $i; done | sort | uniq
+}
+
 ###############################################################################
 
-PS4='DEBUG: $((LASTNO=$LINENO)): '
-exec 2> >(grep -ve "^D*EBUG: ")
-trap 'atexit $LASTNO' EXIT
-set -ex
+trap 'atexit $LINENO $FUNCNAME' EXIT
+set -e
 
 cd $(dirname $0)/..
+export PATH="$PATH:$PWD/provides"
 
 if [ "$1" == "clean" ]; then
 	rm -f rootfs.gz modules.gz vmlinuz
@@ -86,9 +96,7 @@ else
 	realexit 1
 fi 
 source tinycore.conf
-set +x
 tczlist=$(gettczlist)
-set -x
 if [ "$tczlist" == "ERROR" ]; then
 	realexit 1
 fi
@@ -134,9 +142,13 @@ fi
 if [ "$SUDO_USER" != "" ]; then
 	chownuser vmlinuz rootfs.gz modules.gz
 fi
+
+deps=$(get_tczlist_full)
 mkdir -p tcz
 cd tcz
-for i in $tczlist; do
+for i in $deps; do
+	i=${i/.tcz/}.tcz
+	i=${i/KERNEL/$KERN-tinycore$ARCH}
 	info "Downloading $i..."
 	echo
 	download $tcrepo/$tczall/$i $i

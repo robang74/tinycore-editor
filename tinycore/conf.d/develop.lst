@@ -21,7 +21,7 @@ gmp.tcz
 gzip.tcz
 iproute2.tcz
 iptables.tcz
-ipv6-netfilter-5.10.3-tinycore64.tcz
+ipv6-netfilter-KERNEL.tcz
 isl.tcz
 kmaps.tcz
 libdb.tcz
@@ -34,7 +34,7 @@ mkisofs-tools.tcz
 mpc.tcz
 mpfr.tcz
 ncursesw.tcz
-net-bridging-5.10.3-tinycore64.tcz
+net-bridging-KERNEL.tcz
 ntfs-3g.tcz
 ntfsprogs.tcz
 openssl-1.1.1.tcz

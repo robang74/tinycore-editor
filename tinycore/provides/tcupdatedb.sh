@@ -56,6 +56,9 @@ function download() {
 
 ###############################################################################
 
+export PATH=/home/tc/.local/bin:/usr/local/sbin:/usr/local/bin
+export PATH=$PATH:/apps/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
 set -e
 trap 'atexit' EXIT
 cd $(dirname $0)

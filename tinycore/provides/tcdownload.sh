@@ -53,6 +53,9 @@ function download() {
 
 ###############################################################################
 
+export PATH=/home/tc/.local/bin:/usr/local/sbin:/usr/local/bin
+export PATH=$PATH:/apps/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
 if [ "$1" == "" ]; then
 	echo
 	warn "USAGE: $(basename $0) [-d \$dirname] name.tgz"
@@ -106,10 +109,9 @@ for i in "$@"; do
 		setdir=1
 		continue
 	fi
+	i=${i/.tcz/}.tcz
+	i=${i/KERNEL/$KERN-tinycore$ARCH}
 	info "Downloading $i ..."
-	if ! echo $i | grep -qe "\.tcz$"; then
-		i="$i.tcz"
-	fi
 	download $tcrepo/$tczall/$i $i
 	i="$i.dep"
 	download -ne $tcrepo/$tczall/$i $i

@@ -56,7 +56,10 @@ function download() {
 
 ###############################################################################
 
-set -em
+export PATH=/home/tc/.local/bin:/usr/local/sbin:/usr/local/bin
+export PATH=$PATH:/apps/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+set -e
 trap 'atexit' EXIT
 
 cd $(dirname $0)
@@ -150,15 +153,10 @@ function getmissing() {
 }
 
 for tcz in $(cat index.lst); do
-	tcz=${tcz/KERNEL/*-tinycore$ARCH}
+	tcz=${tcz/KERNEL/$KERN-tinycore$ARCH}
 	info "Checking $tcz ..."
 	deps=$(cat $tcz.dep || true)
-	for i in $deps; do
-		i=${i/.tcz/}.tcz
-		ndps="
-$i"
-	done
-	deps=$(echo "$deps" | egrep . | sort)
+	deps=$(echo "$deps" | sort)
 	ndps=$deps
 	n=1
 	m=$(getmissing | wc -l)
@@ -167,7 +165,7 @@ $i"
 		printf " $n"
 		for i in $deps; do
 			i=${i/.tcz/}.tcz
-			i=${i/KERNEL/*-tinycore$ARCH}
+			i=${i/KERNEL/$KERN-tinycore$ARCH}
 			ndps="$ndps
 $(cat $i.dep 2>missing.lst || true)"
 		done
