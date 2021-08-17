@@ -85,12 +85,12 @@ warn "Architecture: x86 $tcsize bit"
 warn "Version: $TC.x"
 echo
 
-if ! which wget >/dev/null; then
-	if which tce-load >/dev/null; then
+if which tce-load >/dev/null; then
+	if [ ! -x /usr/local/bin/wget ]; then
 		su tc -c "tce-load -wi wget"
 	else
 		echo
-		perr "ERROR: wget is not available, abort"
+		perr "ERROR: real wget is not available, abort"
 		echo
 		realexit 1
 	fi

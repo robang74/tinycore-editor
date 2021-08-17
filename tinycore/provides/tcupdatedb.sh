@@ -31,6 +31,29 @@ function perr() {
 	echo -e "\e[1;31m$@\e[0m"
 }
 
+function download() {
+	rc=1
+	opt=-c
+	if [ "$1" == "-ne" ]; then
+		opt=
+		rc=0
+		shift
+	fi
+	if [ "$2" == "" ]; then
+		set -- $1 $(basename $1)
+	fi
+	if which wget >/dev/null; then
+		if ! wget --tries=1 $opt $1 -O $2 2>&1; then
+			return $rc
+		fi
+	else
+		echo
+		perr "ERROR: wget is not available, abort"
+		echo
+		realexit 1
+	fi
+}
+
 ###############################################################################
 
 set -e
@@ -75,7 +98,8 @@ if [ -e $datafile.gz ]; then
 	done
 fi
 
-wget -c $tcrepo/$tczall/provides.db
+download -ne $tcrepo/$tczall/provides.db.gz
+gunzip provides.db.gz
 awk -v VER=":TC$TC" 'BEGIN {FS="\n";OFS=";";RS=""} {$1=$1 VER; print}' provides.db > $datafile
 rm -f provides.db
 gzip -9f $datafile
