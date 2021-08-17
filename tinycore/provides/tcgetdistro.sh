@@ -155,20 +155,6 @@ for i in $deps; do
 	i="$i.dep"
 	download -ne $tcrepo/$tczall/$i $i
 done
-dep=1
-while [ "$dep" == "1" ]; do
-	dep=0
-	for i in $(cat *.tcz.dep); do
-		if [ ! -e $i ]; then
-			info "Downloading dependency $i..."
-			echo
-			download $tcrepo/$tczall/$i $i
-			i="$i.dep"
-			download -ne $tcrepo/$tczall/$i $i
-			dep=1
-		fi
-	done
-done
 cd ..
 if [ "$SUDO_USER" != "" ]; then
 	chownuser tcz

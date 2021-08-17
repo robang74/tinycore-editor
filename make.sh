@@ -207,6 +207,8 @@ function tccopyall() {
 	fi
 	mkdir -p $tczdir
 	for i in $(get_tczlist_full); do
+		i=${i/.tcz/}.tcz
+		i=${i/KERNEL/$KERN-tinycore$ARCH}
 		cp -f tinycore/tcz/{$i,$i.dep} $tczdir
 	done
 	echo -e "\ttransfer tinycore/tcz/{selected *.tcz,*tcz.dep} -> /$tczdir/"
