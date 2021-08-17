@@ -25,7 +25,7 @@ cd $mntdir
 if [ "$1" == "back" -o "$1" == "reverse" ]; then
 	if [ -d tce ]; then
 		mkdir -p tcz
-		mv -f $optional/*.tcz tcz
+		mv -f $optional/*.tcz* tcz
 		if [ "$1" == "reverse" ]; then
 			rm -rf tce
 			mkdir -p /tmp/tce
@@ -42,7 +42,7 @@ fi
 
 mkdir -p $optional
 ls -1 tcz/*.tcz 2>/dev/null && \
-	mv -f tcz/*.tcz $optional
+	mv -f tcz/*.tcz* $optional
 cd $optional
 ls -1 *.tcz >../onboot.lst 2>/dev/null
 rm -f /etc/sysconfig/tcedir
