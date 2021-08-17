@@ -31,26 +31,6 @@ function perr() {
 	echo -e "\e[1;31m$@\e[0m"
 }
 
-function download() {
-	rc=1
-	opt=-c
-	if [ "$1" == "-ne" ]; then
-		opt=
-		rc=0
-		shift
-	fi
-	if which wget >/dev/null; then
-		if ! wget --tries=1 $opt $1 -O $2 2>&1; then
-			return $rc
-		fi
-	else
-		echo
-		perr "ERROR: no wget is installed, abort"
-		echo
-		realexit 1
-	fi
-}
-
 ###############################################################################
 
 if [ "$1" == "" ]; then
@@ -85,31 +65,28 @@ warn "Architecture: x86 $tcsize bit"
 warn "Version: $TC.x"
 echo
 
-if ! which curl >/dev/null; then
-	if which tce-load >/dev/null; then
-		su tc -c "tce-load -wi wget"
-	fi
+dbfile="tc$TC-$tcsize-deps.db.gz"
+
+if [ ! -e $dbfile ]; then
+	echo
+	perr "ERROR: $dbfile does not exist, use tcupdatedb.sh"
+	echo
+	realexit 1
 fi
 
-for i in "$@"; do
+for i in $@; do
 	info "Checking $i ..."
 	if ! echo $i | grep -qe "\.tcz$"; then
 		i="$i.tcz"
 	fi
-	rm -f /tmp/$i.dep
-	download -ne $tcrepo/$tczall/$i.dep /tmp/$i.dep
-	deps=$(cat /tmp/$i.dep 2>/dev/null || true)
-	for j in $deps; do
-		download -ne $tcrepo/$tczall/$j.dep /tmp/$j.dep
-		deps+=$(cat /tmp/$i.dep)
-	done
-	deps=$(echo "$deps" | sort | uniq)
-	deps=$(echo "$deps" | tr \\n ' ')
-	echo
-	warn "package: $i"
-	warn "dependecies: $deps"
-	echo
+	if ! zcat $dbfile | grep -e "^$i:"; then
+		echo
+		perr "ERROR: $i is not present in database, abort"
+		echo
+		realexit 1
+	fi
 done
+echo
 comp "$(basename $0) completed successfully"
 echo
 realexit 0
