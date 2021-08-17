@@ -44,7 +44,8 @@ copylist="
 tinycore/tcz:
 tinycore/flags:
 tinycore/tinycore.conf:provides/
-tinycore/provides/tc[udp]*.sh:provides/
+tinycore/provides/tc[udpm]*.sh:provides/
+tinycore/provides/tc*deps.db.gz:provides/
 tinycore/changes/afterboot.sh:
 tinycore/changes/{*.sh,*.tgz}:custom/
 tinycore/changes/syslinux.cfg:boot/syslinux/
@@ -321,6 +322,22 @@ while [ -e tinycore/tinycore.conf ]; do
 			exit 1
 		fi
 	done
+	cd tinycore/tcz
+	for i in *.tcz; do
+		deps=$(../provides/tcdepends.sh $i | grep -e "^$i:" | cut -d: -f2)
+		for j in $deps; do
+			if ! echo $j | grep -qe "\.tcz$"; then
+				j="$j.tcz"
+			fi
+			if [ ! -e $j ]; then
+				echo
+				perr "ERROR: $i missing $j in tcz, abort"
+				echo
+				exit 1
+			fi
+		done
+	done
+	cd - >/dev/null
 	break
 done
 

@@ -56,8 +56,6 @@ else
 	realexit 1
 fi
 
-cd - >/dev/null
-
 echo
 warn "Working folder: $PWD"
 warn "Config files: tinycore.conf"
