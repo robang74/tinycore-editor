@@ -89,6 +89,9 @@ source tinycore.conf
 set +x
 tczlist=$(gettczlist)
 set -x
+if [ "$tczlist" == "ERROR" ]; then
+	realexit 1
+fi
 cd - >/dev/null
 
 if [ "$1" != "quiet" ]; then

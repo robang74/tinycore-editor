@@ -295,13 +295,17 @@ while [ -e tinycore/tinycore.conf ]; do
 
 	cd tinycore
 	source tinycore.conf
-	tczlist=$(gettczlist)
-	cd - >/dev/null
-
 	echo
 	warn "Config files: tinycore/tinycore.conf"
 	warn "Architecture: x86 $tcsize bit"
 	warn "Version: $TC.x"
+
+	tczlist=$(gettczlist)
+	if [ "$tczlist" == "ERROR" ]; then
+		exit 1
+	fi
+	cd - >/dev/null
+
 	for i in $syslist; do
 		if [ ! -e tinycore/$i ]; then
 			echo
@@ -324,8 +328,7 @@ while [ -e tinycore/tinycore.conf ]; do
 	done
 	cd tinycore/tcz
 	for i in *.tcz; do
-		deps=$(../provides/tcdepends.sh $i | grep -e "^$i:" | cut -d: -f2)
-		for j in $deps; do
+		for j in $(cat $i.dep); do
 			if ! echo $j | grep -qe "\.tcz$"; then
 				j="$j.tcz"
 			fi
