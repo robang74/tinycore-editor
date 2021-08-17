@@ -29,12 +29,24 @@ function devdir() {
 	sed -ne "s,^$1 \([^ ]*\) .*,\1,p" /proc/mounts | head -n1
 }
 
+function rotating() {
+	while true; do
+		printf "%c\b" '\'; sleep $1
+		printf "%c\b" '|'; sleep $1
+		printf "%c\b" '/'; sleep $1
+		printf "%c\b" '-'; sleep $1
+	done
+}
+
 function tceload() {
 	test -z "$1" && return 1
+	rotating 0.1 &
+	pid=$!
 	su tc -c "tce-load -i $*" | \
 		grep -v "is already installed!" | \
 			tr \\n ' ' | grep .. || \
 				echo "no extra tcz!"
+	kill $pid
 }
 
 ###############################################################################
@@ -128,10 +140,6 @@ ldconfig
 . /etc/os-release
 echo "$PRETTY_NAME" >/etc/issue
 
-#if [ ! -x /bin/bash ]; then
-#	echo "ash \"\$@\"" >/bin/bash
-#	chmod a+x /bin/bash
-#fi
 gpg=$(which gpg2)
 gpg=${gpg%2}
 test -n "$gpg" && ln -sf gpg2 "$gpg"
