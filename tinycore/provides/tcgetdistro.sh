@@ -50,7 +50,7 @@ function download() {
 		fi
 	else
 		echo
-		perr "ERROR: no wget is installed, abort"
+		perr "ERROR: wget is not available, abort"
 		echo
 		realexit 1
 	fi
@@ -99,9 +99,14 @@ if [ "$1" != "quiet" ]; then
 	warn "Version: $TC.x"
 fi
 
-if ! which curl >/dev/null; then
+if ! which wget >/dev/null; then
 	if which tce-load >/dev/null; then
 		su tc -c "tce-load -wi wget"
+	else
+		echo
+		perr "ERROR: wget is not available, abort"
+		echo
+		realexit 1
 	fi
 fi
 

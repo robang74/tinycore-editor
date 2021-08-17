@@ -45,7 +45,7 @@ function download() {
 		fi
 	else
 		echo
-		perr "ERROR: no wget is installed, abort"
+		perr "ERROR: wget is not available, abort"
 		echo
 		realexit 1
 	fi
@@ -85,9 +85,14 @@ warn "Architecture: x86 $tcsize bit"
 warn "Version: $TC.x"
 echo
 
-if ! which curl >/dev/null; then
+if ! which wget >/dev/null; then
 	if which tce-load >/dev/null; then
 		su tc -c "tce-load -wi wget"
+	else
+		echo
+		perr "ERROR: wget is not available, abort"
+		echo
+		realexit 1
 	fi
 fi
 

@@ -98,7 +98,7 @@ function download() {
 		fi
 	else
 		echo
-		perr "ERROR: no wget is installed, abort"
+		perr "ERROR: wget is not available, abort"
 		echo
 		realexit 1
 	fi
