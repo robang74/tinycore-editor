@@ -35,10 +35,13 @@ for i in *.tcz; do
 	if [ "$algo" == " 5a58" -o "$algo" == " 0000" -o "$algo" == " 1b78" ]; then
 		continue
 	fi
-	info "Recompressing $i ..."
+	info "Recompressing $i (algo:$algo)..."
 	mount $i tmp
 	mksquashfs tmp $i.xz -comp xz -Xbcj x86 >/dev/null
-	umount tmp
+	for k in 1 2 3 4 5; do
+		umount tmp 2>/dev/null && break
+		sleep 1
+	done || umount tmp
 	mv -f $i.xz $i
 done
 rmdir tmp
