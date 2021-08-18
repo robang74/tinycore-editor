@@ -32,7 +32,10 @@ function perr() {
 }
 
 function chownuser() {
-	guid=$(grep -e "^$SUDO_USER:" /etc/passwd | cut -d: -f3-4)
+	declare user guid
+	user=$SUDO_USER
+	user=${user:-$USER}
+	guid=$(grep -e "^$user:" /etc/passwd | cut -d: -f3-4)
 	chown -R $guid "$@"
 }
 
@@ -113,7 +116,9 @@ fi
 if which tce-load >/dev/null; then
 	if [ ! -x /usr/local/bin/wget ]; then
 		su tc -c "tce-load -wi wget"
-	else
+	fi
+else
+	if ! which wget >/dev/null; then
 		echo
 		perr "ERROR: real wget is not available, abort"
 		echo

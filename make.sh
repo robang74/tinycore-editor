@@ -31,6 +31,7 @@ qemu
 ssh-root
 ssh-copy
 ssh-end
+ssh
 qemu-stop
 close
 clean
@@ -73,6 +74,7 @@ function usage() {
 	echo -e "\t\t ssh-copy [8GB] [\$ipaddr]"
 	echo -e "\t\t ssh-root [\$ipaddr]"
 	echo -e "\t\t ssh-end [8GB]"
+	echo -e "\t\t ssh"
 	echo -e "\t\t qemu-stop"
 	echo -e "\t\t close [8GB]"
 	echo -e "\t\t clean [8GB|all]"
@@ -263,9 +265,13 @@ function storage_32GB_create()
 }
 
 function chownuser() {
-	guid=$(grep -e "^$SUDO_USER:" /etc/passwd | cut -d: -f3-4)
+	declare user guid
+	user=$SUDO_USER
+	user=${user:-$USER}
+	guid=$(grep -e "^$user:" /etc/passwd | cut -d: -f3-4)
 	chown -R $guid "$@"
 }
+
 
 function info() {
 	echo -e "\e[1;36m$@\e[0m"
@@ -658,13 +664,23 @@ fi
 
 if [ "$param" == "ssh-root" ]; then
 	tdone=1
-	info "executing: ssh $tcip"
+	info "executing: ssh-root $tcip"
 	sshfingerprintclean
 	killsshafterqemu >/dev/null 2>&1 &
 	tcrootunlock
 	set +e
 	myssh 0 root
 	info "executing: ssh-root $tcip completed"
+fi
+
+if [ "$param" == "ssh" ]; then
+	tdone=1
+	info "executing: ssh $tcip"
+	sshfingerprintclean
+	killsshafterqemu >/dev/null 2>&1 &
+	set +e
+	myssh 0 tc
+	info "executing: ssh $tcip completed"
 fi
 
 if [ "$param" == "ssh-copy" -a "$option" == "8GB" ]; then
@@ -788,6 +804,13 @@ if [ "$param" == "clean" ]; then
 		rm -f tcl-8GB-usb.disk storage-32GB.disk
 	fi
 	rm -rf $tcldir tclinux.iso
+fi
+
+if [ "$param" == "iso" -o "$param" == "image" ]; then
+	if [ ! -x busybox/src/rootfs/bin/busybox ]; then
+		warn "SUGGEST: run ./make.sh busybox redo $param"
+		echo
+	fi
 fi
 
 trap - EXIT

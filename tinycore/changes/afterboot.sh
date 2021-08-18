@@ -117,7 +117,7 @@ fi
 infotime "Mounting local drives in read only..." ##############################
 
 for i in a b c d; do
-	for j in 1 2; do
+	for j in 1 2 3 4; do
 		if grep -qe "^/dev/sd$i$j " /proc/mounts; then
 			mount -o remount,ro /mnt/sd$i$j
 		else

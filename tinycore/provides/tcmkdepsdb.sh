@@ -87,7 +87,9 @@ echo
 if which tce-load >/dev/null; then
 	if [ ! -x /usr/local/bin/wget ]; then
 		su tc -c "tce-load -wi wget"
-	else
+	fi
+else
+	if ! which wget >/dev/null; then
 		echo
 		perr "ERROR: real wget is not available, abort"
 		echo

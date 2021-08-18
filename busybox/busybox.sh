@@ -70,7 +70,10 @@ function setconfig() {
 }
 
 function chownuser() {
-	guid=$(grep -e "^$SUDO_USER:" /etc/passwd | cut -d: -f3-4)
+	declare user guid
+	user=$SUDO_USER
+	user=${user:-$USER}
+	guid=$(grep -e "^$user:" /etc/passwd | cut -d: -f3-4)
 	chown -R $guid "$@"
 }
 
@@ -184,11 +187,11 @@ if [ "$1" == "all" ]; then
 	cd $mydir
 	info "executing all..."
 	./busybox.sh open
-	./busybox.sh update
+	./busybox.sh install
 #	if ! ./busybox.sh update; then
 #		./busybox.sh compile
+#		./busybox.sh install
 #	fi | grep -v "compile first"
-#	./busybox.sh install
 fi
 
 if [ "$1" == "checklib" ]; then
@@ -295,10 +298,9 @@ if [ "$1" == "compile" ]; then
 	setconfig nosuid
 	usermake oldconfig
 	warn "compile nosuid"
-	usermake install
-	mv _install rootfs
+	usermake
 
-	dd if=rootfs/bin/busybox >/dev/null
+	dd if=busybox >/dev/null
 	cd ..
 fi
 
@@ -307,8 +309,15 @@ if [ "$1" == "install" ]; then
 	cd $mydir
 	info "executing install..."
 	checkfordir src open
+
 	cd src
-	checkfordir rootfs compile
+	rm -rf _install rootfs
+	if [ ! -e .config.old ]; then
+		usermake oldconfig
+	fi
+	usermake install
+	mv _install rootfs
+
 	rtdir=$($tcdir/rootfs.sh open)
 	echo "$rtdir"
 	rtdir=$(echo "$rtdir" | sed -ne "s,^opened folder: \(.*\),\1,p")
@@ -398,12 +407,11 @@ if [ "$1" == "update" ]; then
 	warn "compile with: $compile"
 	checkconfig $ctype
 	rm -rf _install rootfs
-
-	usermake install
-	mv _install rootfs
-	ctype=${ctype/nosuid/}
-	ctype=${ctype/suid/.suid}
-	dd if=busybox of=rootfs/bin/busybox$ctype
+	if [ ! -e .config.old ]; then
+		usermake oldconfig
+	fi
+	usermake
+	dd if=busybox >/dev/null
 	cd ..
 	$mydir/$myname install quiet
 fi

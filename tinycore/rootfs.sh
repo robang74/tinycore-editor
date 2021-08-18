@@ -17,9 +17,16 @@ function errexit() {
 }
 
 function chownuser() {
-	guid=$(grep -e "^$SUDO_USER:" /etc/passwd | cut -d: -f3-4)
+	user=$SUDO_USER
+	user=${user:-$USER}
+	guid=$(grep -e "^$user:" /etc/passwd | cut -d: -f3-4)
 	chown -R $guid "$@"
 }
+
+###############################################################################
+
+export PATH=/home/tc/.local/bin:/usr/local/sbin:/usr/local/bin
+export PATH=$PATH:/apps/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
 ok=0
 if [ "$USER" != "root" ]; then
