@@ -1,5 +1,5 @@
 #
-# Autore: Roberto A. Foglietta <roberto.foglietta@altran.it>
+# Author: Roberto A. Foglietta
 #
 
  Read tinycore/readme.txt to build a modified Tiny Core Linux

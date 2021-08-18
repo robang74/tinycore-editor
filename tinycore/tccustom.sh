@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Autore: Roberto A. Foglietta <roberto.foglietta@altran.it>
+# Author: Roberto A. Foglietta
 #
 
 tmpdir=tccustom.tmp

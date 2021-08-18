@@ -1,6 +1,6 @@
 #!/bin/ash
 #
-# Autore: Roberto A. Foglietta <roberto.foglietta@altran.it>
+# Author: Roberto A. Foglietta
 #
 
 export PATH=/home/tc/.local/bin:/usr/local/sbin:/usr/local/bin

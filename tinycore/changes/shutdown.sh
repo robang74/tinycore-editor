@@ -1,6 +1,6 @@
 #!/bin/ash
 #
-# Autore: Roberto A. Foglietta <roberto.foglietta@altran.it>
+# Author: Roberto A. Foglietta
 #
 
 if [ "$USER" != "root" ]; then
