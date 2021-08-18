@@ -168,7 +168,7 @@ if [ "$1" == "download" ]; then
 	if which tce-load >/dev/null; then
 		tczlist="wget patch make linux-5.10_api_headers"
 		tczlist+=" gcc glibc_base-dev libtirpc-dev"
-		tczlist+=" glibc_add_lib advcomp"
+		tczlist+=" glibc_add_lib advcomp squashfs-tools"
 		su - tc -c "tce-load -wi $tczlist"
 	fi | grep -ve "already installed" | tr \\n ' '
 	echo

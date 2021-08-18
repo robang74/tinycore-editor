@@ -27,6 +27,7 @@ function chownuser() {
 	chown -R $guid "$@"
 }
 
+trap "umount tmp 2>/dev/null" EXIT
 set -e
 mkdir -p tmp
 for i in *.tcz; do

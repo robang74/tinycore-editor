@@ -2,7 +2,7 @@
 # (c) Robert Shingledecker 2004-2010
 # tcz concept and code from Jason Williams
 #
-echo "Running: $0 $@"
+
 . /etc/init.d/tc-functions
 useBusybox
 runasuser "$@"
