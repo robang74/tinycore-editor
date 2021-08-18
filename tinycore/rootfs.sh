@@ -54,6 +54,8 @@ if [ "$1" == "open" -o "$1" == "update" ]; then
 	echo -n "open data: "
 	zcat ../rootfs.gz | sudo cpio -i -H newc -d 2>&1
 	cat ../changes/rcS > etc/init.d/rcS
+	cat ../changes/tce-load > usr/bin/tce-load
+	cat ../changes/tc-functions > etc/init.d/tc-functions
 	test -e lib64 || ln -sf lib lib64
 	echo "opened folder: $tmpdir"
 	cd ..
