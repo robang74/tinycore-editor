@@ -78,7 +78,7 @@ function chownuser() {
 }
 
 function usermake() {
-	nproc=$(nproc 2>/dev/null)
+	nproc=$(nproc 2>/dev/null || true)
 	nproc=${nproc:-2}
 	su $SUDO_USER bash -c "make -j$nproc $1"
 }
