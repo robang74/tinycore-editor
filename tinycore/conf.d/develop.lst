@@ -48,3 +48,5 @@ libzstd.tcz
 lzo.tcz
 liblzma.tcz
 squashfs-tools.tcz
+ncursesw-dev.tcz
+ncursesw.tcz
