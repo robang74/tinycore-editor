@@ -12,9 +12,15 @@
 ###############################################################################
 
 	./make.sh download
-	./make.sh busybox
+[1]	./make.sh busybox 
 	./make.sh qemu-test iso
 	./make.sh clean image 8GB qemu 8GB ssh
+
+[1] if your system libraries are newer than those included into TinyCore Linux
+    the virtual machine will fail to boot. In such a case remove the rootfs.gz
+    and repeat the sequence from the start without busybox start. Then you can
+    create a rootfs.gz including the customised busybox enabling develop git 
+    in tincore.conf and using the virtual machine for the building.
 
 ###############################################################################
 			HOW TO DEAL WITH THE SUITE
