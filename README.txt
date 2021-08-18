@@ -14,6 +14,7 @@
 	./make.sh download
 	./make.sh busybox
 	./make.sh qemu-test iso
+	./make.sh clean image 8GB qemu 8GB ssh
 
 ###############################################################################
 			HOW TO DEAL WITH THE SUITE

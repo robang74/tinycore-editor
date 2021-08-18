@@ -273,6 +273,15 @@ function chownuser() {
 	chown -R $guid "$@"
 }
 
+function isatarget() {
+	declare i
+	for i in $targets; do
+		if [ "$1" == "$i" ]; then
+			return 0
+		fi
+	done
+	return 1
+}
 
 function info() {
 	echo -e "\e[1;36m$@\e[0m"
@@ -305,6 +314,28 @@ if [ "$USER" != "root" ]; then
 	fi 2>/dev/null
 	sudo $0 "$@"
 	exit $?
+fi
+
+if [ "$1" != "--real" ]; then
+	if isatarget $1; then
+		options="$1"
+		shift 
+		while ! isatarget $1; do
+			test "$1" == "" && break
+			options+=" $1"
+			shift
+		done
+		$0 --real $options || realexit $?
+		rc=$?
+		test "$1" == "" && realexit $rc
+		$0 $@
+		realexit $?
+	else
+		usage
+		realexit 1
+	fi
+else
+	shift
 fi
 
 param="$1"
