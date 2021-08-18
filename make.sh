@@ -4,9 +4,8 @@
 #
 
 ifnm=eth0
-myip=10.0.2.15
 brip=10.0.2.16
-tcip=10.0.2.17
+tcip=10.0.2.18
 netm=24
 qemumem=256
 qemuncpu=$[($(nproc)+1)/2]
@@ -22,6 +21,8 @@ tcldir="tcldisk"
 if [ -e make.conf ]; then
 	source make.conf
 fi
+
+myip=$(ifconfig $ifnm | sed -ne "s,.*inet \([^ ]*\) .*,\\1,p")
 
 targets="
 open
@@ -530,6 +531,7 @@ if [ "$param" == "image" -a "$option" != "8GB" ]; then
 	tccopyall
 	sudo dd if=/dev/zero of=$tcldir/zero >/dev/null 2>&1 || true
 	sync; sudo rm -f $tcldir/zero $tcldir/FSCK????.REC; sync
+	du -ks $tcldir
 	k=0; sleep 1
 	while ! sudo umount $tcldir; do
 		[[ $k -lt 5 ]]
