@@ -16,7 +16,7 @@
 	./make.sh qemu-test iso
 	./make.sh clean image 8GB qemu 8GB ssh
 
-[1] if your system libraries are newer than those included into TinyCore Linux
+[1] if your system libraries are incompatible with those included into TinyCore
     the virtual machine will fail to boot. In such a case remove the rootfs.gz
     and repeat the sequence from the start without busybox start. Then you can
     create a rootfs.gz including the customised busybox enabling develop git 

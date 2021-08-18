@@ -350,6 +350,18 @@ if [ "$1" == "install" ]; then
 	fi
 	cd - >/dev/null
 
+	libs=$(ldd bin/busybox | sed -ne "s,.* => \(/[^ ]*\) .*,\\1,p")
+	libcrypt=$(echo "$libs" | grep "libcrypt.so.1")
+	libcrypto=$(readlink $libcrypt)
+	echo; ldd bin/busybox
+	if echo "$libcrypto" | grep -q "libcrypt.so.1"; then
+		echo
+		warn "WARNING: libcrypt.so.1 host/guest mismatch, trying to fix"
+		echo
+		cp -f $(dirname $libcrypt)/$libcrypto $tcdir/$rtdir/lib
+		ln -sf $libcrypto $tcdir/$rtdir/lib/libcrypt-2.*.so
+	fi
+
 	$tcdir/rootfs.sh close
 	chownuser .	
 	cd ../..	
