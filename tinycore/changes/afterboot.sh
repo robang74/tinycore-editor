@@ -1,6 +1,6 @@
 #!/bin/ash
 #
-# Autore: Roberto A. Foglietta <roberto.foglietta@altran.it>
+# Author: Roberto A. Foglietta
 #
 
 function info() {
@@ -173,13 +173,14 @@ fi
 
 infotime "Upraising network and VLANs..." #####################################
 
+dhctmo=7
 if which dhclient >/dev/null; then
 	echo -e "\tusing dhclient..."
-	dhclient="timeout 5 dhclient"
+	dhclient="timeout $dhctmo dhclient"
 	mkdir -p /var/db
 else
 	echo -e "\tusing udhcpc..."
-	dhclient="udhcpc -T1 -t5 -ni"
+	dhclient="udhcpc -T1 -t$dhctmo -ni"
 fi 2>/dev/null
 
 if ! ifconfig eth0 | grep -q "inet "; then
