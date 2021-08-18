@@ -369,10 +369,13 @@ fi
 
 if [ "$1" == "editconfig" ]; then
 	done=1
-	ln -sf /tmp/tcloop/ncursesw/usr/local/lib/* /usr/lib
-	ln -sf /tmp/tcloop/ncursesw-dev/usr/local/lib/* /usr/lib
-	ln -sf /tmp/tcloop/ncursesw-dev/usr/local/bin/* /usr/bin
-	ln -sf /tmp/tcloop/ncursesw-dev/usr/local/include/* /usr/include
+	cursdir=/tmp/tcloop/ncursesw
+	if [ -d $cursdir -a -d ${cursdir}-dev ]; then
+		ln -sf $cursdir/usr/local/lib/* /usr/lib
+		ln -sf ${cursdir}-dev/usr/local/lib/* /usr/lib
+		ln -sf ${cursdir}-dev/usr/local/bin/* /usr/bin
+		ln -sf ${cursdir}-dev/usr/local/include/* /usr/include
+	fi
 	cd $mydir
 	info "executing editconfig..."
 	checkfordir src open
