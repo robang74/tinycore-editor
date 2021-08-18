@@ -27,7 +27,7 @@ function chownuser() {
 	chown -R $guid "$@"
 }
 
-trap "umount tmp 2>/dev/null" EXIT
+trap "umount tmp 2>/dev/null || true" EXIT
 set -e
 mkdir -p tmp
 for i in *.tcz; do
@@ -45,7 +45,8 @@ for i in *.tcz; do
 	mv -f $i.xz $i
 done
 rmdir tmp
-if [ "$USER" == "root" ]; then
+if [ "$SUDO_USER" != "" ]; then
 	chownuser *.tcz
 fi
+trap -- EXIT
 
