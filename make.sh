@@ -663,7 +663,8 @@ if [ "$param" == "qemu-test" ]; then
 			$0 image
 		fi
 	fi
-	$0 image $option && $0 qemu-init && \
+	option=${option:-image}
+	$0 $option && $0 qemu-init && \
 		$0 qemu $option
 	test "$?" != "0" && realexit 1
 	$0 ssh-root
