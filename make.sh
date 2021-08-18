@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Autore: Roberto A. Foglietta <roberto.foglietta@altran.it>
+# Author: Roberto A. Foglietta
 #
 
 ifnm=eth0
@@ -135,7 +135,7 @@ function myscp() {
 }
 
 function waitforssh() {
-	info "executing: $FUNCNAME"
+	info "make.sh executing: $FUNCNAME"
 	declare -i sec=$1
 	sleep $sec
 	while ! myssh 1 tc "whoami" | grep -qw "tc"; do
@@ -352,7 +352,7 @@ shift
 syslist="rootfs.gz modules.gz vmlinuz"
 trglist="ssh-copy image iso"
 
-while [ -e tinycore/tinycore.conf ]; do
+while true; do
 	for i in $trglist; do
 		if [ "$param" == "$i" -o "$param" == "" ]; then
 			print=1
@@ -362,6 +362,12 @@ while [ -e tinycore/tinycore.conf ]; do
 	test "$print" != "1" && break
 
 	cd tinycore
+	if [ ! -r tinycore.conf ]; then
+		echo
+		perr "ERROR: tinycore/tinycore.conf is not readable, abort"
+		echo
+		realexit 1
+	fi
 	source tinycore.conf
 	echo
 	warn "Config files: tinycore/tinycore.conf"
@@ -407,6 +413,9 @@ while [ -e tinycore/tinycore.conf ]; do
 			fi
 		done
 	done
+	if [ -x ../tczconvxz.sh ]; then
+		../tczconvxz.sh
+	fi
 	cd - >/dev/null
 	break
 done
@@ -479,20 +488,20 @@ tdone=0
 
 if [ "$param" == "download" ]; then
 	tdone=1
-	info "executing: download"
+	info "make.sh executing: download"
 	tinycore/provides/tcgetdistro.sh
 	busybox/busybox.sh download
 fi
 
 if [ "$param" == "busybox" ]; then
 	tdone=1
-	info "executing: busybox"
+	info "make.sh executing: busybox"
 	busybox/busybox.sh all
 fi
 
 if [ "$param" == "open" -a "$option" != "8GB" ]; then
 	tdone=1
-	info "executing: open"
+	info "make.sh executing: open"
 	if [ -e tcl-usb.disk ]; then
 		warning="SUGGEST: run '$myname clean' to remove existing disk image"
 		exit 1
@@ -505,7 +514,7 @@ fi
 
 if [ "$param" == "open" -a "$option" == "8GB" ]; then
 	tdone=1
-	info "executing: open 8GB"
+	info "make.sh executing: open 8GB"
 	if [ -e tcl-8GB-usb.disk ]; then
 		warning="SUGGEST: run '$myname clean 8GB' to remove existing disk images"
 		exit 1
@@ -518,7 +527,7 @@ fi
 
 if [ "$param" == "iso" ]; then
 	tdone=1
-	info "executing: iso"
+	info "make.sh executing: iso"
 	rm -rf $tcldir
 	mkdir -p $tcldir
 	tar xzf tcl-boot-isolinux.tgz -C $tcldir
@@ -534,7 +543,7 @@ fi
 
 if [ "$param" == "image" -a "$option" != "8GB" ]; then
 	tdone=1
-	info "executing: image"
+	info "make.sh executing: image"
 	if [ -e tcl-usb.disk ]; then
 		warning="SUGGEST: run '$myname clean' to remove existing disk images"
 		exit 1
@@ -581,7 +590,7 @@ fi
 
 if [ "$param" == "image" -a "$option" == "8GB" ]; then
 	tdone=1
-	info "executing: image 8GB"
+	info "make.sh executing: image 8GB"
 	if [ ! -e tcl-usb.disk.gz -a ! -e tcl-usb.disk ]; then
 		$0 image
 	else
@@ -615,7 +624,7 @@ fi
 stayalive=no
 if [ "$param" == "qemu-init" ]; then
 	tdone=1
-	info "executing: qemu-init"
+	info "make.sh executing: qemu-init"
 	if ! ifconfig $ifnm | grep -qe "inet .*$myip"; then
 		echo
 		perr "ERROR: network configuration is wrong, edit make.conf"
@@ -661,7 +670,7 @@ fi
 
 if [ "$param" == "qemu" ]; then
 	tdone=1
-	info "executing: qemu $option"
+	info "make.sh executing: qemu $option"
 	warning="SUGGEST: target open or image to deploy the disk images"
 	if [ "$option" == "iso" ]; then
 		test -e tclinux.iso || $0 iso
@@ -680,7 +689,7 @@ if [ "$param" == "qemu" ]; then
 		exit 1
 	fi
 	if [ "$option" == "8GB" ]; then
-		info "executing: qemu will boot from the 8GB image"
+		info "make.sh executing: qemu will boot from the 8GB image"
 		drvboot=$drvi8GB
 	fi
 	storage_32GB_create
@@ -693,35 +702,35 @@ if [ "$param" == "qemu" ]; then
 			-net bridge,br=brkvm -drive $drvboot -device sdhci-pci \
 			-device sdhci-pci -device sd-card,drive=sd -drive $drvdata &
 	fi
-	info "executing: waiting for the qemu system start-up"
+	info "make.sh executing: waiting for the qemu system start-up"
 	sshfingerprintclean
 	waitforssh 1
 fi
 
 if [ "$param" == "ssh-root" ]; then
 	tdone=1
-	info "executing: ssh-root $tcip"
+	info "make.sh executing: ssh-root $tcip"
 	sshfingerprintclean
 	killsshafterqemu >/dev/null 2>&1 &
 	tcrootunlock
 	set +e
 	myssh 0 root
-	info "executing: ssh-root $tcip completed"
+	info "make.sh executing: ssh-root $tcip completed"
 fi
 
 if [ "$param" == "ssh" ]; then
 	tdone=1
-	info "executing: ssh $tcip"
+	info "make.sh executing: ssh $tcip"
 	sshfingerprintclean
 	killsshafterqemu >/dev/null 2>&1 &
 	set +e
 	myssh 0 tc
-	info "executing: ssh $tcip completed"
+	info "make.sh executing: ssh $tcip completed"
 fi
 
 if [ "$param" == "ssh-copy" -a "$option" == "8GB" ]; then
 	tdone=1
-	info "executing: ssh-copy 8GB $tcip"
+	info "make.sh executing: ssh-copy 8GB $tcip"
 	if [ ! -d ntfs ]; then
 		warning="SUGGEST: create ntfs folder to copy file in 8GB, abort"
 		exit 1
@@ -737,7 +746,7 @@ fi
 
 if [ "$param" == "ssh-copy" -a "$option" != "8GB" ]; then
 	tdone=1
-	info "executing: ssh-copy $tcip"
+	info "make.sh executing: ssh-copy $tcip"
 	if [ -e "$tcldir" ]; then
 		warning="SUGGEST: run '$myname clean' to remove existing disk folder"
 		exit 1
@@ -760,7 +769,7 @@ fi
 
 if [ "$param" == "ssh-end" ]; then
 	tdone=1
-	info "executing: ssh-end $option"
+	info "make.sh executing: ssh-end $option"
 	sshfingerprintclean
 	tcrootunlock
 	sshgettcdir
@@ -770,7 +779,7 @@ if [ "$param" == "ssh-end" ]; then
 	myssh 0 root "unlock.sh;
 dd if=/dev/zero of=$tcdir/zero; 
 sync; rm -f $tcdir/zero; shutdown"
-	info "executing: waiting for the qemu system shut down"
+	info "make.sh executing: waiting for the qemu system shut down"
 	k=0
 	sleep 1
 	while myssh 1 tc "whoami" >/dev/null 2>&1; do
@@ -788,7 +797,7 @@ fi
 
 if [ "$param" == "qemu-stop" ]; then
 	tdone=1
-	info "executing: qemu-stop"
+	info "make.sh executing: qemu-stop"
 	if pgrep qemu >/dev/null; then
 		warning="SUGGEST: qemu is just running, use it or kill it"
 		exit 1
@@ -806,7 +815,7 @@ fi
 if [ "$param" == "close" ]; then
 	nclosed=0
 	tdone=1
-	info "executing: close $option"
+	info "make.sh executing: close $option"
 	if [ -e tcl-usb.disk ]; then
 		gzip -9c tcl-usb.disk >tcl-usb.disk.gz
 		rm -f tcl-usb.disk
@@ -826,7 +835,7 @@ fi
 
 if [ "$param" == "clean" ]; then
 	tdone=1
-	info "executing: clean $option"
+	info "make.sh executing: clean $option"
 	while sudo umount $tcldir; do
 		true
 	done 2>/dev/null

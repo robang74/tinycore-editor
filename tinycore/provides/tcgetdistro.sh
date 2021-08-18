@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Autore: Roberto A. Foglietta <roberto.foglietta@altran.it>
+# Author: Roberto A. Foglietta
 #
 
 function realexit() {
@@ -48,6 +48,8 @@ function download() {
 		shift
 		test -e $2 && return 0
 	fi
+	info "Downloading $2 ..."
+	echo
 	if which wget >/dev/null; then
 		if ! wget --tries=1 $opt $1 -O $2 2>&1; then
 			return $rc
@@ -126,23 +128,9 @@ else
 	fi
 fi
 
-#if [ ! -e rootfs.gz ]; then
-	info "Downloading rootfs.gz..."
-	echo
-	download $tcrepo/$distro/rootfs$ARCH.gz rootfs.gz
-#fi
-
-#if [ ! -e vmlinuz ]; then
-	info "Downloading vmlinuz..."
-	echo
-	download $tcrepo/$distro/vmlinuz$ARCH vmlinuz
-#fi
-
-#if [ ! -e modules.gz ]; then
-	info "Downloading modules.gz..."
-	echo
-	download $tcrepo/$distro/modules$ARCH.gz modules.gz
-#fi
+download -ne $tcrepo/$distro/rootfs$ARCH.gz rootfs.gz
+download -ne $tcrepo/$distro/vmlinuz$ARCH vmlinuz
+download -ne $tcrepo/$distro/modules$ARCH.gz modules.gz
 
 if [ "$SUDO_USER" != "" ]; then
 	chownuser vmlinuz rootfs.gz modules.gz
@@ -154,16 +142,17 @@ cd tcz
 for i in $deps; do
 	i=${i/.tcz/}.tcz
 	i=${i/KERNEL/$KERN-tinycore$ARCH}
-	info "Downloading $i..."
-	echo
-	download $tcrepo/$tczall/$i $i
+	download -ne $tcrepo/$tczall/$i $i
 	i="$i.dep"
 	download -ne $tcrepo/$tczall/$i $i
 done
-cd ..
 if [ "$SUDO_USER" != "" ]; then
-	chownuser tcz
+	if [ -x ../tczconvxz.sh ]; then
+		../tczconvxz.sh
+	fi
+	chownuser .
 fi
+cd ..
 
 trap - EXIT
 echo
