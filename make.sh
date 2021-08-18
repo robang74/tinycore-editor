@@ -68,7 +68,7 @@ function usage() {
 	echo
 	echo -e "\t targets:"
 	echo -e "\t\t open [8GB]"
-	echo -e "\t\t image [8GB|iso]"
+	echo -e "\t\t image [8GB]"
 	echo -e "\t\t qemu-init"
 	echo -e "\t\t qemu-test [8GB|iso]"
 	echo -e "\t\t qemu [8GB|iso]"
@@ -325,6 +325,12 @@ if [ "$1" != "--real" ]; then
 			options+=" $1"
 			shift
 		done
+		if [ "$1" == "iso" ]; then
+			if echo "$options" | grep -q qemu; then
+				options+=" $1"
+				shift
+			fi
+		fi
 		$0 --real $options || realexit $?
 		rc=$?
 		test "$1" == "" && realexit $rc
@@ -439,9 +445,6 @@ if [ "$param" == "clean" -a "$option" == "all" ]; then
 	true
 elif [ "$param" == "qemu" -a "$option" == "iso" ]; then
 	true
-elif [ "$param" == "image" -a "$option" == "iso" ]; then
-	param=iso
-	option=
 elif [ "$param" == "qemu-test" -a "$option" == "iso" ]; then
 	true
 elif [ "$option" != "8GB" -a "$option" != "" ]; then
