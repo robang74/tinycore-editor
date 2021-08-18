@@ -1,5 +1,6 @@
 expat2.tcz
 openssl-1.1.1.tcz
 ca-certificates.tcz
+less.tcz
 curl.tcz
 git.tcz
