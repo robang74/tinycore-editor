@@ -354,12 +354,13 @@ if [ "$1" == "install" ]; then
 
 	if which tce-load >/dev/null; then
 		echo; ldd bin/busybox
-		libcrypto=$(realpath /lib/libcrypt.so.1)
+		libcrypt=$(realpath /lib/libcrypt.so.1)
+		libcrypto=$(basename $libcrypt)
 		if echo "$libcrypto" | grep -q "libcrypt.so.1"; then
 			echo
 			warn "WARNING: host libcrypt.so.1 inheritance, trying to fix"
 			echo
-			cp -f /lib/$libcrypto $tcdir/$rtdir/lib
+			cp -f $libcrypt $tcdir/$rtdir/lib
 			ln -sf $libcrypto $tcdir/$rtdir/lib/libcrypt-2.*.so
 		fi
 	else
