@@ -76,7 +76,7 @@ function usage() {
 	echo -e "\t\t ssh-copy [8GB] [\$ipaddr]"
 	echo -e "\t\t ssh-root [\$ipaddr]"
 	echo -e "\t\t ssh-end [8GB]"
-	echo -e "\t\t ssh"
+	echo -e "\t\t ssh [\$ipaddr]"
 	echo -e "\t\t qemu-stop"
 	echo -e "\t\t close [8GB]"
 	echo -e "\t\t clean [8GB|all]"
@@ -121,7 +121,12 @@ function myssh() {
 		exit 1
 	fi
 	shift 1
-	su -m $SUDO_USER -c "exec -a myssh timeout $tout sshpass -p $pass ssh -o StrictHostKeyChecking=no $user@$tcip \"$@\""
+	if [ "$1" == "" ]; then
+		if which luit >/dev/null; then
+			luit="luit -encoding ISO-8859-1"
+		fi
+	fi
+	su -m $SUDO_USER -c "exec -a myssh timeout $tout $luit sshpass -p $pass ssh -o StrictHostKeyChecking=no $user@$tcip \"$@\""
 }
 
 function myscp() {
@@ -440,7 +445,7 @@ if [ "$param" == "ssh-copy" -a "$option" == "8GB" ]; then
 		tcip=$1
 		shift
 	fi
-elif [ "$param" == "ssh-copy" -o  "$param" == "ssh-root" ]; then
+elif [ "$param" == "ssh-copy" -o "$param" == "ssh-root" -o "$param" == "ssh" ]; then
 	if isanipaddr $option; then
 		tcip=$option
 		option=""
