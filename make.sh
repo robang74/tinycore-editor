@@ -127,6 +127,9 @@ function myssh() {
 		fi
 	fi
 	su -m $SUDO_USER -c "exec -a myssh timeout $tout $luit sshpass -p $pass ssh -o StrictHostKeyChecking=no $user@$tcip \"$@\""
+	if [ "$1" == "" ]; then
+		reset
+	fi
 }
 
 function myscp() {
@@ -176,7 +179,8 @@ get_tczlist_full() {
 	for i in $tczlist; do
 		i=${i/.tcz/}.tcz
 		i=${i/KERNEL/$KERN-tinycore$ARCH}
-		deps+=" $i $(tcdepends.sh $i | grep -e "^$i:" | cut -d: -f2-)"
+		deps+=" $(tcdepends.sh $i | grep -e "^$i:" | cut -d: -f2-)"
+		deps+=" $(cat $1/$i.dep) $i"
 	done
 	for i in $deps; do echo $i; done | sort | uniq
 }
@@ -215,7 +219,8 @@ function tccopyall() {
 		tczdir=$tcldir/tcz
 	fi
 	mkdir -p $tczdir
-	for i in $(get_tczlist_full); do
+	tczlistfull=$(get_tczlist_full tinycore/tcz)
+	for i in $tczlistfull; do
 		i=${i/.tcz/}.tcz
 		i=${i/KERNEL/$KERN-tinycore$ARCH}
 		cp -f tinycore/tcz/{$i,$i.dep} $tczdir
@@ -258,7 +263,6 @@ function killsshafterqemu() {
 	while sleep 0.5; do
 		if ! pgrep qemu; then
 			pkill -f myssh
-			reset
 			break;
 		fi >/dev/null 2>&1
 	done

@@ -1,0 +1,15 @@
+#!/bin/ash
+
+echo "$0" >/run/develop-meta.load
+exec 2>>/run/develop-meta.load
+set -x
+
+cd $(dirname $0)
+
+./binutils
+./libtirpc
+./openssl-1.1.1
+./ca-certificates &
+
+cd - >/dev/null
+
