@@ -176,7 +176,7 @@ get_tczlist_full() {
 	for i in $tczlist; do
 		i=${i/.tcz/}.tcz
 		i=${i/KERNEL/$KERN-tinycore$ARCH}
-		deps+=" $(tcdepends.sh $i | grep -e "^$i:" | tr -d :)"
+		deps+=" $i $(tcdepends.sh $i | grep -e "^$i:" | cut -d: -f2-)"
 	done
 	for i in $deps; do echo $i; done | sort | uniq
 }

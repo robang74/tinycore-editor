@@ -44,7 +44,6 @@ tar.tcz
 udev-lib.tcz
 util-linux.tcz
 wget.tcz
-libzstd.tcz
 lzo.tcz
 liblzma.tcz
 squashfs-tools.tcz
