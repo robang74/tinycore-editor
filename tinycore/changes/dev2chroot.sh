@@ -198,8 +198,8 @@ tcdev=$(readlink /etc/sysconfig/tcdev)
 if mountdevdir $tcdev $rootdir/mnt/tcp1; then
 	echo -n " TCP1"
 fi
-ntdev=$(readlink /etc/sysconfig/ntdev)
-if mountdevdir $ntdev $rootdir/mnt/tcp2; then
+dtdev=$(readlink /etc/sysconfig/dtdev)
+if mountdevdir $dtdev $rootdir/mnt/tcp2; then
 	echo -n " TCP2"
 fi
 

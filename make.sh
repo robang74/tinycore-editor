@@ -258,6 +258,7 @@ function killsshafterqemu() {
 	while sleep 0.5; do
 		if ! pgrep qemu; then
 			pkill -f myssh
+			reset
 			break;
 		fi >/dev/null 2>&1
 	done
@@ -538,8 +539,8 @@ if [ "$param" == "iso" ]; then
 	mkdir -p $tcldir
 	tar xzf tcl-boot-isolinux.tgz -C $tcldir
 	tccopyall iso
-	cp -arf ntfs $tcldir/extra
-	echo -e "\ttransfer ntfs -> /$tcldir/extra/"
+	cp -arf DATA $tcldir/data
+	echo -e "\ttransfer DATA -> /$tcldir/data"
 	mkisofs -l -Jr -V "$tclabel" -no-emul-boot -boot-load-size 4 -boot-info-table \
 		-b boot/syslinux/isolinux.bin -c boot/syslinux/boot.cat -o tclinux.iso $tcldir
 	chownuser tclinux.iso
@@ -615,11 +616,13 @@ if [ "$param" == "image" -a "$option" == "8GB" ]; then
 	fi
 	if [ "$param" == "image" -a "$create" == "yes" ]; then
 		losetup --partscan $devloop tcl-8GB-usb.disk
-		if true; then
-			echo -e "n\n p\n 2\n \n \n N"
-			echo -e "t\n 2\n 7\n w"
-		fi | fdisk $devloop >/dev/null 2>&1
-		mkfs -t ntfs -L NTFS -F -Q ${devloop}p2 >/dev/null
+		echo -e "n\n p\n 2\n \n \n N\n w" | fdisk $devloop >/dev/null 2>&1
+		if echo "$tczmeta" | grep -wq "develop"; then
+			mkfs -t ext4 -L DATA -F ${devloop}p2 >/dev/null
+		else
+			echo -e "t\n 2\n 7\n w" | fdisk $devloop >/dev/null 2>&1
+			mkfs -t ntfs -L DATA -F -Q ${devloop}p2 >/dev/null
+		fi
 		losetup -D $devloop
 	fi
 	chownuser tcl-8GB-usb.disk
@@ -668,8 +671,9 @@ if [ "$param" == "qemu-test" ]; then
 			$0 image
 		fi
 	fi
-	option=${option:-image}
-	$0 $option && $0 qemu-init && \
+	action=${option:-image}
+	action=${option/8GB/image 8GB}
+	$0 $action && $0 qemu-init && \
 		$0 qemu $option
 	test "$?" != "0" && realexit 1
 	$0 ssh-root
@@ -738,8 +742,8 @@ fi
 if [ "$param" == "ssh-copy" -a "$option" == "8GB" ]; then
 	tdone=1
 	info "make.sh executing: ssh-copy 8GB $tcip"
-	if [ ! -d ntfs ]; then
-		warning="SUGGEST: create ntfs folder to copy file in 8GB, abort"
+	if [ ! -d DATA ]; then
+		warning="SUGGEST: create data folder to copy file in 8GB, abort"
 		exit 1
 	fi
 	sshfingerprintclean
@@ -747,7 +751,7 @@ if [ "$param" == "ssh-copy" -a "$option" == "8GB" ]; then
 	sshgettcdir
 	ntdir=${tcdir%1}2
 	echo -e "\ttransfering everything to $tcip:$ntdir..."
-	myscp ntfs/* root@$tcip:$ntdir && \
+	myscp DATA/* root@$tcip:$ntdir && \
 		echo -e "\ttransfered everything to $tcip:$ntdir -- OK"
 fi
 
@@ -781,7 +785,7 @@ if [ "$param" == "ssh-end" ]; then
 	tcrootunlock
 	sshgettcdir
 	if [ "$option" == "8GB" ]; then
-		myssh 0 root "ntfs-usbdisk-partition-create.sh && echo DONE" | grep -q DONE
+		myssh 0 root "data-usbdisk-partition-create.sh && echo DONE" | grep -q DONE
 	fi
 	myssh 0 root "unlock.sh;
 dd if=/dev/zero of=$tcdir/zero; 

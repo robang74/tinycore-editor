@@ -15,7 +15,7 @@
    tcz2tce.sh		to change in TCE compliant or reverse
 
    bootable-usbdisk-create.sh 		to create a bootable usb disk
-   ntfs-usbdisk-partition-create.sh 	to create ntfs partition
+   data-usbdisk-partition-create.sh 	to create data partition
 
    loadkmap < /usr/share/kmap/qwerty/it.kmap 	to load IT keyboard
 

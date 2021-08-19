@@ -65,9 +65,9 @@ else
 		fi
 	fi
 	if [ "$tcdev" == "/dev/sr0" ]; then
-		ln -sf $tcdir/extra /etc/sysconfig/ntdir
+		ln -sf $tcdir/extra /etc/sysconfig/dtdir
 	else
-		ln -sf ${tcdev%1}2 /etc/sysconfig/ntdev
+		ln -sf ${tcdev%1}2 /etc/sysconfig/dtdev
 	fi
 	infotime "Searching for afterboot.sh in $tcdev"
 	if [ "$tcdir" != "" ]; then

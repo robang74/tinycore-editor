@@ -74,7 +74,7 @@ resetbysf.sh:resetbysf.sh
 usbsetboot.sh:usbsetboot.sh
 dev2chroot.sh:dev2chroot.sh
 sysinstall.sh:system-install.sh
-ntfscrea.sh:ntfs-usbdisk-partition-create.sh
+datacrea.sh:data-usbdisk-partition-create.sh
 "
 
 ###############################################################################
@@ -93,11 +93,14 @@ fi
 
 infotime "Lookup for tinycore partitions..." ##################################
 
+devel=$(cat /etc/sysconfig/devel)
 tcdev=$(readlink /etc/sysconfig/tcdev)
 tcdir=$(readlink /etc/sysconfig/tcdir)
-ntdev=$(readlink /etc/sysconfig/ntdev)
-ntdir=$(readlink /etc/sysconfig/ntdir)
-ntdir=${ntdir:-$(devdir $ntdev)}
+dtdev=$(readlink /etc/sysconfig/dtdev)
+dtdir=$(readlink /etc/sysconfig/dtdir)
+dtdir=${dtdir:-$(devdir $dtdev)}
+devel=${devel:+ext4}
+type=${devel:-ntfs}
 
 if [ "$tcdev" == "" ]; then
 	echo
@@ -112,10 +115,10 @@ if [ "$tcdir" == "" ]; then
 	mount -o ro $tcdev $tcdir || exit 1
 fi
 
-if [ "$ntdir" == "" ]; then
-	ntdir=${ntdev/dev/mnt}
-	mkdir -p $ntdir
-	mount -o ro -t ntfs $ntdev $ntdir || ntdir=""
+if [ "$dtdir" == "" ]; then
+	dtdir=${dtdev/dev/mnt}
+	mkdir -p $dtdir
+	mount -t $type -o ro $dtdev $dtdir || dtdir=""
 fi 2>/dev/null
 
 if [ -d $tcdir/tcz ]; then
@@ -183,10 +186,10 @@ for i in $copylist; do
 done
 chown -R tc.staff /home/tc
 
-if [ "$ntdir" == "" ]; then
-	infotime "Restoring the NTFS partition..."
-	ntfs-usbdisk-partition-create.sh | grep -w ntfs
-	ntdir=$(devdir $ntdev)
+if [ "$dtdir" == "" ]; then
+	infotime "Restoring the data partition..."
+	data-usbdisk-partition-create.sh | grep -w data
+	dtdir=$(devdir $dtdev)
 fi
 
 infotime "Upraising network and VLANs..." #####################################

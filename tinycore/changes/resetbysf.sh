@@ -34,9 +34,9 @@ if [ "$USER" != "root" ]; then
 fi
 
 tcdev=$(readlink /etc/sysconfig/tcdev)
-ntdev=$(readlink /etc/sysconfig/ntdev)
-ntdir=$(readlink /etc/sysconfig/ntdir)
-ntdir=${ntdir:-$(devdir $ntdev)}
+dtdev=$(readlink /etc/sysconfig/dtdev)
+dtdir=$(readlink /etc/sysconfig/dtdir)
+dtdir=${dtdir:-$(devdir $dtdev)}
 bkdev=${tcdev%1}
 
 if [ "$tcdev" == "" ]; then
@@ -52,7 +52,7 @@ dirlist="
 /home/tc
 /root
 /
-$ntdir
+$dtdir
 "
 if [ "$1" == "" ]; then
 	for i in $dirlist; do
@@ -75,9 +75,9 @@ fi
 echo "Image: $(realpath $image)"
 
 errot=0
-if grep -qe "^$ntdev " /proc/mounts; then
-	if ! umount $ntdev; then
-		echo "ERROR: device $ntdev is busy"
+if grep -qe "^$dtdev " /proc/mounts; then
+	if ! umount $dtdev; then
+		echo "ERROR: device $dtdev is busy"
 		echo
 		exit 1
 	fi
@@ -107,7 +107,7 @@ rrdiskptbl $bkdev
 #		error=1
 #	fi
 #fi >/dev/null 2>&1
-ntfs-usbdisk-partition-create.sh
+data-usbdisk-partition-create.sh
 
 if [ "$error" = "1" ]; then
 	echo "ERROR: root partition ${tcdev} is broken"

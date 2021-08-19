@@ -39,6 +39,8 @@ myname=$(basename $0)
 cd $(dirname $0)
 WRKDIR="$PWD"
 
+source tinycore.conf
+
 echo
 echo "Working folder is $WRKDIR"
 
@@ -56,6 +58,7 @@ if [ "$1" == "open" -o "$1" == "update" ]; then
 	cat ../changes/rcS > etc/init.d/rcS
 	cat ../changes/tce-load > usr/bin/tce-load
 	cat ../changes/tc-functions > etc/init.d/tc-functions
+	echo "$tczmeta" | grep -w "develop" >etc/sysconfig/devel
 	test -e lib64 || ln -sf lib lib64
 	test -e lib/x86_64-linux-gnu || ln -sf . lib/x86_64-linux-gnu
 	echo "opened folder: $tmpdir"
@@ -69,6 +72,7 @@ if [ "$1" == "close" -o "$1" == "update" ]; then
 	fi
 	cd $tmpdir
 	echo -n "close data: "
+	echo "$tczmeta" | grep -w "develop" >etc/sysconfig/devel
 	if sudo find . | sudo cpio -o -H newc | gzip > ../rootfs.gz; then
 		cd ..
 		rm -rf $tmpdir

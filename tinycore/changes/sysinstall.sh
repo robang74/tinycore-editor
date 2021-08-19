@@ -175,9 +175,9 @@ fi
 
 tcdev=$(readlink /etc/sysconfig/tcdev)
 tcdir=$(readlink /etc/sysconfig/tcdir)
-ntdev=$(readlink /etc/sysconfig/ntdev)
-ntdir=$(readlink /etc/sysconfig/ntdir)
-ntdir=${ntdir:-$(devdir $ntdev)}
+dtdev=$(readlink /etc/sysconfig/dtdev)
+dtdir=$(readlink /etc/sysconfig/dtdir)
+dtdir=${dtdir:-$(devdir $dtdev)}
 
 usbdisk=${tcdev%1}
 if [ "$rstdisk" == "$usbdisk" ]; then
@@ -185,7 +185,7 @@ if [ "$rstdisk" == "$usbdisk" ]; then
 fi
 
 if [ "$datadir" == "" ]; then
-	datadir=$ntdir
+	datadir=$dtdir
 	if [ "$datadir" == "" ]; then
 		alert_exit 0 "Data folder is unavailable, abort" "Data folder check"
 	fi

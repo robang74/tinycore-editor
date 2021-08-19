@@ -17,20 +17,23 @@ if [ "$USER" != "root" ]; then
 	exit 1
 fi
 
+devel=$(cat /etc/sysconfig/devel)
 tcdev=$(readlink /etc/sysconfig/tcdev)
 tcdir=$(readlink /etc/sysconfig/tcdir)
-ntdev=$(readlink /etc/sysconfig/ntdev)
-ntdir=$(readlink /etc/sysconfig/ntdir)
-ntdir=${ntdir:-$(devdir $ntdev)}
+dtdev=$(readlink /etc/sysconfig/dtdev)
+dtdir=$(readlink /etc/sysconfig/dtdir)
+dtdir=${dtdir:-$(devdir $dtdev)}
+mount=${devel:+mount}
+mount=${devel:-ntfs-3g}
 
 if [ "$tcdir" == "" ]; then
 	tcdir=${tcdev/dev/mnt}
 	mkdir -p $tcdir
 fi
 
-if [ "$ntdir" == "" ]; then
-	ntdir=$(echo "$ntdev" | sed -e "s,/dev/,/mnt/,")
-	mkdir -p $ntdir
+if [ "$dtdir" == "" ]; then
+	dtdir=$(echo "$dtdev" | sed -e "s,/dev/,/mnt/,")
+	mkdir -p $dtdir
 fi
 
 mount -o remount,rw $tcdir 2>/dev/null
@@ -38,14 +41,14 @@ if grep -qe "^$tcdev .* rw," /proc/mounts; then
 	echo "$tcdir (RW)"
 fi
 
-mount -o remount,rw $ntdir 2>/dev/null
-if ! grep -qe "^$ntdev .* rw," /proc/mounts; then
-	if grep -q " $ntdir " /proc/mounts; then
-		umount $ntdir
+mount -o remount,rw $dtdir 2>/dev/null
+if ! grep -qe "^$dtdev .* rw," /proc/mounts; then
+	if grep -q " $dtdir " /proc/mounts; then
+		umount $dtdir
 	fi 2>/dev/null
-	ntfs-3g $ntdev $ntdir 2>/dev/null
+	$mount $dtdev $dtdir 2>/dev/null
 fi
-if grep -qe "^$ntdev .* rw," /proc/mounts; then
-	echo "$ntdir (RW)"
+if grep -qe "^$dtdev .* rw," /proc/mounts; then
+	echo "$dtdir (RW)"
 fi
 
