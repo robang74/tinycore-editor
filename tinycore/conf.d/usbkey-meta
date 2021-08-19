@@ -1,16 +1,14 @@
 #!/bin/ash
 #
-# ./usbkey-meta
+# $wd/usbkey-meta
 #
 
 echo "$0" >/run/usbkey-meta.load
-exec 2>>/run/usbkey-meta.load
+exec >>/run/usbkey-meta.load 2>&1
 set -x
 
-cd $(dirname $0)
+wd=$(dirname $0)
 
-./bash
-./fuse
-
-cd - >/dev/null
+time $wd/bash
+time $wd/fuse
 

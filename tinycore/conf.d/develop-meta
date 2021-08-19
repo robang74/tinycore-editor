@@ -1,18 +1,17 @@
 #!/bin/ash
 #
-# ./develop-meta
+# $wd/develop-meta
 #
 
 echo "$0" >/run/develop-meta.load
-exec 2>>/run/develop-meta.load
+exec >>/run/develop-meta.load 2>&1
 set -x
 
-cd $(dirname $0)
+wd=$(dirname $0)
 
-./binutils
-./libtirpc
-./openssl-1.1.1
-./ca-certificates &
+time $wd/binutils
+time $wd/libtirpc
+time $wd/openssl-1.1.1
 
-cd - >/dev/null
+nohup $wd/ca-certificates >/dev/null 2>&1 &
 

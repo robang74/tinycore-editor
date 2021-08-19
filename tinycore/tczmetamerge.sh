@@ -85,7 +85,7 @@ function metamerge() {
 	cd u/usr/local/tce.installed
 	for i in *; do
 		if [ -x $i ]; then
-			if ! grep -qe "\./$i" $meta-meta 2>/dev/null; then
+			if ! grep -qe "\$wd/$i" $meta-meta 2>/dev/null; then
 				echo
 				perr "ERROR: ./$i is not present in $meta-meta"
 				echo
@@ -96,13 +96,16 @@ function metamerge() {
 	done
 	cd - >/dev/null
 
+	echo
+	info "Compressing $meta-meta.tcz ..."
 	mksquashfs u $meta-meta.tcz -comp xz -Xbcj x86 >/dev/null
 	echo "$deps" | tr ' ' \\n | egrep . > $meta-meta.tcz.dep || true
 	chownuser $meta-meta.tcz $meta-meta.tcz.dep
 	du -ks $meta-meta.tcz
 
-	udir=${udir//:/ }
 	n=1
+	udir=${udir//:/ }
+	echo -e "\tUnmounting ..."
 	while ! umount u $udir; do 
 		sleep 0.5;
 		let n++
