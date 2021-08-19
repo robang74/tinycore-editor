@@ -21,6 +21,15 @@ function infotime() {
 	info $opt "[$(cat /proc/uptime | cut -d' ' -f1)] $1"
 }
 
+function warntime() {
+	opt=""
+	if [ "$1" == "-n" ]; then
+		opt="$1"
+		shift
+	fi
+	warn $opt "[$(cat /proc/uptime | cut -d' ' -f1)] $1"
+}
+
 function warn() {
 	echo -e "\e[1;33m$@\e[0m"
 }
@@ -43,7 +52,9 @@ function tceload() {
 	rotating 0.1 &
 	pid=$!
 	su tc -c "tce-load -i $*" | \
-		grep -v "is already installed!" | \
+		grep -v -e "is already installed!" \
+			-e "Updating certificates" \
+			-e "added.* removed" | \
 			tr \\n ' ' | grep .. || \
 				echo "no extra tcz!"
 	kill $pid
@@ -72,6 +83,13 @@ export PATH=/home/tc/.local/bin:/usr/local/sbin:/usr/local/bin
 export PATH=$PATH:/apps/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
 set +e
+
+libcrypt=$(realpath /lib/libcrypt.so.1)
+if echo $libcrypt | grep -q "libcrypt.so.1"; then
+	warntime "Real libcrypt: $libcrypt (inherited)"
+else
+	infotime "Real libcrypt: $libcrypt (native)"
+fi
 
 infotime "Lookup for tinycore partitions..." ##################################
 

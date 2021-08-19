@@ -183,20 +183,9 @@ usleep_progress() {
   echo "$CHAR"
 }
 
-checkroot() {
- if [ `/usr/bin/id -u` -ne 0 ]; then
-   echo "Need root privileges." >&2
-   exit 1
- fi
-}
-
-getuser() {
-  sed -ne "s,\([^:]*\):x:1001:.*,\\1,p" /etc/passwd
-}
- 
 runasuser() {
  if [ "$USER" == "root" ]; then
-   user=$(getuser)
+   user=$(cat /etc/sysconfig/tcuser)
    echo "Don't run this as root, fall back to $user" >&2
 #  ATTENTION: set -- ciao "bella ciao" does not work because
 #             the space between the two words split them as
@@ -207,8 +196,15 @@ runasuser() {
  fi
 }
 
+checkroot() {
+ if [ `/usr/bin/id -u` -ne 0 ]; then
+   echo "Need root privileges." >&2
+   exit 1
+ fi
+}
+
 checknotroot() {
- if [ "$USER" == "root" ]; then
+ if [ `/usr/bin/id -u` -eq 0 ]; then
    echo "Don't run this as root." >&2
    exit $1
  fi

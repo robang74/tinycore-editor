@@ -81,6 +81,7 @@ else
 	fi
 fi
 
+echo
 echo "The boot log is available in $logfile"
 uptimeshow
 echo
