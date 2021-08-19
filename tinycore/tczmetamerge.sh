@@ -43,7 +43,9 @@ function metamerge() {
 		i=${i/.tcz/}.tcz
 		i=${i/KERNEL/$KERN-tinycore$ARCH}
 		if [ ! -e $i ]; then
+			echo
 			perr "\tERROR: $i is missing, abort"
+			echo
 			cd ..
 			return 1
 		fi
