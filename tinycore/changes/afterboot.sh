@@ -60,6 +60,26 @@ function tceload() {
 	kill $pid
 }
 
+function mount_single_tcz() {
+	rc=KO
+	while true; do
+		mkdir /tmp/tcloop/$1 || break
+		mount $tcdev/tcz/$1 /tmp/tcloop/$1 || break
+		unionfs -o nonempty /:/tmp/tcloop/$1 / && rc=OK
+		wd=/usr/local/tce.installed
+		if [ -x $wd/$1 ]; then
+			$wd/$1
+		else
+			touch $wd/$1 2>/dev/null
+		fi
+	done
+	echo $1 $rc
+
+#	unionfs -o nonempty /tmp/tcloop/$1:/ /tmp/alt	# ok
+#	unionfs -o nonempty /tmp/tcloop/$1:/ /		# not ok
+#	unionfs -o nonempty /:/tmp/tcloop/$1 /		# not ok
+}
+
 ###############################################################################
 
 tcpassword="tinycore"

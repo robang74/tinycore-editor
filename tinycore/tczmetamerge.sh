@@ -35,6 +35,7 @@ function metamerge() {
 	rmdir ? ?? ??? 2>/dev/null || true
 	if [ -e $meta-meta.tcz ]; then
 		cd ..
+		comp "$meta-meta.tcz exists, skipping"
 		deps+=" $meta-meta.tcz"
 		return 0
 	fi
@@ -61,7 +62,7 @@ function metamerge() {
 	for i in $list; do
 		i=${i/.tcz/}.tcz
 		i=${i/KERNEL/$KERN-tinycore$ARCH}
-		if echo "$merged" | grep -wq $i; then
+		if echo "$merged" | grep -q " $i"; then
 			warn "\tskipping: $i in $meta"
 			continue
 		fi
@@ -89,10 +90,12 @@ function metamerge() {
 		if [ -x $i ]; then
 			if ! grep -qe "\$wd/$i" $meta-meta 2>/dev/null; then
 				echo
-				perr "ERROR: ./$i is not present in $meta-meta"
+				perr "ERROR: \$wd/$i is not present in $meta-meta"
 				echo
 				cd - >/dev/null
 				exit 1
+			elif [ "$i" != "$meta-meta" ]; then
+				comp "\tloadscript: $i"
 			fi
 		fi
 	done
@@ -129,6 +132,13 @@ if [ "$USER" != "root" ]; then
 	exit 1
 fi
 
+if ! which unionfs-fuse >/dev/null; then
+	echo
+	echo "ERROR: $(basename $0) requires unionfs-fuse"
+	echo
+	exit 1
+fi
+
 source tinycore.conf
 
 echo
@@ -142,4 +152,5 @@ for i in $tczmeta; do
 	metamerge $i $list
 	merged+=" $list"
 done
+echo
 
