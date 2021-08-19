@@ -352,16 +352,28 @@ if [ "$1" == "install" ]; then
 	fi
 	cd - >/dev/null
 
-	libs=$(ldd bin/busybox | sed -ne "s,.* => \(/[^ ]*\) .*,\\1,p")
-	libcrypt=$(echo "$libs" | grep "libcrypt.so.1")
-	libcrypto=$(readlink $libcrypt)
-	echo; ldd bin/busybox
-	if echo "$libcrypto" | grep -q "libcrypt.so.1"; then
-		echo
-		warn "WARNING: libcrypt.so.1 host/guest mismatch, trying to fix"
-		echo
-		cp -f $(dirname $libcrypt)/$libcrypto $tcdir/$rtdir/lib
-		ln -sf $libcrypto $tcdir/$rtdir/lib/libcrypt-2.*.so
+	if which tce-load >/dev/null; then
+		echo; ldd bin/busybox
+		libcrypto=$(realpath /lib/libcrypt.so.1)
+		if echo "$libcrypto" | grep -q "libcrypt.so.1"; then
+			echo
+			warn "WARNING: host libcrypt.so.1 inheritance, trying to fix"
+			echo
+			cp -f /lib/$libcrypto $tcdir/$rtdir/lib
+			ln -sf $libcrypto $tcdir/$rtdir/lib/libcrypt-2.*.so
+		fi
+	else
+		libs=$(ldd bin/busybox | sed -ne "s,.* => \(/[^ ]*\) .*,\\1,p")
+		libcrypt=$(echo "$libs" | grep "libcrypt.so.1")
+		libcrypto=$(readlink $libcrypt)
+		echo; ldd bin/busybox
+		if echo "$libcrypto" | grep -q "libcrypt.so.1"; then
+			echo
+			warn "WARNING: libcrypt.so.1 host/guest mismatch, trying to fix"
+			echo
+			cp -f $(dirname $libcrypt)/$libcrypto $tcdir/$rtdir/lib
+			ln -sf $libcrypto $tcdir/$rtdir/lib/libcrypt-2.*.so
+		fi
 	fi
 
 	$tcdir/rootfs.sh close
