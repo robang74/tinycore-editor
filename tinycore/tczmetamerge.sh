@@ -16,6 +16,14 @@ function perr() {
 	echo -e "\e[1;31m$@\e[0m"
 }
 
+function chownuser() {
+	declare user guid
+	user=$SUDO_USER
+	user=${user:-$USER}
+	guid=$(grep -e "^$user:" /etc/passwd | cut -d: -f3-4)
+	chown -R $guid "$@"
+}
+
 function metamerge() {
 	declare i n udir meta list
 	meta=$1
@@ -24,6 +32,7 @@ function metamerge() {
 	list="$@"
 
 	cd tcz
+	rmdir ? ?? ??? 2>/dev/null || true
 	if [ -e $meta-meta.tcz ]; then
 		cd ..
 		deps+=" $meta-meta.tcz"
@@ -72,12 +81,33 @@ function metamerge() {
 
 	mkdir -p u
 	unionfs-fuse ${udir}e u
+
+	cd u/usr/local/tce.installed
+	for i in *; do
+		if [ -x $i ]; then
+			if ! grep -qe "\./$i" $meta-meta 2>/dev/null; then
+				echo
+				perr "ERROR: ./$i is not present in $meta-meta"
+				echo
+				cd - >/dev/null
+				exit 1
+			fi
+		fi
+	done
+	cd - >/dev/null
+
 	mksquashfs u $meta-meta.tcz -comp xz -Xbcj x86 >/dev/null
 	echo "$deps" | tr ' ' \\n | egrep . > $meta-meta.tcz.dep || true
-	sync
+	chownuser $meta-meta.tcz $meta-meta.tcz.dep
 	du -ks $meta-meta.tcz
+
 	udir=${udir//:/ }
-	while ! umount u $udir; do sleep 0.5; done 2>/dev/null
+	n=1
+	while ! umount u $udir; do 
+		sleep 0.5;
+		let n++
+		[[ $n -gt 5 ]] && break
+	done 2>/dev/null
 	rm -rf u $udir e
 	echo
 	cd ..

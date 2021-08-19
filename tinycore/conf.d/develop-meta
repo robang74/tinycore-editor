@@ -1,4 +1,7 @@
 #!/bin/ash
+#
+# ./develop-meta
+#
 
 echo "$0" >/run/develop-meta.load
 exec 2>>/run/develop-meta.load
