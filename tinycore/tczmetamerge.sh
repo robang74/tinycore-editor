@@ -24,14 +24,28 @@ function chownuser() {
 	chown -R $guid "$@"
 }
 
+function unmountall() {
+	echo -ne "\tUnmounting ..."
+	declare -i n=1
+	while ! umount ? ?? ???; do
+		mount | grep -qe "/tinycore/tcz/[0-9]* type squashfs" || break
+		sleep 0.5
+		echo -n "."
+	done 2>/dev/null
+	rm -rf u e [1-9] [1-9][0-9] [1-9][0-9][0-9]
+	echo
+}
+
 function metamerge() {
 	declare i n udir meta list
 	meta=$1
 	shift
 	[ "$1" == "" ] && return 0
 	list="$@"
+	merged=$(echo "$merged" | tr \\n ' ')
 
 	cd tcz
+	UNMNTDIR=$PWD
 	rmdir ? ?? ??? 2>/dev/null || true
 	if [ -e $meta-meta.tcz ]; then
 		cd ..
@@ -58,7 +72,7 @@ function metamerge() {
 	mkdir -p $tceinst
 	chmod 0775 $tceinst
 	chown 0.50 $tceinst
-	trap 'rm -f $meta-meta.tcz; umount u ${udir//:/ } 2>/dev/null' EXIT
+	trap 'rm -f $meta-meta.tcz; unmountall' EXIT
 	for i in $list; do
 		i=${i/.tcz/}.tcz
 		i=${i/KERNEL/$KERN-tinycore$ARCH}
@@ -92,7 +106,7 @@ function metamerge() {
 				echo
 				perr "ERROR: \$wd/$i is not present in $meta-meta"
 				echo
-				cd - >/dev/null
+				cd - 2>/dev/null
 				exit 1
 			elif [ "$i" != "$meta-meta" ]; then
 				comp "\tloadscript: $i"
@@ -113,15 +127,7 @@ function metamerge() {
 	chownuser $meta-meta.tcz* $meta.list
 	du -ks $meta-meta.tcz
 
-	n=1
-	udir=${udir//:/ }
-	echo -e "\tUnmounting ..."
-	while ! umount u $udir; do 
-		sleep 0.5;
-		let n++
-		[[ $n -gt 5 ]] && break
-	done 2>/dev/null
-	rm -rf u $udir e
+	unmountall
 	echo
 	cd ..
 	deps+=" $meta-meta.tcz"
@@ -171,7 +177,7 @@ for i in $tczmeta; do
 	if [ ! -e conf.d/$i.lst ]; then
 		exit 1
 	fi
-	list=$(cat conf.d/$i.lst | tr \\n ' ')
+	list=$(cat conf.d/$i.lst)
 	list=$(get_tczlist_full tcz $list)
 	metamerge $i $list
 	merged+=" $list"
