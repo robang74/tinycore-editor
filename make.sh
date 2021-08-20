@@ -878,11 +878,14 @@ if [ "$param" == "clean" ]; then
 fi
 
 if [ "$param" == "distclean" ]; then
-	tinycore/provides/tcgetdistro.sh clean
-	busybox/busybox.sh clean all
+	tdone=1
+	info "make.sh executing: distclean"
 	rm -rf busybox/config.*suid
 	rm -rf busybox.tar.bz2
 	rm -rf tinycore/tcz/*
+	tinycore/provides/tcgetdistro.sh clean
+	busybox/busybox.sh clean
+	$0 clean all
 fi
 
 if [ "$param" == "iso" -o "$param" == "image" ]; then
