@@ -66,7 +66,7 @@ shift `expr $OPTIND - 1`
 [ -z "$1" ] || ( [ -z "$WGET" ] && [ -z "$INSTALL" ] ) && abort
 
 app_exists() {
-	[ -e "$TCEINSTALLED/${1/.tcz/}" ] && return 0
+	[ "$INSTALL" == "TRUE" -a -e "$TCEINSTALLED/${1/.tcz/}" ] && return 0
 	[ -f "$2/$1" ] && [ -f "$2/$1".md5.txt ] && (cd "$2" && md5sum -cs "$1".md5.txt)
 }
 
