@@ -61,9 +61,15 @@ function tceload() {
 }
 
 depdone=""
+
 function _tceload() {
 	mkdir -p /tmp/tcloop
 	wd=/usr/local/tce.installed
+	inner_tceload "$@"
+	echo
+}
+
+function inner_tceload() {
 	for i in $@; do
 		test -e $wd/${i/.tcz/} && continue
 		if echo "$depdone" | grep -q " $i"; then
@@ -75,7 +81,6 @@ function _tceload() {
 		fi
 		load_single_tcz ${i/.tcz/}
 	done
-	echo
 }
 
 function load_single_tcz() {
@@ -85,11 +90,12 @@ function load_single_tcz() {
 		mkdir /tmp/tcloop/$1 || break
 		mount $tcdir/tcz/$1.tcz /tmp/tcloop/$1 || break
 		find /tmp/tcloop/$1 -type d | cut -d/ -f5- | xargs mkdir -p
-		eval $(find /tmp/tcloop/$1/ -type f | cut -d/ -f5- | \
-			sed -e "s,\(.*\),ln -sf /tmp/tcloop/$1/\1 \1;,")
-		eval $(find /tmp/tcloop/$1/ -type l | cut -d/ -f5- | \
-			sed -e "s,\(.*\),ln -sf /tmp/tcloop/$1/\1 \1;,")
-		wd=/usr/local/tce.installed
+		for k in $(find /tmp/tcloop/$1/ -type l | cut -d/ -f5-); do
+			ln -sf /tmp/tcloop/$1/$k $k
+		done
+		for k in $(find /tmp/tcloop/$1/ -type f | cut -d/ -f5-); do
+			ln -sf /tmp/tcloop/$1/$k $k
+		done
 		if [ -x $wd/$1 ]; then
 			$wd/$1
 		else
