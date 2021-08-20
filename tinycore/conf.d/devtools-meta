@@ -1,0 +1,13 @@
+#!/bin/ash
+#
+# $wd/devtools-meta
+#
+
+echo "$0" >/run/devtools-meta.load
+exec >>/run/devtools-meta.load 2>&1
+set -x
+
+wd=$(dirname $0)
+
+time $wd/file
+
