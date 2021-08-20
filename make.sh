@@ -432,7 +432,10 @@ while true; do
 			fi
 		done
 	done
-	if [ -x ../tczconvxz.sh ]; then
+	#
+	# XZ compression waste RAM and it is acceptable for x86_64 architecture
+	#
+	if [ "$ARCH" == "64" -a -x ../tczconvxz.sh ]; then
 		../tczconvxz.sh
 	fi
 	cd - >/dev/null
