@@ -37,6 +37,7 @@ ssh
 qemu-stop
 close
 clean
+distclean
 image
 download
 busybox
@@ -80,6 +81,7 @@ function usage() {
 	echo -e "\t\t qemu-stop"
 	echo -e "\t\t close [8GB]"
 	echo -e "\t\t clean [8GB|all]"
+	echo -e "\t\t distclean"
 	echo -e "\t\t download"
 	echo -e "\t\t busybox"
 	echo -e "\t\t iso"
@@ -870,6 +872,14 @@ if [ "$param" == "clean" ]; then
 		rm -f tcl-8GB-usb.disk storage-32GB.disk
 	fi
 	rm -rf $tcldir tclinux.iso
+fi
+
+if [ "$param" == "distclean" ]; then
+	tinycore/provides/tcgetdistro.sh clean
+	busybox/busybox.sh clean all
+	rm -rf busybox/config.*suid
+	rm -rf busybox.tar.bz2
+	rm -rf tinycore/tcz/*
 fi
 
 if [ "$param" == "iso" -o "$param" == "image" ]; then
