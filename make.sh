@@ -223,9 +223,15 @@ function tccopyall() {
 	for i in $tczlistfull; do
 		i=${i/.tcz/}.tcz
 		i=${i/KERNEL/$KERN-tinycore$ARCH}
-		cp -f tinycore/tcz/{$i,$i.dep} $tczdir
+		if [ ! -e tinycore/tcz/$i.md5.txt ]; then
+			cd tinycore/tcz
+			md5sum $i >$i.md5.txt
+			chownuser $i.md5.txt
+			cd - >/dev/null
+		fi
+		cp -f tinycore/tcz/{$i,$i.dep,$i.md5.txt} $tczdir
 	done
-	echo -e "\ttransfer tinycore/tcz/{selected *.tcz,*tcz.dep} -> /$tczdir/"
+	echo -e "\ttransfer tinycore/tcz/{selected *.tcz} -> /$tczdir/"
 	sync
 }
 

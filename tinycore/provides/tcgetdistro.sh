@@ -143,8 +143,8 @@ for i in $deps; do
 	i=${i/.tcz/}.tcz
 	i=${i/KERNEL/$KERN-tinycore$ARCH}
 	download -ne $tcrepo/$tczall/$i $i
-	i="$i.dep"
-	download -ne $tcrepo/$tczall/$i $i
+	download -ne $tcrepo/$tczall/$i.dep $i.dep
+	download -ne $tcrepo/$tczall/$i.md5.txt $i.md5.txt
 done
 if [ "$SUDO_USER" != "" ]; then
 	if [ -x ../tczconvxz.sh ]; then

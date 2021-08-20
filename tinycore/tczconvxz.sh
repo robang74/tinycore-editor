@@ -43,10 +43,11 @@ for i in *.tcz; do
 		sleep 1
 	done || umount tmp
 	mv -f $i.xz $i
+	md5sum $i >$i.md5.txt
 done
 rmdir tmp
 if [ "$SUDO_USER" != "" ]; then
-	chownuser *.tcz
+	chownuser *.tcz*
 fi
 trap -- EXIT
 

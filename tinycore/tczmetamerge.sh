@@ -105,7 +105,8 @@ function metamerge() {
 	info "Compressing $meta-meta.tcz ..."
 	mksquashfs u $meta-meta.tcz -comp xz -Xbcj x86 >/dev/null
 	echo "$deps" | tr ' ' \\n | egrep . > $meta-meta.tcz.dep || true
-	chownuser $meta-meta.tcz $meta-meta.tcz.dep
+	md5sum $meta-meta.tcz >$meta-meta.tcz.md5.txt
+	chownuser $meta-meta.tcz*
 	du -ks $meta-meta.tcz
 
 	n=1
