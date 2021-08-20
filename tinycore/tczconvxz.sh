@@ -27,6 +27,11 @@ function chownuser() {
 	chown -R $guid "$@"
 }
 
+###############################################################################
+
+export PATH=/home/tc/.local/bin:/usr/local/sbin:/usr/local/bin
+export PATH=$PATH:/apps/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
 trap "umount tmp 2>/dev/null || true" EXIT
 set -e
 mkdir -p tmp

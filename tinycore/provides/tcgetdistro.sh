@@ -74,6 +74,9 @@ get_tczlist_full() {
 
 ###############################################################################
 
+export PATH=/home/tc/.local/bin:/usr/local/sbin:/usr/local/bin
+export PATH=$PATH:/apps/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
 trap 'atexit $LINENO $FUNCNAME' EXIT
 set -e
 
