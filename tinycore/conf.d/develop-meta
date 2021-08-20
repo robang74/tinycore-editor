@@ -9,6 +9,7 @@ set -x
 
 wd=$(dirname $0)
 
+time $wd/file
 time $wd/binutils
 time $wd/libtirpc
 time $wd/openssl-1.1.1

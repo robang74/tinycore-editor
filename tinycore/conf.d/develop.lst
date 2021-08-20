@@ -49,3 +49,6 @@ liblzma.tcz
 squashfs-tools.tcz
 ncursesw-dev.tcz
 pkg-config.tcz
+file.tcz
+strace.tcz
+submitqc.tcz
