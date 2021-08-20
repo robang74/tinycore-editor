@@ -149,12 +149,6 @@ for i in $deps; do
 	download -ne $tcrepo/$tczall/$i.dep $i.dep
 	download -ne $tcrepo/$tczall/$i.md5.txt $i.md5.txt
 done
-if [ "$SUDO_USER" != "" ]; then
-	if [ -x ../tczconvxz.sh ]; then
-		../tczconvxz.sh
-	fi
-	chownuser .
-fi
 cd ..
 
 trap - EXIT

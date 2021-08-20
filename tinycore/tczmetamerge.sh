@@ -106,7 +106,7 @@ function metamerge() {
 				echo
 				perr "ERROR: \$wd/$i is not present in $meta-meta"
 				echo
-				cd - 2>/dev/null
+				cd - >/dev/null
 				exit 1
 			elif [ "$i" != "$meta-meta" ]; then
 				comp "\tloadscript: $i"

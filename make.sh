@@ -19,6 +19,8 @@ drvboot="format=raw,file=tcl-usb.disk"
 drvdata="id=sd,if=none,bus=1,unit=0,format=raw,file=storage-32GB.disk"
 tcldir="tcldisk"
 
+cd $(dirname $0)
+
 if [ -e make.conf ]; then
 	source make.conf
 fi
@@ -321,7 +323,6 @@ function perr() {
 
 ###############################################################################
 
-cd $(dirname $0)
 myname="$(basename $0)"
 
 if [ "$USER" != "root" ]; then
