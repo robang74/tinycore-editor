@@ -4,8 +4,11 @@ attr.tcz
 bash.tcz
 binutils.tcz
 bridge-utils.tcz
+bzip2-lib.tcz
 ca-certificates.tcz
+coreutils.tcz
 db.tcz
+diffutils.tcz
 dnsmasq.tcz
 dosfstools.tcz
 dropbear.tcz
@@ -19,12 +22,14 @@ gcc.tcz
 glibc_add_lib.tcz
 glibc_base-dev.tcz
 gmp.tcz
+grep.tcz
 gzip.tcz
 iproute2.tcz
 iptables.tcz
 ipv6-netfilter-KERNEL.tcz
 isl.tcz
 kmaps.tcz
+libcap.tcz
 libdb.tcz
 liblzma.tcz
 libtirpc-dev.tcz
@@ -52,3 +57,4 @@ tar.tcz
 udev-lib.tcz
 util-linux.tcz
 wget.tcz
+zsync.tcz
