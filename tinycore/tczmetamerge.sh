@@ -103,10 +103,14 @@ function metamerge() {
 
 	echo
 	info "Compressing $meta-meta.tcz ..."
+	for i in $list; do echo $i; done > $meta.new
+	sed -i "s,$KERN-tinycore$ARCH,KERNEL," $meta.new
+	cat $meta.new | sort | uniq >$meta.list
+	rm -f $meta.new
 	mksquashfs u $meta-meta.tcz -comp xz -Xbcj x86 >/dev/null
 	echo "$deps" | tr ' ' \\n | egrep . > $meta-meta.tcz.dep || true
 	md5sum $meta-meta.tcz >$meta-meta.tcz.md5.txt
-	chownuser $meta-meta.tcz*
+	chownuser $meta-meta.tcz* $meta.list
 	du -ks $meta-meta.tcz
 
 	n=1
@@ -123,6 +127,24 @@ function metamerge() {
 	deps+=" $meta-meta.tcz"
 	trap - EXIT
 }
+
+function get_tczlist_full() {
+	declare deps i tczdir=$1 getdeps
+	getdeps=$tczdir/../provides/tcdepends.sh
+	shift
+	for i in $@; do
+		i=${i/.tcz/}.tcz
+		i=${i/KERNEL/$KERN-tinycore$ARCH}
+		deps+=" $($getdeps $i | grep -e "^$i:" | cut -d: -f2-)"
+		deps+=" $(cat $tczdir/$i.dep) $i"
+	done
+	for i in $deps; do echo $i; done | sort | uniq
+}
+
+###############################################################################
+
+export PATH=/home/tc/.local/bin:/usr/local/sbin:/usr/local/bin
+export PATH=$PATH:/apps/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
 set -e
 
@@ -150,6 +172,7 @@ for i in $tczmeta; do
 		exit 1
 	fi
 	list=$(cat conf.d/$i.lst | tr \\n ' ')
+	list=$(get_tczlist_full tcz $list)
 	metamerge $i $list
 	merged+=" $list"
 done

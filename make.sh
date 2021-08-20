@@ -174,13 +174,14 @@ function tcdircopy() {
 		echo -e "\ttransfer $1" | sed "s,:, -> $tcdir/,"
 }
 
-get_tczlist_full() {
-	declare deps i
-	for i in $tczlist; do
+function get_tczlist_full() {
+	declare deps i tczdir=$1
+	shift
+	for i in $@; do
 		i=${i/.tcz/}.tcz
 		i=${i/KERNEL/$KERN-tinycore$ARCH}
 		deps+=" $(tcdepends.sh $i | grep -e "^$i:" | cut -d: -f2-)"
-		deps+=" $(cat $1/$i.dep) $i"
+		deps+=" $(cat $tczdir/$i.dep) $i"
 	done
 	for i in $deps; do echo $i; done | sort | uniq
 }
@@ -219,7 +220,7 @@ function tccopyall() {
 		tczdir=$tcldir/tcz
 	fi
 	mkdir -p $tczdir
-	tczlistfull=$(get_tczlist_full tinycore/tcz)
+	tczlistfull=$(get_tczlist_full tinycore/tcz $tczlist)
 	for i in $tczlistfull; do
 		i=${i/.tcz/}.tcz
 		i=${i/KERNEL/$KERN-tinycore$ARCH}
@@ -320,7 +321,6 @@ function perr() {
 
 cd $(dirname $0)
 myname="$(basename $0)"
-export PATH="$PATH:$PWD/tinycore/provides"
 
 if [ "$USER" != "root" ]; then
 	set -m
