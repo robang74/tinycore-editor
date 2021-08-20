@@ -179,12 +179,13 @@ function tcdircopy() {
 }
 
 function get_tczlist_full() {
-	declare deps i tczdir=$1
+	declare deps i tczdir=$1 getdeps
+	getdeps=$tczdir/../provides/tcdepends.sh
 	shift
 	for i in $@; do
 		i=${i/.tcz/}.tcz
 		i=${i/KERNEL/$KERN-tinycore$ARCH}
-		deps+=" $(tcdepends.sh $i | grep -e "^$i:" | cut -d: -f2-)"
+		deps+=" $($getdeps $i | grep -e "^$i:" | cut -d: -f2-)"
 		deps+=" $(cat $tczdir/$i.dep) $i"
 	done
 	for i in $deps; do echo $i; done | sort | uniq
