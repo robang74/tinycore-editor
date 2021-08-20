@@ -60,6 +60,48 @@ function tceload() {
 	kill $pid
 }
 
+depdone=""
+function _tceload() {
+	mkdir -p /tmp/tcloop
+	wd=/usr/local/tce.installed
+	for i in $@; do
+		test -e $wd/${i/.tcz/} && continue
+		if echo "$depdone" | grep -q " $i"; then
+			true
+		elif grep -q "\.tcz" $tcdir/tcz/$i.dep; then
+			depdone="$depdone $i"
+			tceload $(cat $tcdir/tcz/$i.dep | tr \\n ' ') $i
+			continue
+		fi
+		load_single_tcz ${i/.tcz/}
+	done
+	echo
+}
+
+function load_single_tcz() {
+	rc=KO
+	cd /
+	while true; do
+		mkdir /tmp/tcloop/$1 || break
+		mount $tcdir/tcz/$1.tcz /tmp/tcloop/$1 || break
+		find /tmp/tcloop/$1 -type d | cut -d/ -f5- | xargs mkdir -p
+		eval $(find /tmp/tcloop/$1/ -type f | cut -d/ -f5- | \
+			sed -e "s,\(.*\),ln -sf /tmp/tcloop/$1/\1 \1;,")
+		eval $(find /tmp/tcloop/$1/ -type l | cut -d/ -f5- | \
+			sed -e "s,\(.*\),ln -sf /tmp/tcloop/$1/\1 \1;,")
+		wd=/usr/local/tce.installed
+		if [ -x $wd/$1 ]; then
+			$wd/$1
+		else
+			touch $wd/$1 2>/dev/null
+		fi
+		rc=OK
+		break
+	done
+	echo -n "$1 $rc "
+	cd - >/dev/null
+}
+
 function mount_single_tcz() {
 	rc=KO
 	while true; do
