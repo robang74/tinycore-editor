@@ -1,0 +1,11 @@
+--- src.prev/shell/ash.c	2021-08-19 01:38:13.406613956 +0200
++++ src/shell/ash.c	2021-08-20 14:32:47.615260876 +0200
+@@ -11055,7 +11055,7 @@ setinputstring(char *string)
+ 	g_parsefile->next_to_pgetc = string;
+ 	g_parsefile->left_in_line = strlen(string);
+ 	g_parsefile->buf = NULL;
+-	g_parsefile->linno = (doingtrap) ? lineno : 1;
++	g_parsefile->linno = lineno;
+ 	INT_ON;
+ }
+ 

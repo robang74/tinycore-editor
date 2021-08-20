@@ -69,3 +69,15 @@ onerror() at line 16 == 16
 exit in mytest() at line 23 == 23 with pippo but not pluto
 #############################################
 
+################## TEST 8 ##################
+ciao! at line 29 == 29
+hello by mytest() at line 22 == 22
+pippo
+LINENO=34
+LINENO=35
+tests/test8.sh: set: line 35: illegal option -o invalid
+[1;31mERROR: test8.sh failed at line 35, rc: 1[0m
+onerror() at line 16 == 16
+exit in () at line 35 == 35 with pippo but not pluto
+#############################################
+
