@@ -152,6 +152,14 @@
 18. There is an adavantage using the ISO/USB image with VirtualBox: at the
     boot the shared folder named 'Shared' will be mounted in /mnt/sf_Shared
 
+19. When you arrived to a configuration which satisfy your expectations, then
+    you can save a lot of seconds at boot time using tczmetamerge.sh. It will
+    create a big meta package for each onion layer defined in tinycore.conf.
+    The meta packaged named 'test' will be not produced because usefull for
+    quick changes in packages configuration for testing. Every time you will
+    change the packages configuration (conf.d/*.lst), you will need to redo
+    all meta packages and this is time consuming.
+
 ###############################################################################
 			USEFULL LINKS TO VISIT
 ###############################################################################
