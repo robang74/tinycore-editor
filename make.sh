@@ -399,7 +399,7 @@ while true; do
 	warn "Architecture: x86 $tcsize bit"
 	warn "Version: $TC.x"
 
-	tczlist=$(gettczlist)
+	tczlist=$(gettczlist $PWD)
 	if [ "$tczlist" == "ERROR" ]; then
 		exit 1
 	fi

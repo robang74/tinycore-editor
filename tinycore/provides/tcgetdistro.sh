@@ -104,7 +104,7 @@ else
 	realexit 1
 fi 
 source tinycore.conf
-tczlist=$(gettczlist)
+tczlist=$(gettczlist $PWD)
 if [ "$tczlist" == "ERROR" ]; then
 	realexit 1
 fi
