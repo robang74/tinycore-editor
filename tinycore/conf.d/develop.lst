@@ -25,12 +25,10 @@ ipv6-netfilter-KERNEL.tcz
 isl.tcz
 kmaps.tcz
 libdb.tcz
-liblzma.tcz
 libtirpc-dev.tcz
 libtirpc.tcz
 libzstd.tcz
 linux-5.10_api_headers.tcz
-lzo.tcz
 make.tcz
 mkisofs-tools.tcz
 mpc.tcz
@@ -44,7 +42,6 @@ openssl-1.1.1.tcz
 patch.tcz
 pkg-config.tcz
 readline.tcz
-squashfs-tools.tcz
 tar.tcz
 udev-lib.tcz
 util-linux.tcz
