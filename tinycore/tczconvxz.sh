@@ -32,14 +32,18 @@ function chownuser() {
 export PATH=/home/tc/.local/bin:/usr/local/sbin:/usr/local/bin
 export PATH=$PATH:/apps/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
+skipvals="0000 2073 1b78 5a58"
+
 trap "umount tmp 2>/dev/null || true" EXIT
 set -e
 mkdir -p tmp
 for i in *.tcz; do
 	algo=$(dd if=$i bs=1 skip=$[6*16+13] count=2 2>/dev/null | od -A none -x)
-	if [ "$algo" == " 5a58" -o "$algo" == " 0000" -o "$algo" == " 1b78" ]; then
-		continue
-	fi
+	for id in $skipvals; do
+		if [ "$algo" == " $id" ]; then
+			continue 2
+		fi
+	done
 	info "Recompressing $i (algo:$algo)..."
 	mount $i tmp
 	mksquashfs tmp $i.xz -comp xz -Xbcj x86 >/dev/null
