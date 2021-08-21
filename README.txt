@@ -153,7 +153,7 @@
     boot the shared folder named 'Shared' will be mounted in /mnt/sf_Shared
 
 19. When you arrived to a configuration which satisfy your expectations, then
-    you can save a lot of seconds at boot time using tczmetamerge.sh. It will
+    you can save many seconds at boot time using tczmetamerge.sh. It will
     create a big meta package for each onion layer defined in tinycore.conf.
     The meta packaged named 'test' will be not produced because usefull for
     quick changes in packages configuration for testing. Every time you will
