@@ -195,10 +195,14 @@ function tccopyall() {
 	test -n "$tcldir"
 	cd tinycore
 	./tccustom.sh
-	./rootfs.sh update
 	ln -sf ../tccustom$tcsize.tgz changes/tccustom.tgz
 	chownuser tccustom*.tgz changes
-	cd -
+	if [ -e ../busybox/src/busybox ]; then
+		../busybox/busybox.sh update quiet
+	else
+		./rootfs.sh update
+	fi
+	cd - >/dev/null
 	mkdir -p $tcldir/flags
 	mkdir -p $tcldir/custom
 	mkdir -p $tcldir/provides

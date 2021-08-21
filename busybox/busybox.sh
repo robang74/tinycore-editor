@@ -161,12 +161,15 @@ if [ "$2" != "quiet" ]; then
 	warn "Architecture: x86 ${arch/-m/} bit"
 	warn "Version: $version"
 	echo
+else
+	echo
+	exec &> >(grep -v "./_install")
 fi
 
 if [ "$1" == "download" ]; then
 	done=1
 	cd $mydir
-	info "executing download..."
+	info "busybox.sh executing download..."
 	if which tce-load >/dev/null; then
 		tczlist="wget patch make linux-5.10_api_headers"
 		tczlist+=" gcc glibc_base-dev libtirpc-dev"
@@ -187,7 +190,7 @@ fi
 if [ "$1" == "all" ]; then
 	done=1
 	cd $mydir
-	info "executing all..."
+	info "busybox.sh executing all..."
 	./busybox.sh open
 	./busybox.sh install
 #	if ! ./busybox.sh update; then
@@ -198,7 +201,7 @@ fi
 
 if [ "$1" == "checklib" ]; then
 	done=1
-	info "executing checklib..."
+	info "busybox.sh executing checklib..."
 	hver=$(ldd --version | head -n1)
 	hnver=${hver//.}
 	hnver=${hnver: -3}
@@ -230,7 +233,7 @@ fi
 if [ "$1" == "open" ]; then
 	done=1
 	cd $mydir
-	info "executing open${2+ $2}..."
+	info "busybox.sh executing open${2+ $2}..."
 	if [ ! -e busybox.tar.bz2 ]; then
 		echo
 		perr "ERROR: source archive not present, run $myname download"
@@ -286,7 +289,7 @@ fi
 if [ "$1" == "compile" ]; then
 	done=1
 	cd $mydir
-	info "executing compile..."
+	info "busybox.sh executing compile..."
 	warn "compile with: $compile"
 	checkfordir src open
 	echo
@@ -309,7 +312,7 @@ fi
 if [ "$1" == "install" ]; then
 	done=1
 	cd $mydir
-	info "executing install..."
+	info "busybox.sh executing install..."
 	checkfordir src open
 
 	cd src
@@ -395,7 +398,7 @@ if [ "$1" == "editconfig" ]; then
 		fi
 	fi
 	cd $mydir
-	info "executing editconfig..."
+	info "busybox.sh executing editconfig..."
 	checkfordir src open
 	cd src
 	usermake menuconfig
@@ -407,7 +410,7 @@ if [ "$1" == "saveconfig" ]; then
 	done=1
 	cd $mydir
 	ctype=$(cat src/.config.type 2>/dev/null)
-	info "executing saveconfig${ctype+ $ctype}..."
+	info "busybox.sh executing saveconfig${ctype+ $ctype}..."
 	checkconfig $ctype
 	if [ ! -d src ]; then
 		echo
@@ -433,14 +436,14 @@ if [ "$1" == "update" ]; then
 	checkfordir src open
 	cd src
 	if [ ! -e .config.type -o ! -e .config ]; then
-		info "executing update..."
+		info "busybox.sh executing update..."
 		echo
 		perr "ERROR: run $myname compile first, abort"
 		echo
 		realexit 1
 	fi
 	ctype=$(cat .config.type 2>/dev/null)
-	info "executing update${ctype+ $ctype}..."
+	info "busybox.sh executing update${ctype+ $ctype}..."
 	warn "compile with: $compile"
 	checkconfig $ctype
 	rm -rf _install rootfs
@@ -456,7 +459,7 @@ fi
 if [ "$1" == "close" ]; then
 	done=1
 	cd $mydir
-	info "executing close..."
+	info "busybox.sh executing close..."
 	checkfordir src open
 	cd src
 	sudo rm -rf _install rootfs .config*
@@ -471,14 +474,14 @@ fi
 if [ "$1" == "clean" ]; then
 	done=1
 	cd $mydir
-	info "executing clean..."
+	info "busybox.sh executing clean..."
 	rm -rf src .patches_applied
 fi
 
 if [ "$1" == "distclean" ]; then
 	done=1
 	cd $mydir
-	info "executing distclean..."
+	info "busybox.sh executing distclean..."
 	rm -f busybox.tar.bz2 .patches_applied*
 	rm -f config.suid config.nosuid
 	rm -rf src
