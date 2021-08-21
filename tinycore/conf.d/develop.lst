@@ -3,10 +3,8 @@ advcomp.tcz
 attr.tcz
 bash.tcz
 binutils.tcz
-bridge-utils.tcz
 ca-certificates.tcz
 db.tcz
-dnsmasq.tcz
 dosfstools.tcz
 dropbear.tcz
 e2fsprogs.tcz
@@ -19,14 +17,9 @@ glibc_add_lib.tcz
 glibc_base-dev.tcz
 gmp.tcz
 gzip.tcz
-iproute2.tcz
-iptables.tcz
-ipv6-netfilter-KERNEL.tcz
 isl.tcz
 kmaps.tcz
 libdb.tcz
-libtirpc-dev.tcz
-libtirpc.tcz
 libzstd.tcz
 linux-5.10_api_headers.tcz
 make.tcz
@@ -35,7 +28,6 @@ mpc.tcz
 mpfr.tcz
 ncursesw-dev.tcz
 ncursesw.tcz
-net-bridging-KERNEL.tcz
 ntfs-3g.tcz
 ntfsprogs.tcz
 openssl-1.1.1.tcz

@@ -29,6 +29,8 @@ isl.tcz
 less.tcz
 libcap.tcz
 liblzma.tcz
+libtirpc-dev.tcz
+libtirpc.tcz
 libzstd.tcz
 linux-5.10_api_headers.tcz
 lzo.tcz
