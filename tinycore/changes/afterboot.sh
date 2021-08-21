@@ -42,7 +42,7 @@ function tceload() {
 	test -z "$1" && return 1
 	user=$(cat /etc/sysconfig/tcuser)
 	user=${user:-tc}
-	su $user -c "tce-load -bi $*" | \
+	su $user -c "tce-load -i $*" | \
 		grep -v -e "is already installed!" \
 			-e "Updating certificates" \
 			-e "added.* removed" | \
@@ -186,6 +186,48 @@ if [ "$dtdir" == "" ]; then
 	dtdir=$(devdir $dtdev)
 fi
 
+infotime "Creating the crypto keys..." ########################################
+
+find=/etc/ssh/sshd_config.orig
+found=$(ls -1d $find /usr/local/$find 2>/dev/null | head -n1)
+found=${found:-$find}
+sshdconfig=${found%%.orig}
+dstdir=$(dirname $sshdconfig)
+mkdir -p $dstdir
+if ! tar xzf $tcdir/custom/sshdhostkeys.tgz -moC $dstdir; then
+	keygen="-R"
+fi 2>/dev/null
+
+if which sshd >/dev/null; then
+	if [ "$keygen" != "" ]; then
+		ssh-keygen -A
+		ssh-keygen -m PEM -p -N '' -f $dstdir/ssh_host_dsa_key
+		ssh-keygen -m PEM -p -N '' -f $dstdir/ssh_host_rsa_key
+		ssh-keygen -m PEM -p -N '' -f $dstdir/ssh_host_ecdsa_key
+		ssh-keygen -m PEM -p -N '' -f $dstdir/ssh_host_ed25519_key
+	fi
+	if cat $sshdconfig.orig >$sshdconfig; then
+		authstr=PubkeyAuthentication
+		sed -ie "s,.*$authstr.*,$authstr yes," $sshdconfig
+		if ! grep -qe "$authstr" $sshdconfig; then
+			echo "$authstr yes" >>$sshdconfig
+		fi
+	fi
+elif which dropbear >/dev/null; then
+	dbdir=/usr/local/etc/dropbear
+	if [ "$keygen" == "" ]; then
+		dropbearconvert openssh dropbear $dstdir/ssh_host_dsa_key \
+			$dbdir/dropbear_dss_host_key
+		dropbearconvert openssh dropbear $dstdir/ssh_host_rsa_key \
+			$dbdir/dropbear_rsa_host_key
+		dropbearconvert openssh dropbear $dstdir/ssh_host_ecdsa_key \
+			$dbdir/dropbear_ecdsa_host_key
+		dropbearconvert openssh dropbear $dstdir/ssh_host_ed25519_key \
+			$dbdir/dropbear_ed25519_host_key
+	fi
+fi 2>/dev/null &
+pid=$!
+
 infotime "Upraising network and VLANs..." #####################################
 
 dhctmo=10
@@ -211,12 +253,13 @@ if [ "$netopts" != "" ] && ifconfig eth0 | grep -q "inet "; then
 elif ! grep -qw nodhcp /proc/cmdline; then
 	netset=1
 	echo -e "$netmsg"
-	echo -ne "\tenabling eth0:"
+	echo -ne "\tenabling eth0: "
 	if $dhclient eth0 >/dev/null 2>&1; then
-		echo " OK"
+		echo "OK"
 	else
-		echo " KO"
-	fi
+		echo "KO"
+	fi &
+	rotdash $!
 fi
 while true; do
 	test -e $tcdir/flags/VLAN-ENA.BLE || break
@@ -226,14 +269,15 @@ while true; do
 	netset=1
 	modprobe 8021q
 	for i in 1 2; do
-		echo -ne "\tenabling eth0.$i:"
+		echo -ne "\tenabling eth0.$i: "
 		vconfig add eth0 $i
 		ifconfig eth0.$i up
 		if $dhclient eth0.$i >/dev/null; then
-			echo " OK"
+			echo "OK"
 		else
-			echo " KO"
-		fi
+			echo "KO"
+		fi &
+		rotdash $!
 	done 2>/dev/null
 	break
 done
@@ -249,53 +293,20 @@ for i in /root /home/tc; do
 done 2>/dev/null
 chown -R tc.staff /home/tc
 
+echo -ne "\twaiting for the crypto keys: "
+rotdash $pid
+echo "OK"
+
 if [ "$tcpassword" != "" ]; then
 	echo -ne "\t" >&2
 	echo -e "$tcpassword\n$tcpassword" | passwd tc
 fi >/dev/null
 
-find=/etc/ssh/sshd_config.orig
-found=$(ls -1d $find /usr/local/$find 2>/dev/null | head -n1)
-found=${found:-$find}
-sshdconfig=${found%%.orig}
-dstdir=$(dirname $sshdconfig)
-mkdir -p $dstdir
-if ! tar xzf $tcdir/custom/sshdhostkeys.tgz -moC $dstdir; then
-	keygen="-R"
-fi 2>/dev/null
-
 if which sshd >/dev/null; then
 	sshd=1
-	if [ "$keygen" != "" ]; then
-		ssh-keygen -A
-		ssh-keygen -m PEM -p -N '' -f $dstdir/ssh_host_dsa_key
-		ssh-keygen -m PEM -p -N '' -f $dstdir/ssh_host_rsa_key
-		ssh-keygen -m PEM -p -N '' -f $dstdir/ssh_host_ecdsa_key
-		ssh-keygen -m PEM -p -N '' -f $dstdir/ssh_host_ed25519_key
-	fi
-	if cat $sshdconfig.orig >$sshdconfig; then
-		authstr=PubkeyAuthentication
-		sed -ie "s,.*$authstr.*,$authstr yes," $sshdconfig
-		if ! grep -qe "$authstr" $sshdconfig; then
-			echo "$authstr yes" >>$sshdconfig
-		fi
-	fi
 	$(which sshd)
 elif which dropbear >/dev/null; then
 	sshd=1
-	dbdir=/usr/local/etc/dropbear
-	if [ "$keygen" == "" ]; then
-		echo -ne "\tdropbear converting host keys:"
-		dropbearconvert openssh dropbear $dstdir/ssh_host_dsa_key \
-			$dbdir/dropbear_dss_host_key && echo -n " dsa"
-		dropbearconvert openssh dropbear $dstdir/ssh_host_rsa_key \
-			$dbdir/dropbear_rsa_host_key && echo -n " rsa"
-		dropbearconvert openssh dropbear $dstdir/ssh_host_ecdsa_key \
-			$dbdir/dropbear_ecdsa_host_key && echo -n " ecdsa"
-		dropbearconvert openssh dropbear $dstdir/ssh_host_ed25519_key \
-			$dbdir/dropbear_ed25519_host_key && echo -n " ed25519"
-		echo
-	fi
 	dropbear $keygen
 fi 2>/dev/null
 
