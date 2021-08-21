@@ -7,7 +7,7 @@ if [ "$1" == "x86" ]; then
 	export CFLAGS="-march=i486 -mtune=i686 -Os -pipe"
 	export CXXFLAGS="-march=i486 -mtune=i686 -Os -pipe"
 	export LDFLAGS="-Wl,-O1"
-elif [ "$1" == "x86_64"; then
+elif [ "$1" == "x86_64" ]; then
 	export CFLAGS="-mtune=generic -Os -pipe"
 	export CXXFLAGS="-mtune=generic -Os -pipe"
 	export LDFLAGS="-Wl,-O1"
@@ -17,7 +17,7 @@ elif [ "$1" == "RPi" ]; then
 	export LDFLAGS="-Wl,-O1"
 else
 	echo
-	echo "USAGE: $(basename $0) <name.tgz> <x86|x_86_64|RPi>"
+	echo "USAGE: $(basename $0) <name.tgz> <x86|x86_64|RPi>"
 	echo
 	exit 1
 fi
@@ -29,10 +29,24 @@ if ! which file >/dev/null; then
 	exit 1
 fi
 
-trap 'echo -e "\nERROR at line $LINENO, abort\n"' ERR
+function onerror() {
+	echo
+	echo -e "\nERROR at line $1, abort\n"
+	echo
+	exit 1
+}
+
+trap 'onerror $LINENO' EXIT
 set -e
 
+if [ -e configure.ac ]; then
+	autoupdate
+	autoconf
+	./configure
+fi
+
 make clean
+rm -f *~
 rm -f $name.tcz
 rm -f $name.tcz.list
 rm -f $name.tcz.zsync 
@@ -41,20 +55,20 @@ rm -f $name.tcz.build_dep
 sudo rm -rf _install
 
 make
-make DESTDIR=./_install install
-rm -rf _install/usr/local/share
+make DESTDIR=$PWD/_install install
+rm -rf _install/usr/local/share/man
 
 exebin=$(find _install -type f | xargs file | grep "ELF .* executable, .* not stripped" | cut -f 1 -d :)
 strip --strip-unneeded $exebin 2>/dev/null || true
-sstrip $exebin 2>/dev/null || true
+sstrip $exebin >/dev/null 2>&1 || true
 
 solibs=$(find _install -type f | xargs file | grep "ELF .* shared object, .* not stripped" | cut -f 1 -d :)
 strip -g $solibs 2>/dev/null || true
-sstrip $solibs 2>/dev/null || true
+sstrip $solibs >/dev/null 2>&1 || true
 
-find _install -type d | xargs chmod 755
-find _install -type f | xargs chmod 644
-find _install -type f | xargs file | grep "executable" | cut -d: -f1 | xargs chmod 755
+find _install -type d | xargs chmod 0755
+find _install -type f | xargs chmod 0644
+find _install -type f | xargs file | grep "executable" | cut -d: -f1 | xargs chmod 0755
 
 echo
 echo "Check this for dependencies"
@@ -70,7 +84,7 @@ sudo mksquashfs _install $name.tcz >/dev/null
 sudo chown tc.staff $name.tcz
 du -ks $name.tcz
 
-ls -1 /usr/local/tce.installed/ | grep -ve "-meta$" | sed -e "s,\(.*\),\1.tcz," >$name.tcz.buid_dep
+ls -1 /usr/local/tce.installed/ | grep -ve "-meta$" | sed -e "s,\(.*\),\1.tcz," >$name.tcz.build_dep
 
 cd _install 
 find usr -not -type d > ../$name.tcz.list
@@ -79,3 +93,4 @@ cd ..
 submitqc --libs --tcz=$name.tcz
 
 echo
+trap -- EXIT
