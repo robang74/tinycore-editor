@@ -12,4 +12,5 @@ wd=$(dirname $0)
 time $wd/file
 time $wd/binutils
 time $wd/findutils
+time $wd/libtirpc
 
