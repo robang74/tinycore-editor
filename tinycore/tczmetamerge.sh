@@ -85,6 +85,9 @@ function metamerge() {
 		if echo "$merged" | grep -q " $i"; then
 			warn "\tskipping: $i in $meta"
 			continue
+		elif [ ! -s $i ]; then
+			warn "\tskipping: $i is null"
+			continue
 		fi
 		echo -e "\tprocessing: $i"
 		fname=$tceinst/${i%????}

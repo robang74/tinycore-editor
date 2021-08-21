@@ -44,6 +44,10 @@ for i in *.tcz; do
 			continue 2
 		fi
 	done
+	if [ ! -s $i ]; then
+		warn "Skipping $i is null"
+		continue
+	fi
 	info "Recompressing $i (algo:$algo)..."
 	mount $i tmp
 	mksquashfs tmp $i.xz -comp xz -Xbcj x86 >/dev/null

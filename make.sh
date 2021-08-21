@@ -239,8 +239,10 @@ function tccopyall() {
 			chownuser $i.md5.txt
 			cd - >/dev/null
 		fi
-		touch tinycore/tcz/$i.info
-		cp -f tinycore/tcz/{$i,$i.dep,$i.info,$i.md5.txt} $tczdir
+		if [ -s tinycore/tcz/$i ]; then
+			touch tinycore/tcz/$i.info
+			cp -f tinycore/tcz/{$i,$i.dep,$i.info,$i.md5.txt} $tczdir
+		fi
 	done
 	echo -e "\ttransfer tinycore/tcz/{selected *.tcz} -> /$tczdir/"
 	sync
