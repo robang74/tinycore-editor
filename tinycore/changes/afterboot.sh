@@ -196,7 +196,7 @@ fi
 
 infotime "Upraising network and VLANs..." #####################################
 
-dhctmo=7
+dhctmo=10
 if which dhclient >/dev/null; then
 	netmsg="\tusing dhclient..."
 	dhclient="timeout $dhctmo dhclient"
