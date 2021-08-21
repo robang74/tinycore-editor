@@ -196,41 +196,56 @@ infotime "Upraising network and VLANs..." #####################################
 
 dhctmo=7
 if which dhclient >/dev/null; then
-	echo -e "\tusing dhclient..."
+	netmsg="\tusing dhclient..."
 	dhclient="timeout $dhctmo dhclient"
 	mkdir -p /var/db
 else
-	echo -e "\tusing udhcpc..."
+	netmsg="\tusing udhcpc..."
 	dhclient="udhcpc -T1 -t$dhctmo -ni"
 fi 2>/dev/null
 
-if ! ifconfig eth0 | grep -q "inet "; then
-	echo -ne "\tenabling eth0:"
+if [ -e $tcdir/flags/ETH0-STATIC.UP ]; then
+	echo -e "\tusing static settings..."
+	source $tcdir/flags/ETH0-STATIC.UP
+else
 	ifconfig eth0 up
+fi
+
+if [ "$netopts" != "" ] && ifconfig eth0 | grep -q "inet "; then
+	netset=1
+	echo -ne "\tstatic eth0  : OK"
+elif ! grep -qw nodhcp /proc/cmdline; then
+	netset=1
+	echo -e "$netmsg"
+	echo -ne "\tenabling eth0:"
 	if $dhclient eth0 >/dev/null 2>&1; then
 		echo " OK"
 	else
 		echo " KO"
 	fi
 fi
-for k in $tcdir/flags/VLAN-ENA.BLE; do
+while true; do
+	test -e $tcdir/flags/VLAN-ENA.BLE || break
 	if ifconfig eth0 | grep -q "inet "; then
 		break;
 	fi
+	netset=1
 	modprobe 8021q
 	for i in 1 2; do
 		echo -ne "\tenabling eth0.$i:"
 		vconfig add eth0 $i
 		ifconfig eth0.$i up
-		if $dhclient eth0.$i >/dev/null 2>&1; then
+		if $dhclient eth0.$i >/dev/null; then
 			echo " OK"
 		else
 			echo " KO"
 		fi
-	done
+	done 2>/dev/null
+	break
 done
-
-infotime "Upraising SSH for {tc, $tcpassword}..." #############################
+if [ "$netset" != "1" ]; then
+	echo -e "\tno settings found."
+else infotime "Upraising SSH for {tc, $tcpassword}..." ########################
 
 for i in /root /home/tc; do
 	mkdir -p $i/.ssh
@@ -300,7 +315,7 @@ else
 	echo
 fi
 
-###############################################################################
+fi ############################################################################
 
 kmap=$(sed -e "s,.* kmap=\([^ ]*\) .*,\1," /proc/cmdline)
 if [ -e /usr/share/kmap/$kmap.kmap ]; then
