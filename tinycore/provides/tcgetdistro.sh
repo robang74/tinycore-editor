@@ -158,7 +158,7 @@ download -ne $tcrepo/$distro/vmlinuz$ARCH vmlinuz
 download -ne $tcrepo/$distro/modules$ARCH.gz modules.gz
 
 if [ "$SUDO_USER" != "" ]; then
-	chownuser vmlinuz rootfs.gz modules.gz
+	chownuser vmlinuz rootfs.gz modules.gz chownuser .downloaded
 fi
 
 deps=$(get_tczlist_full)
@@ -172,6 +172,9 @@ for i in $deps; do
 	download -ne $tcrepo/$tczall/$i.info $i.info
 	download -ne $tcrepo/$tczall/$i.md5.txt $i.md5.txt
 done
+if [ "$SUDO_USER" != "" ]; then
+	chownuser .
+fi
 cd ..
 
 trap - EXIT
