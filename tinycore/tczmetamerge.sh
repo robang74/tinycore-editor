@@ -40,7 +40,12 @@ function metamerge() {
 	declare i n udir meta list
 	meta=$1
 	shift
-	[ "$1" == "" ] && return 0
+	test "$1" == "" && return 0
+	if [ "$meta" == "test" ]; then
+		warn "$meta-meta.tcz skipping by default"
+		echo
+		return 0
+	fi
 	list=$(echo "$@" | sed -e "s/KERNEL/$KERN-tinycore$ARCH/g")
 	list=$(echo "$list" | tr ' ' \\n | sort | uniq)
 	merged=$(echo "$merged" | tr \\n ' ')
