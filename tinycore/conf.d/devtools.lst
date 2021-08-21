@@ -45,6 +45,7 @@ pkg-config.tcz
 readline.tcz
 sed.tcz
 squashfs-tools.tcz
+sstrip.tcz
 strace.tcz
 submitqc.tcz
 util-linux_base-dev.tcz
