@@ -15,6 +15,7 @@ expat2.tcz
 file.tcz
 findutils.tcz
 flex.tcz
+fuse-dev.tcz
 gawk.tcz
 gcc_base-dev.tcz
 gcc_libs-dev.tcz

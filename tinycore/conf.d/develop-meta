@@ -9,7 +9,6 @@ set -x
 
 wd=$(dirname $0)
 
-time $wd/fuse
 time $wd/binutils
 time $wd/openssl-1.1.1
 

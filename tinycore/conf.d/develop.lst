@@ -8,7 +8,6 @@ db.tcz
 dosfstools.tcz
 dropbear.tcz
 e2fsprogs.tcz
-fuse.tcz
 gcc_base-dev.tcz
 gcc_libs-dev.tcz
 gcc_libs.tcz
