@@ -51,7 +51,7 @@ function tceload() {
 	test -z "$1" && return 1
 	rotating 0.1 &
 	pid=$!
-	su tc -c "tce-load -i $*" | \
+	su tc -c "tce-load -bi $*" | \
 		grep -v -e "is already installed!" \
 			-e "Updating certificates" \
 			-e "added.* removed" | \
