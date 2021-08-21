@@ -115,8 +115,9 @@ for i in "$@"; do
 	i=${i/KERNEL/$KERN-tinycore$ARCH}
 	info "Downloading $i ..."
 	download $tcrepo/$tczall/$i $i
-	i="$i.dep"
-	download -ne $tcrepo/$tczall/$i $i
+	download -ne $tcrepo/$tczall/$i.dep $i.dep
+	download -ne $tcrepo/$tczall/$i.info $i.info
+	download -ne $tcrepo/$tczall/$i.md5.txt $i.md5.txt
 done
 comp "$(basename $0) completed successfully"
 echo

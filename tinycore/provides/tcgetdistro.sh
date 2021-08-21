@@ -104,11 +104,21 @@ else
 	realexit 1
 fi 
 source tinycore.conf
+
 tczlist=$(gettczlist $PWD)
 if [ "$tczlist" == "ERROR" ]; then
 	realexit 1
 fi
 cd - >/dev/null
+
+for i in $tczlist; do
+	ok=${i/-meta.tcz/OK}
+	ok=${ok: -2}
+	if [ "$ok" == "OK" ]; then
+		i=${i/-meta.tcz/}
+		tczlist="$tczlist $(cat conf.d/$i.lst)"
+	fi
+done
 
 if [ "$1" != "quiet" ]; then
 	echo
@@ -147,6 +157,7 @@ for i in $deps; do
 	i=${i/KERNEL/$KERN-tinycore$ARCH}
 	download -ne $tcrepo/$tczall/$i $i
 	download -ne $tcrepo/$tczall/$i.dep $i.dep
+	download -ne $tcrepo/$tczall/$i.info $i.info
 	download -ne $tcrepo/$tczall/$i.md5.txt $i.md5.txt
 done
 cd ..
