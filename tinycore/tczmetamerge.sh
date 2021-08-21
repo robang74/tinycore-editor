@@ -41,7 +41,8 @@ function metamerge() {
 	meta=$1
 	shift
 	[ "$1" == "" ] && return 0
-	list="$@"
+	list=$(echo "$@" | sed -e "s/KERNEL/$KERN-tinycore$ARCH/g")
+	list=$(echo "$list" | tr ' ' \\n | sort | uniq)
 	merged=$(echo "$merged" | tr \\n ' ')
 
 	cd tcz
@@ -56,7 +57,6 @@ function metamerge() {
 	info "Merging $meta in $meta-meta.tcz ..."
 	for i in $list; do
 		i=${i/.tcz/}.tcz
-		i=${i/KERNEL/$KERN-tinycore$ARCH}
 		if [ ! -e $i ]; then
 			echo
 			perr "\tERROR: $i is missing, abort"
@@ -77,7 +77,6 @@ function metamerge() {
 	trap 'rm -f $meta-meta.tcz; unmountall' EXIT
 	for i in $list; do
 		i=${i/.tcz/}.tcz
-		i=${i/KERNEL/$KERN-tinycore$ARCH}
 		if echo "$merged" | grep -q " $i"; then
 			warn "\tskipping: $i in $meta"
 			continue
