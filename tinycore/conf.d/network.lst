@@ -1,6 +1,8 @@
 bridge-utils.tcz
+db.tcz
 dnsmasq.tcz
 iproute2.tcz
 iptables.tcz
 ipv6-netfilter-KERNEL.tcz
+libdb.tcz
 net-bridging-KERNEL.tcz

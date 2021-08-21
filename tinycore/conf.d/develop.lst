@@ -4,7 +4,6 @@ attr.tcz
 bash.tcz
 binutils.tcz
 ca-certificates.tcz
-db.tcz
 dosfstools.tcz
 dropbear.tcz
 e2fsprogs.tcz
@@ -18,7 +17,6 @@ gmp.tcz
 gzip.tcz
 isl.tcz
 kmaps.tcz
-libdb.tcz
 libzstd.tcz
 linux-5.10_api_headers.tcz
 make.tcz
