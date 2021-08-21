@@ -7,6 +7,7 @@
 /tinycore/conf.d/test.lst
 /tinycore/tccustom32.tgz
 /tinycore/tccustom64.tgz
+/tinycore/.downloaded
 /tinycore/vmlinuz
 /tinycore/tcz/*
 /busybox/src

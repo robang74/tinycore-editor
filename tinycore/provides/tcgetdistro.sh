@@ -87,6 +87,7 @@ if [ "$1" == "clean" ]; then
 	rm -f rootfs.gz modules.gz vmlinuz
 	rm -f tcz/*.tcz tcz/*.tcz.dep
 	rm -f changes/tccustom.tgz
+	rm -f .downloaded
 	echo
 	comp "COMPLETED: files cleaning in $PWD"
 	echo
@@ -140,6 +141,17 @@ else
 		realexit 1
 	fi
 fi
+
+tcsnow=$(cat .downloaded 2>/dev/null || true)
+if [ "$tcsnow" != "" -a "$tcsnow" != "$tcsize" ]; then
+	echo
+	perr "ERROR: previous download have been done for x86 $tcsnow bits, abort"
+	echo
+	warn "SUGGEST: run $(basename $0) clean or change ARCH in tinycore.conf"
+	echo
+	realexit 1
+fi
+echo "$tcsize" >.downloaded
 
 download -ne $tcrepo/$distro/rootfs$ARCH.gz rootfs.gz
 download -ne $tcrepo/$distro/vmlinuz$ARCH vmlinuz
