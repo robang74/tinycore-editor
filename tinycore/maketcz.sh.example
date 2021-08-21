@@ -37,6 +37,7 @@ function onerror() {
 }
 
 trap 'onerror $LINENO' EXIT
+exec 2>&1 | tee $name.tcz.log
 set -e
 
 if [ -e configure.ac ]; then
@@ -81,14 +82,13 @@ read
 sudo rm -rf $name.tcz
 sudo chown -R root.root _install
 sudo mksquashfs _install $name.tcz >/dev/null
-sudo chown tc.staff $name.tcz
+sudo chown tc.staff $name.tcz*
+md5sum $name.tcz >$name.tcz.md5.txt
 du -ks $name.tcz
 
 ls -1 /usr/local/tce.installed/ | grep -ve "-meta$" | sed -e "s,\(.*\),\1.tcz," >$name.tcz.build_dep
 
-cd _install 
-find usr -not -type d > ../$name.tcz.list
-cd ..
+find _install -not -type d | sed -e "s,^_install,," > ../$name.tcz.list
 
 submitqc --libs --tcz=$name.tcz
 
