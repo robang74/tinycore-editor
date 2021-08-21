@@ -1,7 +1,7 @@
 #!/bin/ash
 
-make clean
-sudo rm -rf _install
+name=${1/.tcz/}
+shift
 
 if [ "$1" == "x86" ]; then
 	export CFLAGS="-march=i486 -mtune=i686 -Os -pipe"
@@ -14,10 +14,10 @@ elif [ "$1" == "x86_64"; then
 elif [ "$1" == "RPi" ]; then
 	export CFLAGS="-Os -pipe"
 	export CXXFLAGS="-Os -pipe"
-	export LDFLAGS="-Wl,-O1
+	export LDFLAGS="-Wl,-O1"
 else
 	echo
-	echo "USAGE: $(basename $0) x86 | x_86_64 | RPi
+	echo "USAGE: $(basename $0) <name.tgz> <x86|x_86_64|RPi>"
 	echo
 	exit 1
 fi
@@ -29,11 +29,24 @@ if ! which file >/dev/null; then
 	exit 1
 fi
 
+trap 'echo -e "\nERROR at line $LINENO, abort\n"' ERR
+set -e
+
+make clean
+sudo rm -rf _install
+
 make
 make DESTDIR=./_install install
 rm -rf _install/usr/local/share
-find _install -type f | xargs file | grep "ELF .* executable, .* not stripped" | cut -f 1 -d : | xargs strip --strip-unneeded 2>/dev/null
-find _install -type f | xargs file | grep "ELF .* shared object, .* not stripped" | cut -f 1 -d : | xargs strip -g 2>/dev/null
+
+exebin=$(find _install -type f | xargs file | grep "ELF .* executable, .* not stripped" | cut -f 1 -d :)
+strip --strip-unneeded $exebin 2>/dev/null || true
+sstrip $exebin 2>/dev/null || true
+
+solibs=$(find _install -type f | xargs file | grep "ELF .* shared object, .* not stripped" | cut -f 1 -d :)
+strip -g $solibs 2>/dev/null || true
+sstrip $solibs 2>/dev/null || true
+
 find _install -type d | xargs chmod 755
 find _install -type f | xargs chmod 644
 find _install -type f | xargs file | grep "executable" | cut -d: -f1 | xargs chmod 755
@@ -46,18 +59,18 @@ echo
 echo "Press ENTER to continue or CTR-C to stop"
 read
 
-sudo rm -rf unionfs-fuse.tcz
+sudo rm -rf $name.tcz
 sudo chown -R root.root _install
-sudo mksquashfs _install unionfs-fuse.tcz >/dev/null
-sudo chown tc.staff unionfs-fuse.tcz
-du -ks unionfs-fuse.tcz
+sudo mksquashfs _install $name.tcz >/dev/null
+sudo chown tc.staff $name.tcz
+du -ks $name.tcz
 
-ls -1 /usr/local/tce.installed/ | grep -ve "-meta$" | sed -e "s,\(.*\),\1.tcz," >unionfs-fuse.tcz.buid_dep
+ls -1 /usr/local/tce.installed/ | grep -ve "-meta$" | sed -e "s,\(.*\),\1.tcz," >$name.tcz.buid_dep
 
 cd _install 
-find usr -not -type d > ../unionfs-fuse.tcz.list
+find usr -not -type d > ../$name.tcz.list
 cd ..
 
-submitqc --libs --tcz=unionfs-fuse.tcz
+submitqc --libs --tcz=$name.tcz
 
 echo
