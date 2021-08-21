@@ -131,8 +131,8 @@ if [ -d $tcdir/tcz ]; then
 		cacert="$calast"
 	fi
 	infotime -n "Loading TCZ archives: "
-	tceload $metalist
-	tceload $tczlist
+	tceload $metalist | tr \\n \\0
+	tceload $tczlist || echo
 	tceload $cacert >/dev/null 2>&1 &
 	cd - >/dev/null
 fi
