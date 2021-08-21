@@ -60,7 +60,6 @@ if [ "$1" == "open" -o "$1" == "update" ]; then
 	cat ../changes/tc-functions > etc/init.d/tc-functions
 	echo "$tczmeta" | grep -w "develop" >etc/sysconfig/devel
 	test -e lib64 || ln -sf lib lib64
-	test -e lib/x86_64-linux-gnu || ln -sf . lib/x86_64-linux-gnu
 	echo "opened folder: $tmpdir"
 	cd ..
 fi
