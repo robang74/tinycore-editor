@@ -241,6 +241,7 @@ function tccopyall() {
 		fi
 		if [ -s tinycore/tcz/$i ]; then
 			touch tinycore/tcz/$i.info
+			chownuser tinycore/tcz/$i.info
 			cp -f tinycore/tcz/{$i,$i.dep,$i.info,$i.md5.txt} $tczdir
 		fi
 	done
