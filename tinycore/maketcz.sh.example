@@ -33,6 +33,11 @@ trap 'echo -e "\nERROR at line $LINENO, abort\n"' ERR
 set -e
 
 make clean
+rm -f $name.tcz
+rm -f $name.tcz.list
+rm -f $name.tcz.zsync 
+rm -f $name.tcz.md5.txt
+rm -f $name.tcz.build_dep
 sudo rm -rf _install
 
 make
