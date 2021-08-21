@@ -25,13 +25,13 @@ function mytest() {
 }
 trap 'onerror $LINENO $FUNCNAME' ERR
 trap 'echo exit in $FUNCNAME\(\) at line $LINENO == 23 with pippo but not pluto' EXIT
-set -E
+exec 2>&1; set -E
 echo "ciao! at line $LINENO == 29, FUNCNAME = '$FUNCNAME'"
 mytest || true
 echo "ciao! at line $LINENO == 31, FUNCNAME = '$FUNCNAME'"
 echo "pippo"
-mytest
-echo "mytest should have failed at line 30 and it will again at line 36"
+(:) >/access-denied
+echo ""
 set -e
 mytest
 
