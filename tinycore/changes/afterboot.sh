@@ -123,15 +123,17 @@ fi 2>/dev/null
 
 if [ -d $tcdir/tcz ]; then
 	cd $tcdir/tcz
-	tczlist=$(ls -1 *.tcz 2>/dev/null)
+	metalist=$(ls -1 *-meta.tcz 2>/dev/null)
+	tczlist=$(ls -1 *.tcz 2>/dev/null | grep -ve "-meta.tcz$")
 	calast="ca-certificates.tcz"
 	if echo "$tczlist" | grep -q "$calast"; then
 		tczlist=$(echo "$tczlist" | grep -v "$calast")
 		cacert="$calast"
 	fi
 	infotime -n "Loading TCZ archives: "
+	tceload $metalist
 	tceload $tczlist
-	tceload $cacert >/dev/null &
+	tceload $cacert >/dev/null 2>&1 &
 	cd - >/dev/null
 fi
 
