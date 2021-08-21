@@ -42,7 +42,7 @@ function tceload() {
 	test -z "$1" && return 1
 	user=$(cat /etc/sysconfig/tcuser)
 	user=${user:-tc}
-	su $user -c "tce-load -i $*" | \
+	su $user -c "tce-load -bi $*" | \
 		grep -v -e "is already installed!" \
 			-e "Updating certificates" \
 			-e "added.* removed" | \
@@ -126,6 +126,7 @@ if [ -d $tcdir/tcz ]; then
 	tceload $tczlist || echo
 	tceload $cacert >/dev/null 2>&1 &
 	cd - >/dev/null
+	ldconfig
 fi
 
 infotime "Mounting local drives in read only..." ##############################
@@ -148,7 +149,7 @@ fi 2>/dev/null
 
 infotime "Customizing the system..." ##########################################
 
-tar xzf $tcdir/custom/tccustom.tgz -moC / >/dev/null 2>&1
+tar xzf $tcdir/custom/tccustom.tgz -moC /
 ldconfig
 
 . /etc/os-release
