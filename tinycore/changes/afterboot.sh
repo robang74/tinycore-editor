@@ -38,26 +38,17 @@ function devdir() {
 	sed -ne "s,^$1 \([^ ]*\) .*,\1,p" /proc/mounts | head -n1
 }
 
-function rotating() {
-	while true; do
-		printf "%c\b" '\'; sleep $1
-		printf "%c\b" '|'; sleep $1
-		printf "%c\b" '/'; sleep $1
-		printf "%c\b" '-'; sleep $1
-	done
-}
-
 function tceload() {
 	test -z "$1" && return 1
-	rotating 0.1 &
-	pid=$!
-	su tc -c "tce-load -bi $*" | \
+	user=$(cat /etc/sysconfig/tcuser)
+	user=${user:-tc}
+	su $user -c "tce-load -i $*" | \
 		grep -v -e "is already installed!" \
 			-e "Updating certificates" \
 			-e "added.* removed" | \
 			tr \\n ' ' | grep .. || \
-				echo "no extra tcz!"
-	kill $pid
+				echo "no extra tcz!" &
+	rotdash $!
 }
 
 ###############################################################################
