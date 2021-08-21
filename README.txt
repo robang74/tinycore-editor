@@ -149,6 +149,9 @@
     is not what you want, simple delete that file. You can also change the
     tarball content using host keys of your own choice.
 
+18. There is an adavantage using the ISO/USB image with VirtualBox: at the
+    boot the shared folder named 'Shared' will be mounted in /mnt/sf_Shared
+
 ###############################################################################
 			USEFULL LINKS TO VISIT
 ###############################################################################
