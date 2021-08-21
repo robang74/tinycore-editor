@@ -399,6 +399,19 @@ while true; do
 	warn "Architecture: x86 $tcsize bit"
 	warn "Version: $TC.x"
 
+	for i in $tczmeta; do
+		test -e tcz/$i.list || continue
+		if [ conf.d/$i.lst -nt tcz/$i.list ]; then
+			echo
+			perr "WARNING: conf.d/$i.lst is newer than tcz/$i.list"
+			echo
+			echo "If you did changes then delete and rebuild the meta packages"
+			echo "otherwise touch tinycore/tcz/$i.list to ignore this message"
+			echo
+			exit 1
+		fi
+	done
+
 	tczlist=$(gettczlist $PWD)
 	if [ "$tczlist" == "ERROR" ]; then
 		exit 1
