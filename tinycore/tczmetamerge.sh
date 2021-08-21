@@ -61,6 +61,8 @@ function metamerge() {
 			echo
 			perr "\tERROR: $i is missing, abort"
 			echo
+			warn "\tSUGGEST: run ./provides/tcgetdistro.sh and retry"
+			echo
 			cd ..
 			return 1
 		fi
