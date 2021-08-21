@@ -1,13 +1,13 @@
 #!/bin/bash
 
-for i in {1..9}; do
+for i in {1..9} A; do
 	echo "################## TEST $i ##################"
 	src/busybox ash tests/test$i.sh
 	echo "#############################################"
 	echo
 done >tests/bbash.txt
 
-for i in {1..9}; do
+for i in {1..9} A; do
 	echo "################## TEST $i ##################"
 	bash tests/test$i.sh
 	echo "#############################################"

@@ -86,3 +86,18 @@ shell: bash
 LINENO=0
 #############################################
 
+################## TEST A ##################
+ciao! at line 29 == 29, FUNCNAME = ''
+hello by mytest() at line 22 == 22
+ciao! at line 31 == 31, FUNCNAME = ''
+pippo
+hello by mytest() at line 22 == 22
+[1;31mERROR: testA.sh failed in mytest() at line 23, rc: 1[0m
+onerror() at line 16 == 16
+mytest should have failed at line 30 and it will again at line 36
+hello by mytest() at line 22 == 22
+[1;31mERROR: testA.sh failed in mytest() at line 23, rc: 1[0m
+onerror() at line 16 == 16
+exit in mytest() at line 1 == 23 with pippo but not pluto
+#############################################
+
