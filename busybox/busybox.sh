@@ -334,8 +334,9 @@ if [ "$1" == "install" ]; then
 	mkdir -p etc bin
 	chmod u+s bin/busybox
 	cp -f ../../busybox.conf etc
+	chmod 0444 etc/busybox.conf
 	cp -f ../../busybox.suid bin
-	chmod a+x bin/busybox.suid
+	chmod 0555 bin/busybox.suid
 	chown -R root.root .
 	cp -arf * $tcdir/$rtdir
 
