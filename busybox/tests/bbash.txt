@@ -26,12 +26,14 @@ exit at line 34 == 34 with pippo but not pluto
 ciao! at line 29 == 29
 hello at line 22 == 22
 exit at line 30 == 30 with pippo but not pluto
+memory leak, evaldone: 0, exitstatus: 1, eflag: 1, e: 1, evalskip: 0x00000000
 #############################################
 
 ################## TEST 4 ##################
 ciao! at line 29 == 29
 hello by mytest() at line 22 == 22
 exit in mytest() at line 30 == 30 with pippo but not pluto
+memory leak, evaldone: 0, exitstatus: 1, eflag: 1, e: 1, evalskip: 0x00000000
 #############################################
 
 ################## TEST 5 ##################
@@ -53,6 +55,7 @@ this is a multi-line trap which ends at line 9 == 11
 ciao! at line 29 == 29
 hello by mytest() at line 22 == 22
 exit in mytest() at line 30 == 30 with pippo but not pluto
+memory leak, evaldone: 0, exitstatus: 0, eflag: 0, e: 1, evalskip: 0x00000000
 #############################################
 
 ################## TEST 7 ##################
@@ -99,5 +102,60 @@ hello by mytest() at line 22 == 22
 [1;31mERROR: testA.sh failed in mytest() at line 23, rc: 1[0m
 onerror() at line 16 == 16
 exit in mytest() at line 23 == 23 with pippo but not pluto
+#############################################
+
+################## TEST B ##################
+hello by myecho() at line 27
+FUNCNAME = , LINENO = 45, EXITSTATUS: 0
+FUNCNAME = , LINENO = 46
+hello by mytrue() at line 36
+FUNCNAME = , LINENO = 47, EXITSTATUS: 0
+FUNCNAME = , LINENO = 48
+hello by myfalse() at line 31
+FUNCNAME = , LINENO = 50
+hello by myfalse() at line 31
+FUNCNAME = , LINENO = 51, EXITSTATUS: 1
+FUNCNAME = , LINENO = 52
+hello by mytrue() at line 36
+FUNCNAME = , LINENO = 53, EXITSTATUS: 0
+FUNCNAME = , LINENO = 54
+hello by myfalse() at line 31
+[1;31mERROR: testB.sh failed in myfalse() at line 32, rc: 1[0m
+onerror() at line 16 == 16
+[1;31mERROR: testB.sh failed at line 55, rc: 1[0m
+onerror() at line 16 == 16
+FUNCNAME = , LINENO = 55, EXITSTATUS: 1
+FUNCNAME = , LINENO = 56
+hello by myexit() at line 22
+exit in myexit() at line 60 == 60, EXITSTATUS: 1
+memory leak, evaldone: 0, exitstatus: 0, eflag: 0, e: 1, evalskip: 0x00000000
+#############################################
+
+################## TEST C ##################
+hello by myecho() at line 27
+FUNCNAME = , LINENO = 45, EXITSTATUS: 0
+FUNCNAME = , LINENO = 46
+hello by mytrue() at line 36
+FUNCNAME = , LINENO = 47, EXITSTATUS: 0
+FUNCNAME = , LINENO = 48
+hello by myfalse() at line 31
+FUNCNAME = , LINENO = 50
+hello by myfalse() at line 31
+FUNCNAME = , LINENO = 51, EXITSTATUS: 1
+FUNCNAME = , LINENO = 52
+hello by mytrue() at line 36
+FUNCNAME = , LINENO = 53, EXITSTATUS: 0
+FUNCNAME = , LINENO = 54
+hello by myfalse() at line 31
+[1;31mERROR: testC.sh failed in myfalse() at line 32, rc: 1[0m
+onerror() at line 16 == 16
+[1;31mERROR: testC.sh failed at line 55, rc: 1[0m
+onerror() at line 16 == 16
+FUNCNAME = , LINENO = 55, EXITSTATUS: 1
+FUNCNAME = , LINENO = 56
+hello by myfalse() at line 31
+[1;31mERROR: testC.sh failed in myfalse() at line 32, rc: 1[0m
+onerror() at line 16 == 16
+exit in myfalse() at line 32 == 32 not 60 because set -E, EXITSTATUS: 1
 #############################################
 

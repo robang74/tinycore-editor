@@ -1,0 +1,383 @@
+--- src.0/shell/ash.c	2021-05-03 20:06:49.000000000 +0200
++++ src.9/shell/ash.c	2021-08-22 15:03:28.953645945 +0200
+@@ -336,7 +336,8 @@ static const char *const optletters_optn
+ 	"a"   "allexport",
+ 	"b"   "notify",
+ 	"u"   "nounset",
+-	"\0"  "vi"
++	"\0"  "vi",
++	"E"   "errtrace"
+ #if BASH_PIPEFAIL
+ 	,"\0"  "pipefail"
+ #endif
+@@ -431,14 +432,15 @@ struct globals_misc {
+ #define bflag optlist[12]
+ #define uflag optlist[13]
+ #define viflag optlist[14]
++#define Eflag optlist[15]
+ #if BASH_PIPEFAIL
+-# define pipefail optlist[15]
++# define pipefail optlist[16]
+ #else
+ # define pipefail 0
+ #endif
+ #if DEBUG
+-# define nolog optlist[15 + BASH_PIPEFAIL]
+-# define debug optlist[16 + BASH_PIPEFAIL]
++# define nolog optlist[16 + BASH_PIPEFAIL]
++# define debug optlist[17 + BASH_PIPEFAIL]
+ #endif
+ 
+ 	/* trap handler commands */
+@@ -456,7 +458,7 @@ struct globals_misc {
+ 	/* indicates specified signal received */
+ 	uint8_t gotsig[NSIG - 1]; /* offset by 1: "signal" 0 is meaningless */
+ 	uint8_t may_have_traps; /* 0: definitely no traps are set, 1: some traps may be set */
+-	char *trap[NSIG];
++	char *trap[NSIG + 1]; /* increased by 1: trap ERR handler */
+ 	char **trap_ptr;        /* used only by "trap hack" */
+ 
+ 	/* Rarely referenced stuff */
+@@ -2109,6 +2111,7 @@ static const struct {
+ 	{ VSTRFIXED|VTEXTFIXED       , defoptindvar, getoptsreset    },
+ #endif
+ 	{ VSTRFIXED|VTEXTFIXED       , NULL /* inited to linenovar */, NULL },
++	{ VSTRFIXED|VTEXTFIXED       , NULL /* inited to funcnamevar */, NULL },
+ #if ENABLE_ASH_RANDOM_SUPPORT
+ 	{ VSTRFIXED|VTEXTFIXED|VUNSET|VDYNAMIC, "RANDOM", change_random },
+ #endif
+@@ -2135,6 +2138,9 @@ struct globals_var {
+ 	struct var varinit[ARRAY_SIZE(varinit_data)];
+ 	int lineno;
+ 	char linenovar[sizeof("LINENO=") + sizeof(int)*3];
++	char funcnamevar[sizeof("FUNCNAME=") + 256];
++	char *funcname;
++	bool doingtrap;
+ };
+ extern struct globals_var *BB_GLOBAL_CONST ash_ptr_to_globals_var;
+ #define G_var (*ash_ptr_to_globals_var)
+@@ -2145,6 +2151,9 @@ extern struct globals_var *BB_GLOBAL_CON
+ #define varinit       (G_var.varinit      )
+ #define lineno        (G_var.lineno       )
+ #define linenovar     (G_var.linenovar    )
++#define funcnamevar   (G_var.funcnamevar  )
++#define funcname      (G_var.funcname     )
++#define doingtrap	  (G_var.doingtrap    )
+ #define vifs      varinit[0]
+ #if ENABLE_ASH_MAIL
+ # define vmail    varinit[1]
+@@ -2160,13 +2169,14 @@ extern struct globals_var *BB_GLOBAL_CON
+ #endif
+ #define VAR_OFFSET2 (VAR_OFFSET1 + ENABLE_ASH_GETOPTS)
+ #define vlineno   varinit[VAR_OFFSET2 + 5]
++#define vfuncname varinit[VAR_OFFSET2 + 6]
+ #if ENABLE_ASH_RANDOM_SUPPORT
+-# define vrandom  varinit[VAR_OFFSET2 + 6]
++# define vrandom  varinit[VAR_OFFSET2 + 7]
+ #endif
+ #define VAR_OFFSET3 (VAR_OFFSET2 + ENABLE_ASH_RANDOM_SUPPORT)
+ #if BASH_EPOCH_VARS
+-# define vepochs  varinit[VAR_OFFSET3 + 6]
+-# define vepochr  varinit[VAR_OFFSET3 + 7]
++# define vepochs  varinit[VAR_OFFSET3 + 7]
++# define vepochr  varinit[VAR_OFFSET3 + 8]
+ #endif
+ #define INIT_G_var() do { \
+ 	unsigned i; \
+@@ -2177,8 +2187,13 @@ extern struct globals_var *BB_GLOBAL_CON
+ 		varinit[i].var_text = varinit_data[i].var_text; \
+ 		varinit[i].var_func = varinit_data[i].var_func; \
+ 	} \
++	lineno = 0; \
+ 	strcpy(linenovar, "LINENO="); \
+ 	vlineno.var_text = linenovar; \
++	strcpy(funcnamevar, "FUNCNAME="); \
++	vfuncname.var_text = funcnamevar; \
++	funcname = NULL; \
++	doingtrap = 0; \
+ } while (0)
+ 
+ /*
+@@ -2316,8 +2331,12 @@ lookupvar(const char *name)
+ 			v->var_func(NULL);
+ #endif
+ 		if (!(v->flags & VUNSET)) {
+-			if (v == &vlineno && v->var_text == linenovar) {
++			if (v->var_text == linenovar) {
+ 				fmtstr(linenovar+7, sizeof(linenovar)-7, "%d", lineno);
++			} else
++			if (v->var_text == funcnamevar) {
++				fmtstr(funcnamevar+9, sizeof(funcnamevar)-9, "%s", 
++					funcname ? funcname : "");
+ 			}
+ 			return var_end(v->var_text);
+ 		}
+@@ -5114,13 +5133,13 @@ clear_traps(void)
+ 	char **tp;
+ 
+ 	INT_OFF;
+-	for (tp = trap; tp < &trap[NSIG]; tp++) {
++	for (tp = trap; tp < &trap[NSIG+1]; tp++) { /* increased by 1: trap ERR handler */
+ 		if (*tp && **tp) {      /* trap not NULL or "" (SIG_IGN) */
+ 			if (trap_ptr == trap)
+ 				free(*tp);
+ 			/* else: it "belongs" to trap_ptr vector, don't free */
+ 			*tp = NULL;
+-			if ((tp - trap) != 0)
++			if ((tp - trap) != 0 && tp < &trap[NSIG])
+ 				setsignal(tp - trap);
+ 		}
+ 	}
+@@ -9069,7 +9088,7 @@ defun(union node *func)
+ static smallint evalskip;       /* set to SKIPxxx if we are skipping commands */
+ static int skipcount;           /* number of levels to skip */
+ static int loopnest;            /* current loop nesting level */
+-static int funcline;            /* starting line number of current function, or 0 if not in a function */
++static int funcline = 0;        /* starting line number of current function, or 0 if not in a function */
+ 
+ /* Forward decl way out to parsing code - dotrap needs it */
+ static int evalstring(char *s, int flags);
+@@ -9091,6 +9110,7 @@ dotrap(void)
+ 	if (!pending_sig)
+ 		return;
+ 
++	doingtrap = 1;
+ 	status = savestatus;
+ 	last_status = status;
+ 	if (status < 0) {
+@@ -9127,6 +9147,7 @@ dotrap(void)
+ 			exitstatus = status;
+ 	}
+ 
++	doingtrap = 0;
+ 	savestatus = last_status;
+ 	TRACE(("dotrap returns\n"));
+ }
+@@ -9176,8 +9197,6 @@ evaltree(union node *n, int flags)
+ 		goto setstatus;
+ 	case NREDIR:
+ 		errlinno = lineno = n->nredir.linno;
+-		if (funcline)
+-			lineno -= funcline - 1;
+ 		expredir(n->nredir.redirect);
+ 		pushredir(n->nredir.redirect);
+ 		status = redirectsafe(n->nredir.redirect, REDIR_PUSH);
+@@ -9190,7 +9209,7 @@ evaltree(union node *n, int flags)
+ 	case NCMD:
+ 		evalfn = evalcommand;
+  checkexit:
+-		if (eflag && !(flags & EV_TESTED))
++		if ((eflag || trap[NSIG]) && !(flags & EV_TESTED))
+ 			checkexit = ~0;
+ 		goto calleval;
+ 	case NFOR:
+@@ -9264,8 +9283,26 @@ evaltree(union node *n, int flags)
+ 	 */
+ 	dotrap();
+ 
+-	if (checkexit & status)
+-		raise_exception(EXEND);
++	if (checkexit & status) {
++		if(trap[NSIG] && (Eflag || (!Eflag && !funcline))) {
++				static bool recursive = 0;
++				if(!recursive) {
++					int savelineno = lineno;
++					savestatus = exitstatus;
++					doingtrap = 1;
++					recursive = 1;
++					evalstring(trap[NSIG], 0);
++					recursive = 0;
++					doingtrap = 0;
++					lineno = savelineno;
++					exitstatus = savestatus;
++					if(eflag)
++						exitshell();
++			}
++		}
++		if(eflag)
++			raise_exception(EXEND);
++	}
+ 	if (flags & EV_EXIT)
+ 		raise_exception(EXEND);
+ 
+@@ -9333,8 +9370,6 @@ evalfor(union node *n, int flags)
+ 	int status = 0;
+ 
+ 	errlinno = lineno = n->ncase.linno;
+-	if (funcline)
+-		lineno -= funcline - 1;
+ 
+ 	arglist.list = NULL;
+ 	arglist.lastp = &arglist.list;
+@@ -9365,8 +9400,6 @@ evalcase(union node *n, int flags)
+ 	int status = 0;
+ 
+ 	errlinno = lineno = n->ncase.linno;
+-	if (funcline)
+-		lineno -= funcline - 1;
+ 
+ 	arglist.list = NULL;
+ 	arglist.lastp = &arglist.list;
+@@ -9400,8 +9433,6 @@ evalsubshell(union node *n, int flags)
+ 	int status;
+ 
+ 	errlinno = lineno = n->nredir.linno;
+-	if (funcline)
+-		lineno -= funcline - 1;
+ 
+ 	expredir(n->nredir.redirect);
+ 	if (!backgnd && (flags & EV_EXIT) && !may_have_traps)
+@@ -9728,11 +9759,15 @@ evalfun(struct funcnode *func, int argc,
+ 	volatile struct shparam saveparam;
+ 	struct jmploc *volatile savehandler;
+ 	struct jmploc jmploc;
+-	int e;
++	int e, evaldone = 0;
++	int savelineno;
+ 	int savefuncline;
++	char *savefuncname;
+ 
++	savelineno = lineno;
+ 	saveparam = shellparam;
+ 	savefuncline = funcline;
++	savefuncname = funcname;
+ 	savehandler = exception_handler;
+ 	e = setjmp(jmploc.loc);
+ 	if (e) {
+@@ -9742,6 +9777,7 @@ evalfun(struct funcnode *func, int argc,
+ 	exception_handler = &jmploc;
+ 	shellparam.malloced = 0;
+ 	func->count++;
++	funcname = strdup(func->n.ndefun.text);
+ 	funcline = func->n.ndefun.linno;
+ 	INT_ON;
+ 	shellparam.nparam = argc - 1;
+@@ -9751,9 +9787,20 @@ evalfun(struct funcnode *func, int argc,
+ 	shellparam.optoff = -1;
+ #endif
+ 	evaltree(func->n.ndefun.body, flags & EV_TESTED);
++	evaldone = 1;
+  funcdone:
+ 	INT_OFF;
++	if((exitstatus && eflag) || (e)) {
++
++		/* memmory leak is not a problem, we are exiting */
++
++	} else {
++		if(funcname)
++			free(funcname);
++		funcname = savefuncname;
++	}
+ 	funcline = savefuncline;
++	lineno = savelineno;
+ 	freefunc(func);
+ 	freeparam(&shellparam);
+ 	shellparam = saveparam;
+@@ -10142,8 +10189,6 @@ evalcommand(union node *cmd, int flags)
+ 	int vlocal;
+ 
+ 	errlinno = lineno = cmd->ncmd.linno;
+-	if (funcline)
+-		lineno -= funcline - 1;
+ 
+ 	/* First expand the arguments. */
+ 	TRACE(("evalcommand(0x%lx, %d) called\n", (long)cmd, flags));
+@@ -10396,6 +10441,7 @@ evalcommand(union node *cmd, int flags)
+ 	FORCE_INT_ON;
+ 
+  out:
++
+ 	if (cmd->ncmd.redirect)
+ 		popredir(/*drop:*/ cmd_is_exec);
+ 	unwindredir(redir_stop);
+@@ -10774,13 +10820,15 @@ preadbuffer(void)
+ static void
+ nlprompt(void)
+ {
+-	g_parsefile->linno++;
++	if(!doingtrap)
++		g_parsefile->linno++;
+ 	setprompt_if(doprompt, 2);
+ }
+ static void
+ nlnoprompt(void)
+ {
+-	g_parsefile->linno++;
++	if(!doingtrap)
++		g_parsefile->linno++;
+ 	needprompt = doprompt;
+ }
+ 
+@@ -11012,7 +11060,7 @@ setinputstring(char *string)
+ 	g_parsefile->next_to_pgetc = string;
+ 	g_parsefile->left_in_line = strlen(string);
+ 	g_parsefile->buf = NULL;
+-	g_parsefile->linno = 1;
++	g_parsefile->linno = lineno;
+ 	INT_ON;
+ }
+ 
+@@ -12470,7 +12518,8 @@ checkend: {
+ 
+ 		if (c == '\n' || c == PEOF) {
+ 			c = PEOF;
+-			g_parsefile->linno++;
++			if(!doingtrap)
++				g_parsefile->linno++;
+ 			needprompt = doprompt;
+ 		} else {
+ 			int len_here;
+@@ -13713,7 +13762,7 @@ trapcmd(int argc UNUSED_PARAM, char **ar
+ 	nextopt(nullstr);
+ 	ap = argptr;
+ 	if (!*ap) {
+-		for (signo = 0; signo < NSIG; signo++) {
++		for (signo = 0; signo < NSIG + 1; signo++) { /* increased by 1: trap ERR handler */
+ 			char *tr = trap_ptr[signo];
+ 			if (tr) {
+ 				/* note: bash adds "SIG", but only if invoked
+@@ -13722,7 +13771,7 @@ trapcmd(int argc UNUSED_PARAM, char **ar
+ 				 * We are printing short names: */
+ 				out1fmt("trap -- %s %s\n",
+ 						single_quote(tr),
+-						get_signame(signo));
++						(signo == NSIG) ? "ERR" : get_signame(signo));
+ 		/* trap_ptr != trap only if we are in special-cased `trap` code.
+ 		 * In this case, we will exit very soon, no need to free(). */
+ 				/* if (trap_ptr != trap && tp[0]) */
+@@ -13748,7 +13797,7 @@ trapcmd(int argc UNUSED_PARAM, char **ar
+ 
+ 	exitcode = 0;
+ 	while (*ap) {
+-		signo = get_signum(*ap);
++		signo = strstr(*ap, "ERR") ? NSIG : get_signum(*ap);
+ 		if (signo < 0) {
+ 			/* Mimic bash message exactly */
+ 			ash_msg("%s: invalid signal specification", *ap);
+@@ -13767,7 +13816,7 @@ trapcmd(int argc UNUSED_PARAM, char **ar
+ 		}
+ 		free(trap[signo]);
+ 		trap[signo] = action;
+-		if (signo != 0)
++		if (signo != 0 && signo < NSIG)
+ 			setsignal(signo);
+ 		INT_ON;
+  next:
+@@ -14188,7 +14237,9 @@ exitshell(void)
+ 	if (p) {
+ 		trap[0] = NULL;
+ 		evalskip = 0;
++		doingtrap = 1;
+ 		evalstring(p, 0);
++		doingtrap = 0;
+ 		evalskip = SKIPFUNCDEF;
+ 		/*free(p); - we'll exit soon */
+ 	}
+@@ -14495,6 +14546,7 @@ int ash_main(int argc UNUSED_PARAM, char
+ 		//  ash -sc 'echo $-'
+ 		// continue reading input from stdin after running 'echo'.
+ 		// bash does not do this: it prints "hBcs" and exits.
++		lineno = 0;
+ 		evalstring(minusc, EV_EXIT);
+ 	}
+ 
