@@ -381,3 +381,50 @@
  		evalstring(minusc, EV_EXIT);
  	}
  
+--- src.0/shell/ash.c	2021-08-22 18:31:09.763207836 +0200
++++ src/shell/ash.c	2021-08-22 19:22:47.479281989 +0200
+@@ -9163,6 +9163,8 @@ static int evalcommand(union node *, int
+ static int evalbltin(const struct builtincmd *, int, char **, int);
+ static void prehash(union node *);
+ 
++#define errflag (trap[NSIG] && (Eflag || (!Eflag && !funcline)))
++
+ /*
+  * Evaluate a parse tree.  The value is left in the global variable
+  * exitstatus.
+@@ -9209,7 +9211,7 @@ evaltree(union node *n, int flags)
+ 	case NCMD:
+ 		evalfn = evalcommand;
+  checkexit:
+-		if ((eflag || trap[NSIG]) && !(flags & EV_TESTED))
++		if ((errflag) && !(flags & EV_TESTED))
+ 			checkexit = ~0;
+ 		goto calleval;
+ 	case NFOR:
+@@ -9284,7 +9286,7 @@ evaltree(union node *n, int flags)
+ 	dotrap();
+ 
+ 	if (checkexit & status) {
+-		if(trap[NSIG] && (Eflag || (!Eflag && !funcline))) {
++		if(errflag) {
+ 				static bool recursive = 0;
+ 				if(!recursive) {
+ 					int savelineno = lineno;
+@@ -9296,15 +9298,13 @@ evaltree(union node *n, int flags)
+ 					doingtrap = 0;
+ 					lineno = savelineno;
+ 					exitstatus = savestatus;
+-					if(eflag)
+-						exitshell();
+ 			}
+ 		}
+ 		if(eflag)
+-			raise_exception(EXEND);
++			exitshell();
+ 	}
+ 	if (flags & EV_EXIT)
+-		raise_exception(EXEND);
++			exitshell();
+ 
+ 	popstackmark(&smark);
+ 	TRACE(("leaving evaltree (no interrupts)\n"));

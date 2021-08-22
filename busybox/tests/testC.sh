@@ -38,7 +38,7 @@ function mytrue() {
 }
 
 trap 'onerror $LINENO $FUNCNAME' ERR
-trap 'echo exit in $FUNCNAME\(\) at line $LINENO == 32 not 60 because set -E, EXITSTATUS: $?' EXIT
+trap 'echo exit in $FUNCNAME\(\) at line $LINENO == 32, EXITSTATUS: $?' EXIT
 
 set -E
 

@@ -21,18 +21,18 @@ function onerror() {
 function mytest() {
 	echo "hello by $FUNCNAME() at line $LINENO == 22"
 	false
+	true
 }
 
 trap 'onerror $LINENO $FUNCNAME' ERR
-trap 'echo exit in $FUNCNAME\(\) at line $LINENO == 30 with pippo but not pluto' EXIT
-set -e
-echo "ciao! at line $LINENO == 29"
+trap 'echo exit in $FUNCNAME\(\) at line $LINENO == 23 without any onerror print' EXIT
 mytest
-echo "mytest should have failed at line 30"
-echo "pippo"
+false
+echo "Tracing error in function starts here (set -E)"
 set -E
 mytest
+false
+set -e
+echo "ciao! at line $LINENO == 36"
+mytest
 
-
-
-echo "pluto at line 38"

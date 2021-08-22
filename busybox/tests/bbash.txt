@@ -22,18 +22,21 @@ onerror() at line 16 == 16
 exit at line 34 == 34 with pippo but not pluto
 #############################################
 
-################## TEST 3 ##################
-ciao! at line 29 == 29
-hello at line 22 == 22
-exit at line 30 == 30 with pippo but not pluto
-memory leak, evaldone: 0, exitstatus: 1, eflag: 1, e: 1, evalskip: 0x00000000
-#############################################
-
 ################## TEST 4 ##################
-ciao! at line 29 == 29
 hello by mytest() at line 22 == 22
-exit in mytest() at line 30 == 30 with pippo but not pluto
-memory leak, evaldone: 0, exitstatus: 1, eflag: 1, e: 1, evalskip: 0x00000000
+[1;31mERROR: test4.sh failed at line 30, rc: 1[0m
+onerror() at line 16 == 16
+Tracing error in function starts here (set -E)
+hello by mytest() at line 22 == 22
+[1;31mERROR: test4.sh failed in mytest() at line 23, rc: 1[0m
+onerror() at line 16 == 16
+[1;31mERROR: test4.sh failed at line 34, rc: 1[0m
+onerror() at line 16 == 16
+ciao! at line 36 == 36
+hello by mytest() at line 22 == 22
+[1;31mERROR: test4.sh failed in mytest() at line 23, rc: 1[0m
+onerror() at line 16 == 16
+exit in mytest() at line 23 == 23 without any onerror print
 #############################################
 
 ################## TEST 5 ##################
@@ -55,7 +58,6 @@ this is a multi-line trap which ends at line 9 == 11
 ciao! at line 29 == 29
 hello by mytest() at line 22 == 22
 exit in mytest() at line 30 == 30 with pippo but not pluto
-memory leak, evaldone: 0, exitstatus: 0, eflag: 0, e: 1, evalskip: 0x00000000
 #############################################
 
 ################## TEST 7 ##################
@@ -128,7 +130,6 @@ FUNCNAME = , LINENO = 55, EXITSTATUS: 1
 FUNCNAME = , LINENO = 56
 hello by myexit() at line 22
 exit in myexit() at line 60 == 60, EXITSTATUS: 1
-memory leak, evaldone: 0, exitstatus: 0, eflag: 0, e: 1, evalskip: 0x00000000
 #############################################
 
 ################## TEST C ##################
@@ -156,6 +157,6 @@ FUNCNAME = , LINENO = 56
 hello by myfalse() at line 31
 [1;31mERROR: testC.sh failed in myfalse() at line 32, rc: 1[0m
 onerror() at line 16 == 16
-exit in myfalse() at line 32 == 32 not 60 because set -E, EXITSTATUS: 1
+exit in myfalse() at line 32 == 32, EXITSTATUS: 1
 #############################################
 
