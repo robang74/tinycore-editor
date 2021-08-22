@@ -263,9 +263,9 @@ if [ "$1" == "open" ]; then
 		for i in ../patches/*.patch; do
 			err=0
 			warn "\nApplying $(basename $i)"
-			if ! timeout 1 patch -Np1 -i $i; then
+			if ! patch -Np1 -fi $i; then
 				echo "************ Using -p0 **************"
-				if ! timeout 1 patch -Np0 -i $i; then
+				if ! patch -Np0 -fi $i; then
 					perr "\nApplying $(basename $i) failed"
 					realexit 1
 				fi
