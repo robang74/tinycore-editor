@@ -1,11 +1,11 @@
 ################## TEST 1 ##################
 ciao! at line 29 == 29
 hello at line 22 == 22
-[1;31mERROR: test1.sh failed at line 30, rc: 1[0m
+ERROR: test1.sh failed at line 30, rc: 1
 onerror() at line 16 == 16
 mytest should have failed at line 30
 pippo
-[1;31mERROR: test1.sh failed at line 34, rc: 1[0m
+ERROR: test1.sh failed at line 34, rc: 1
 onerror() at line 16 == 16
 exit in () at line 34 == 34 with pippo but not pluto
 #############################################
@@ -13,28 +13,28 @@ exit in () at line 34 == 34 with pippo but not pluto
 ################## TEST 2 ##################
 ciao! at line 29 == 29
 hello at line 22 == 22
-[1;31mERROR: test2.sh failed at line 30, rc: 1[0m
+ERROR: test2.sh failed at line 30, rc: 1
 onerror() at line 16 == 16
 mytest should have failed at line 30
 pippo
-[1;31mERROR: test2.sh failed at line 34, rc: 1[0m
+ERROR: test2.sh failed at line 34, rc: 1
 onerror() at line 16 == 16
 exit at line 34 == 34 with pippo but not pluto
 #############################################
 
 ################## TEST 4 ##################
 hello by mytest() at line 22 == 22
-[1;31mERROR: test4.sh failed at line 30, rc: 1[0m
+ERROR: test4.sh failed at line 30, rc: 1
 onerror() at line 16 == 16
 Tracing error in function starts here (set -E)
 hello by mytest() at line 22 == 22
-[1;31mERROR: test4.sh failed in mytest() at line 23, rc: 1[0m
+ERROR: test4.sh failed in mytest() at line 23, rc: 1
 onerror() at line 16 == 16
-[1;31mERROR: test4.sh failed at line 34, rc: 1[0m
+ERROR: test4.sh failed at line 34, rc: 1
 onerror() at line 16 == 16
 ciao! at line 36 == 36
 hello by mytest() at line 22 == 22
-[1;31mERROR: test4.sh failed in mytest() at line 23, rc: 1[0m
+ERROR: test4.sh failed in mytest() at line 23, rc: 1
 onerror() at line 16 == 16
 exit in mytest() at line 23 == 23 without any onerror print
 #############################################
@@ -43,11 +43,11 @@ exit in mytest() at line 23 == 23 without any onerror print
 funcname in script: '' == ''
 ciao! at line 29 == 29
 hello at line 22 == 22
-[1;31mERROR: test5.sh failed at line 30, rc: 1[0m
+ERROR: test5.sh failed at line 30, rc: 1
 onerror() at line 16 == 16
 mytest should have failed at line 30
 pippo
-[1;31mERROR: test5.sh failed at line 34, rc: 1[0m
+ERROR: test5.sh failed at line 34, rc: 1
 onerror() at line 16 == 16
 this is a multi-line trap which begins at line 9 == 9
 exit at line 34 == 34 with pippo but not pluto
@@ -65,11 +65,11 @@ ciao! at line 29 == 29
 hello by mytest() at line 22 == 22
 pippo
 hello by mytest() at line 22 == 22
-[1;31mERROR: test7.sh failed in mytest() at line 23, rc: 1[0m
+ERROR: test7.sh failed in mytest() at line 23, rc: 1
 onerror() at line 16 == 16
 mytest should have failed at line 30 and it will again at line 36
 hello by mytest() at line 22 == 22
-[1;31mERROR: test7.sh failed in mytest() at line 23, rc: 1[0m
+ERROR: test7.sh failed in mytest() at line 23, rc: 1
 onerror() at line 16 == 16
 exit in mytest() at line 23 == 23 with pippo but not pluto
 #############################################
@@ -81,7 +81,7 @@ pippo, exit status 0 == 0
 LINENO=34
 LINENO=35
 tests/test8.sh: set: line 35: illegal option -o invalid
-[1;31mERROR: test8.sh failed at line 35, rc: 1[0m
+ERROR: test8.sh failed at line 35, rc: 1
 onerror() at line 16 == 16
 exit in () at line 35 == 35 with pippo but not pluto
 #############################################
@@ -97,11 +97,11 @@ hello by mytest() at line 22 == 22
 ciao! at line 31 == 31, FUNCNAME = ''
 pippo
 tests/testA.sh: line 33: can't create /access-denied: Permission denied
-[1;31mERROR: testA.sh failed at line 33, rc: 2[0m
+ERROR: testA.sh failed at line 33, rc: 2
 onerror() at line 16 == 16
 The script should have failed at line 33 with ERROR message, exitstatus 2 != 0
 hello by mytest() at line 22 == 22
-[1;31mERROR: testA.sh failed in mytest() at line 23, rc: 1[0m
+ERROR: testA.sh failed in mytest() at line 23, rc: 1
 onerror() at line 16 == 16
 exit in mytest() at line 23 == 23 with pippo but not pluto
 #############################################
@@ -122,9 +122,9 @@ hello by mytrue() at line 36
 FUNCNAME = , LINENO = 53, EXITSTATUS: 0
 FUNCNAME = , LINENO = 54
 hello by myfalse() at line 31
-[1;31mERROR: testB.sh failed in myfalse() at line 32, rc: 1[0m
+ERROR: testB.sh failed in myfalse() at line 32, rc: 1
 onerror() at line 16 == 16
-[1;31mERROR: testB.sh failed at line 55, rc: 1[0m
+ERROR: testB.sh failed at line 55, rc: 1
 onerror() at line 16 == 16
 FUNCNAME = , LINENO = 55, EXITSTATUS: 1
 FUNCNAME = , LINENO = 56
@@ -148,14 +148,14 @@ hello by mytrue() at line 36
 FUNCNAME = , LINENO = 53, EXITSTATUS: 0
 FUNCNAME = , LINENO = 54
 hello by myfalse() at line 31
-[1;31mERROR: testC.sh failed in myfalse() at line 32, rc: 1[0m
+ERROR: testC.sh failed in myfalse() at line 32, rc: 1
 onerror() at line 16 == 16
-[1;31mERROR: testC.sh failed at line 55, rc: 1[0m
+ERROR: testC.sh failed at line 55, rc: 1
 onerror() at line 16 == 16
 FUNCNAME = , LINENO = 55, EXITSTATUS: 1
 FUNCNAME = , LINENO = 56
 hello by myfalse() at line 31
-[1;31mERROR: testC.sh failed in myfalse() at line 32, rc: 1[0m
+ERROR: testC.sh failed in myfalse() at line 32, rc: 1
 onerror() at line 16 == 16
 exit in myfalse() at line 32 == 32, EXITSTATUS: 1
 #############################################
