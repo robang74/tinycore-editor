@@ -31,7 +31,7 @@ mytest || true
 echo "ciao! at line $LINENO == 31, FUNCNAME = '$FUNCNAME'"
 echo "pippo"
 (:) >/access-denied
-echo "The script should have failed at line 33 with ERROR message"
+echo "The script should have failed at line 33 with ERROR message, exitstatus $? != 0"
 set -e
 mytest
 

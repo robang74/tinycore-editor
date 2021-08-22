@@ -72,7 +72,7 @@ exit in mytest() at line 1 == 23 with pippo but not pluto
 ################## TEST 8 ##################
 ciao! at line 29 == 29
 hello by mytest() at line 22 == 22
-pippo
+pippo, exit status 0 == 0
 LINENO=34
 LINENO=35
 tests/test8.sh: line 35: set: invalid: invalid option name
@@ -94,7 +94,7 @@ pippo
 tests/testA.sh: line 33: /access-denied: Permission denied
 [1;31mERROR: testA.sh failed at line 33, rc: 1[0m
 onerror() at line 16 == 16
-The script should have failed at line 33 with ERROR message
+The script should have failed at line 33 with ERROR message, exitstatus 1 != 0
 hello by mytest() at line 22 == 22
 [1;31mERROR: testA.sh failed in mytest() at line 23, rc: 1[0m
 onerror() at line 16 == 16

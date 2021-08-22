@@ -28,7 +28,7 @@ trap 'echo exit in $FUNCNAME\(\) at line $LINENO == 35 with pippo but not pluto'
 #exec 2>&1; set -x
 echo "ciao! at line $LINENO == 29"
 mytest
-echo "pippo"
+echo "pippo, exit status $? == 0"
 set -e
 
 echo LINENO=$LINENO
