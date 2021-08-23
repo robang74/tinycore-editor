@@ -46,7 +46,7 @@ if [ "$tcdev" == "" ]; then
 	exit 1
 fi
 
-imgname=tcl-64MB-usb.disk.gz
+imgname=tcl-usb.disk.gz
 dirlist="
 /mnt/sf_Shared
 /home/tc
