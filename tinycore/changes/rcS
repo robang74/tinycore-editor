@@ -17,7 +17,7 @@ function devdir() {
 }
 
 function gettcdev() {
-	blkid | grep -e " LABEL=.$tclabel. " | cut -d: -f1 | head -n1
+	blkid --label $tclabel
 }
 
 logfile=/var/log/tcboot.log
