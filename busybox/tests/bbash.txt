@@ -78,12 +78,17 @@ exit in mytest() at line 23 == 23 with pippo but not pluto
 ciao! at line 29 == 29
 hello by mytest() at line 22 == 22
 pippo, exit status 0 == 0
-LINENO=34
-LINENO=35
-tests/test8.sh: set: line 35: illegal option -o invalid
-ERROR: test8.sh failed at line 35, rc: 1
+LINENO=33 == 33, FUNCNAME='' == ''
+setoinvalid LINENO=10 == 10
+tests/test8.sh: set: line 10: illegal option -o invalid
+ERROR: test8.sh failed at line 34, rc: 1 != 0
 onerror() at line 16 == 16
-exit in () at line 35 == 35 with pippo but not pluto
+LINENO=35 == 35, FUNCNAME='' == ''
+LINENO=37
+tests/test8.sh: set: line 37: illegal option -o invalid
+ERROR: test8.sh failed at line 37, rc: 1 != 0
+onerror() at line 16 == 16
+exit in () at line 37 == 37 with pippo but not pluto
 #############################################
 
 ################## TEST 9 ##################
