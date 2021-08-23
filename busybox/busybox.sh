@@ -142,6 +142,10 @@ source tinycore.conf
 cd - >/dev/null
 source busybox.sh.conf
 
+if echo "$source" | grep -qe "\.git$"; then
+	version="latest-git"
+fi
+
 arch=${ARCH:--m32}
 arch=${arch/64/-m64}
 archtune=${arch/-m64/$cputune64}
@@ -179,7 +183,21 @@ if [ "$1" == "download" ]; then
 	echo
 	download -ne $confsuid config.suid
 	download -ne $confnosuid config.nosuid
-	download -ne $source busybox.tar.bz2
+
+	if echo "$source" | grep -qe "\.git$"; then
+		if (cd src 2>/dev/null; git pull); then
+			mv src busybox-$version
+		else
+			git clone $source
+			mv busybox busybox-$version
+		fi
+		chownuser busybox-$version
+		tar cjf busybox.tar.bz2 busybox-$version
+		chownuser busybox.tar.bz2
+		mv busybox-$version src
+	else
+		download -ne $source busybox.tar.bz2
+	fi
 	mkdir -p patches
 	for i in $patchlist; do
 		download -ne $tcbbsrc/$i patches/$i
@@ -192,11 +210,7 @@ if [ "$1" == "all" ]; then
 	cd $mydir
 	info "busybox.sh executing all..."
 	./busybox.sh open
-	./busybox.sh install
-#	if ! ./busybox.sh update; then
-#		./busybox.sh compile
-#		./busybox.sh install
-#	fi | grep -v "compile first"
+	./busybox.sh update
 fi
 
 if [ "$1" == "checklib" ]; then
@@ -255,7 +269,7 @@ if [ "$1" == "open" ]; then
 	if [ ! -d src ]; then
 		mod=1
 		tar xjf busybox.tar.bz2
-		mv busybox-$version src
+		mv -f busybox-$version src
 		rm -f .patches_applied*
 	fi
 	if [ ! -e .patches_applied -a ! -e .patches_applied.close ]; then
