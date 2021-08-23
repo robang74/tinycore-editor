@@ -946,11 +946,9 @@ fi
 if [ "$param" == "distclean" ]; then
 	tdone=1
 	info "make.sh executing: distclean"
-	rm -rf busybox/busybox.tar.bz2
-	rm -rf busybox/config.*suid
-	rm -rf tinycore/tcz/*
 	tinycore/provides/tcgetdistro.sh clean
-	busybox/busybox.sh clean
+	busybox/busybox.sh distclean
+	rm -rf tinycore/tcz/*
 	$0 clean all
 fi
 
