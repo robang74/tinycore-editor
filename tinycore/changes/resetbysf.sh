@@ -84,7 +84,7 @@ if grep -qe "^$dtdev " /proc/mounts; then
 fi
 if grep -qe "^$tcdev " /proc/mounts; then
 	mount -o remount,ro $tcdev
-	if ! grep -qe "^$tcdev .* ro,"; then
+	if ! grep -qe "^$tcdev .* ro," /proc/mounts; then
 		echo "ERROR: device $tcdev is busy"
 		echo
 		exit 1
