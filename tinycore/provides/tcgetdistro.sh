@@ -70,7 +70,7 @@ function get_tczlist_full() {
 		i=${i/.tcz/}.tcz
 		i=${i/KERNEL/$KERN-tinycore$ARCH}
 		deps+=" $($getdeps $i | grep -e "^$i:" | cut -d: -f2-)"
-		deps+=" $(cat $tczdir/$i.dep) $i"
+		deps+=" $(cat $tczdir/$i.dep 2>/dev/null) $i"
 	done
 	for i in $deps; do echo $i; done | sort | uniq
 }
