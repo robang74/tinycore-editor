@@ -160,3 +160,22 @@ onerror() at line 16 == 16
 exit in myfalse() at line 1 == 32, EXITSTATUS: 1
 #############################################
 
+################## TEST D ##################
+trap -- ')' ERR
+-----------
+tests/testD.sh: error trap: line 4: syntax error near unexpected token `)'
+tests/testD.sh: error trap: line 4: `)'
+tests/testD.sh: error trap: line 4: syntax error near unexpected token `)'
+tests/testD.sh: error trap: line 4: `)'
+tests/testD.sh: error trap: line 4: syntax error near unexpected token `)'
+tests/testD.sh: error trap: line 4: `)'
+FUNCNAME='cmdevalfalse'
+FUNCNAME=''
+-----------
+trap -- 'echo ERR' ERR
+still running
+ERR
+1
+still running after false
+#############################################
+

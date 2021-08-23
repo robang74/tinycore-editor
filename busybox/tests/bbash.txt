@@ -160,3 +160,17 @@ onerror() at line 16 == 16
 exit in myfalse() at line 32 == 32, EXITSTATUS: 1
 #############################################
 
+################## TEST D ##################
+trap -- ')' ERR
+-----------
+tests/testD.sh: eval: line 4: syntax error: unexpected ")"
+FUNCNAME='cmdevalfalse'
+FUNCNAME=''
+-----------
+trap -- 'echo ERR' ERR
+still running
+ERR
+1
+still running after false
+#############################################
+

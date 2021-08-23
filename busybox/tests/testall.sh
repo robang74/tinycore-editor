@@ -1,6 +1,12 @@
 #!/bin/bash
 
-for i in {1..9} {A..C}; do
+if [ "$1" != "" ]; then
+	all="$@"
+else
+	all="$(echo {1..9} {A..D})"
+fi
+
+for i in $all; do
 	test -e tests/test$i.sh || continue
 	echo "################## TEST $i ##################"
 	src/busybox ash tests/test$i.sh
@@ -8,7 +14,7 @@ for i in {1..9} {A..C}; do
 	echo
 done >tests/bbash.txt
 
-for i in {1..9} {A..C}; do
+for i in $all; do
 	test -e tests/test$i.sh || continue
 	echo "################## TEST $i ##################"
 	bash tests/test$i.sh

@@ -261,7 +261,7 @@
  	INT_OFF;
 +	if((exitstatus && eflag) || (e)) {
 +
-+		/* memory leak is not a problem, we are exiting */
++		/* memmory leak is not a problem, we are exiting */
 +
 +	} else {
 +		if(funcname)
@@ -428,3 +428,26 @@
  
  	popstackmark(&smark);
  	TRACE(("leaving evaltree (no interrupts)\n"));
+--- src/shell/ash.c	2021-08-23 12:34:11.698914759 +0200
++++ src.2/shell/ash.c	2021-08-23 12:23:20.246911003 +0200
+@@ -9288,6 +9288,11 @@ evaltree(union node *n, int flags)
+ 	if (checkexit & status) {
+ 		if(errflag) {
+ 				static bool recursive = 0;
++				if(exception_type == EXERROR) {
++					doingtrap = 0;
++					recursive = 0;
++					exception_type = -1;
++				} else
+ 				if(!recursive) {
+ 					int savelineno = lineno;
+ 					savestatus = exitstatus;
+@@ -9792,7 +9797,7 @@ evalfun(struct funcnode *func, int argc,
+ 	INT_OFF;
+ 	if((exitstatus && eflag) || (e)) {
+ 
+-		/* memmory leak is not a problem, we are exiting */
++		/* memory leak is not a problem, we are exiting */
+ 
+ 	} else {
+ 		if(funcname)
