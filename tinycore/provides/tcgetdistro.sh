@@ -199,7 +199,7 @@ download -ne $tcrepo/$distro/vmlinuz$ARCH vmlinuz
 download -ne $tcrepo/$distro/modules$ARCH.gz modules.gz
 
 if [ "$SUDO_USER" != "" ]; then
-	chownuser vmlinuz rootfs.gz modules.gz chownuser .downloaded
+	chownuser vmlinuz rootfs.gz modules.gz .downloaded
 fi
 
 deps=$(get_tczlist_full tcz $tczlist)
