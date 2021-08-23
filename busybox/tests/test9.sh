@@ -13,3 +13,4 @@ else
 	echo "shell: busybox ash"
 	ENV=shrc src/busybox ash -ic 'echo LINENO=$LINENO'
 fi
+rm -f shrc
