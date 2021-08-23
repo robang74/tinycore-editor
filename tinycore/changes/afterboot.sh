@@ -42,7 +42,7 @@ function tceload() {
 	test -z "$1" && return 1
 	user=$(cat /etc/sysconfig/tcuser)
 	user=${user:-tc}
-	su $user -c "tce-load -i $*" | \
+	su $user -c "tce-load -bi $*" | \
 		grep -v -e "is already installed!" \
 			-e "Updating certificates" \
 			-e "added.* removed" | \
@@ -112,23 +112,6 @@ if [ "$dtdir" == "" ]; then
 	mount -t $type -o ro $dtdev $dtdir || dtdir=""
 fi 2>/dev/null
 
-if [ -d $tcdir/tcz ]; then
-	cd $tcdir/tcz
-	metalist=$(ls -1 *-meta.tcz 2>/dev/null)
-	tczlist=$(ls -1 *.tcz 2>/dev/null | grep -ve "-meta.tcz$")
-	calast="ca-certificates.tcz"
-	if echo "$tczlist" | grep -q "$calast"; then
-		tczlist=$(echo "$tczlist" | grep -v "$calast")
-		cacert="$calast"
-	fi
-	infotime -n "Loading TCZ archives: "
-	tceload $metalist | tr \\n \\0
-	tceload $tczlist || echo
-	tceload $cacert >/dev/null 2>&1 &
-	cd - >/dev/null
-	ldconfig
-fi
-
 infotime "Mounting local drives in read only..." ##############################
 
 for i in a b c d; do
@@ -140,7 +123,8 @@ for i in a b c d; do
 			mount -r /dev/sd$i$j /mnt/sd$i$j
 		fi
 	done
-done 2>/dev/null
+done 2>/dev/null &
+lastpid=$!
 
 if true; then
 	mkdir -p /mnt/sf_Shared
@@ -184,6 +168,40 @@ if [ "$dtdir" == "" ]; then
 	infotime "Restoring the data partition..."
 	data-usbdisk-partition-create.sh | grep -w data
 	dtdir=$(devdir $dtdev)
+fi
+
+###############################################################################
+
+if [ -d $tcdir/tcz ]; then
+	cd $tcdir/tcz
+	metalist=$(ls -1 *-meta.tcz 2>/dev/null)
+	tczlist=$(ls -1 *.tcz 2>/dev/null | grep -ve "-meta.tcz$")
+#	calast="ca-certificates.tcz"
+#	if echo "$tczlist" | grep -q "$calast"; then
+#		tczlist=$(echo "$tczlist" | grep -v "$calast")
+#		cacert="$calast"
+#	fi
+	infotime -n "Loading TCZ archives: "
+	tceload $metalist | tr \\n \\0
+	tceload $tczlist || echo
+#	tceload $cacert >/dev/null 2>&1 &
+	cd - >/dev/null
+	ldconfig
+
+	infotime -n "Installing TCZ archives: "
+	if true; then
+		cd /usr/local/tce.installed
+		list=$(find . -not -type d | grep -v "ca-certificates")
+		for i in $list; do
+			test -x $i || continue; $i
+			echo $? >/run/$(basename $i).rc
+		done
+		if [ -x ./ca-certificates ]; then
+			./ca-certificates &
+		fi
+	fi >/dev/null &
+	rotdash $!
+	echo OK
 fi
 
 infotime "Creating the crypto keys..." ########################################
@@ -293,14 +311,14 @@ for i in /root /home/tc; do
 done 2>/dev/null
 chown -R tc.staff /home/tc
 
+echo -ne "\twaiting for the crypto keys: "
+rotdash $pid
+echo "OK"
+
 if [ "$tcpassword" != "" ]; then
 	echo -ne "\t" >&2
 	echo -e "$tcpassword\n$tcpassword" | passwd tc
 fi >/dev/null
-
-echo -ne "\twaiting for the crypto keys: "
-rotdash $pid
-echo "OK"
 
 if which sshd >/dev/null; then
 	sshd=1
@@ -332,10 +350,12 @@ else
 fi 2>/dev/null
 
 infotime "Waiting for background jobs..."
-if [ -e /usr/local/tce.installed/ca-certificates ]; then
+if [ -x /usr/local/tce.installed/ca-certificates ]; then
 	echo -ne "\tca-certificates: "
 	rotdash $(pgrep ca-certificates)
 	touch /run/ca-certificates.done
 	echo "OK"
 fi
+echo -ne "\tremounting-ro: "
+rotdash $lastpid; echo OK
 
