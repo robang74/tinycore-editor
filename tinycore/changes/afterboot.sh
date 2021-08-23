@@ -18,7 +18,8 @@ function infotime() {
 		opt="$1"
 		shift
 	fi
-	info $opt "[$(cat /proc/uptime | cut -d' ' -f1)] $1"
+	tm="$(printf '%5.2f' $(cat /proc/uptime | cut -d' ' -f1))"
+	info $opt "[$tm] $1"
 }
 
 function warntime() {
@@ -114,15 +115,15 @@ fi 2>/dev/null
 
 infotime "Mounting local drives in read only..." ##############################
 
-for i in a b c d; do
-	for j in 1 2 3 4; do
-		if grep -qe "^/dev/sd$i$j " /proc/mounts; then
-			mount -o remount,ro /mnt/sd$i$j
-		else
-			mkdir -p /mnt/sd$i$j
-			mount -r /dev/sd$i$j /mnt/sd$i$j
-		fi
-	done
+disks=$(grep -e "sd[a-d][0-4]$" /proc/mounts | tr -s ' ' | cut -d' ' -f5)
+for i in $disks; do
+	warntime "remounting $i"
+	if grep -qe "^/dev/$i " /proc/mounts; then
+		mount -o remount,ro /mnt/$i
+	else
+		mkdir -p /mnt/$i
+		mount -r /dev/$i /mnt/$i
+	fi
 done 2>/dev/null &
 lastpid=$!
 
@@ -164,12 +165,6 @@ for i in $copylist; do
 done
 chown -R tc.staff /home/tc
 
-if [ "$dtdir" == "" ]; then
-	infotime "Restoring the data partition..."
-	data-usbdisk-partition-create.sh | grep -w data
-	dtdir=$(devdir $dtdev)
-fi
-
 ###############################################################################
 
 if [ -d $tcdir/tcz ]; then
@@ -202,6 +197,16 @@ if [ -d $tcdir/tcz ]; then
 	fi >/dev/null &
 	rotdash $!
 	echo OK
+fi
+
+###############################################################################
+
+if [ "$dtdir" == "" ]; then
+	infotime "Restoring the data partition..."
+	rotdash $lastpid >/dev/null
+	data-usbdisk-partition-create.sh |\
+		sed -ne "s,\(.* data .*\),\t\1,p"
+	dtdir=$(devdir $dtdev)
 fi
 
 infotime "Creating the crypto keys..." ########################################
