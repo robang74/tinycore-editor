@@ -256,6 +256,7 @@ if [ "$1" == "open" ]; then
 		mod=1
 		tar xjf busybox.tar.bz2
 		mv busybox-$version src
+		rm -f .patches_applied*
 	fi
 	if [ ! -e .patches_applied -a ! -e .patches_applied.close ]; then
 		mod=1
