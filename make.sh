@@ -180,6 +180,44 @@ function get_tczlist_full() {
 	for i in $deps; do echo $i; done | sort | uniq
 }
 
+function tczmetamask() {
+	declare i deps="" skipmeta="$2"
+	[ -d "$1" ] || return 1
+	echo "skipmeta: $skipmeta" >&2
+	for i in $tczmeta; do
+		[ ! -e "$1/tcz/$i-meta.tcz" ] && continue
+		[ "$skipmeta" == "$i" ] && continue
+		deps="$deps $(cat $1/conf.d/$i.lst | tr \\n ' ')"
+	done
+	shift 2
+	for i in $@; do
+		if echo "$deps" | grep -qe " $i"; then
+			echo -e "\tskiptcz: $i" >&2
+			continue
+		fi
+		echo -n " $i"
+	done
+}
+
+function gettczlist() {
+	declare i j tczlist="" deps="" adding
+	[ -d "$1" ] || return 1
+	for i in $tczmeta; do
+		if [ ! -e $1/conf.d/$i.lst ]; then
+			echo -e "\n\e[1;31mERROR: tinycore.conf, tczmeta='$i' unsupported\e[0m\n" >&2
+			echo "ERROR"
+			return 1
+		fi
+		if [ -e $1/tcz/$i-meta.tcz ]; then
+			tczlist="$tczlist $i-meta.tcz"
+			continue
+		fi
+		adding=$(cat $1/conf.d/$i.lst)
+		tczlist="$tczlist $(tczmetamask $1 $i $adding)"
+	done
+	for i in $tczlist; do echo $i; done | sort | uniq
+}
+
 function tccopyall() {
 	test -n "$tcldir"
 	cd tinycore
@@ -510,7 +548,7 @@ if [ "$devloop" == "" ]; then
 fi
 
 if [ "$ifnm" != "" ]; then
-	if ! ifconfig $ifnm; then
+	if ! ifconfig $ifnm >/dev/null; then
 		echo
 		perr "ERROR: selected network interface is not correct"
 		echo

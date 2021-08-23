@@ -62,14 +62,55 @@ function download() {
 	fi
 }
 
-get_tczlist_full() {
-	declare deps i
-	for i in $tczlist; do
+function get_tczlist_full() {
+	declare deps i tczdir=$1 getdeps
+	getdeps=$tczdir/../provides/tcdepends.sh
+	shift
+	for i in $@; do
 		i=${i/.tcz/}.tcz
 		i=${i/KERNEL/$KERN-tinycore$ARCH}
-		deps+=" $(tcdepends.sh $i | grep -e "^$i:" | cut -d: -f2-) $i"
+		deps+=" $($getdeps $i | grep -e "^$i:" | cut -d: -f2-)"
+		deps+=" $(cat $tczdir/$i.dep) $i"
 	done
 	for i in $deps; do echo $i; done | sort | uniq
+}
+
+function tczmetamask() {
+	declare i deps="" skipmeta="$2"
+	[ -d "$1" ] || return 1
+	echo "skipmeta: $skipmeta" >&2
+	for i in $tczmeta; do
+		[ ! -e "$1/tcz/$i-meta.tcz" ] && continue
+		[ "$skipmeta" == "$i" ] && continue
+		deps="$deps $(cat $1/conf.d/$i.lst | tr \\n ' ')"
+	done
+	shift 2
+	for i in $@; do
+		if echo "$deps" | grep -qe " $i"; then
+			echo -e "\tskiptcz: $i" >&2
+			continue
+		fi
+		echo -n " $i"
+	done
+}
+
+function gettczlist() {
+	declare i j tczlist="" deps="" adding
+	[ -d "$1" ] || return 1
+	for i in $tczmeta; do
+		if [ ! -e $1/conf.d/$i.lst ]; then
+			echo -e "\n\e[1;31mERROR: tinycore.conf, tczmeta='$i' unsupported\e[0m\n" >&2
+			echo "ERROR"
+			return 1
+		fi
+		if [ -e $1/tcz/$i-meta.tcz ]; then
+			tczlist="$tczlist $i-meta.tcz"
+			continue
+		fi
+		adding=$(cat $1/conf.d/$i.lst)
+		tczlist="$tczlist $(tczmetamask $1 $i $adding)"
+	done
+	for i in $tczlist; do echo $i; done | sort | uniq
 }
 
 ###############################################################################
@@ -161,7 +202,7 @@ if [ "$SUDO_USER" != "" ]; then
 	chownuser vmlinuz rootfs.gz modules.gz chownuser .downloaded
 fi
 
-deps=$(get_tczlist_full)
+deps=$(get_tczlist_full tcz $tczlist)
 mkdir -p tcz
 cd tcz
 for i in $deps; do
