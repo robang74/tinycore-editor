@@ -3,29 +3,18 @@
 # Author: Roberto A. Foglietta
 #
 
-ifnm=eth0
-brip=10.0.2.16
-tcip=10.0.2.18
-netm=24
-qemumem=256
-qemuncpu=$(( ($(nproc 2>/dev/null || true)+1)/2 ))
-qemuncpu=${qemuncpu:-2}
-qemuopts="--cpu host --enable-kvm -smp $qemuncpu"
-qemuexec="qemu-system-x86_64" #i386
-tcdir="" #if not defined, it will be found
-devloop="" #if not defined, it will be found
-drvi8GB="format=raw,file=tcl-8GB-usb.disk"
-drvboot="format=raw,file=tcl-usb.disk"
-drvdata="id=sd,if=none,bus=1,unit=0,format=raw,file=storage-32GB.disk"
-tcldir="tcldisk"
-
 cd $(dirname $0)
 
 if [ -e make.conf ]; then
 	source make.conf
 fi
 
-myip=$(ifconfig $ifnm | sed -ne "s,.*inet \([^ ]*\) .*,\\1,p")
+tcdir="" #if not defined, it will be found
+devloop="" #if not defined, it will be found
+drvi8GB="format=raw,file=tcl-8GB-usb.disk"
+drvboot="format=raw,file=tcl-usb.disk"
+drvdata="id=sd,if=none,bus=1,unit=0,format=raw,file=storage-32GB.disk"
+tcldir="tcldisk"
 
 targets="
 open
@@ -520,6 +509,20 @@ if [ "$devloop" == "" ]; then
 	devloop="/dev/loop$(getfreeloop)"
 fi
 
+if [ "$ifnm" != "" ]; then
+	if ! ifconfig $ifnm; then
+		echo
+		perr "ERROR: selected network interface is not correct"
+		echo
+		warn "SUGGEST: change 'ifnm' in make.conf or set to void"
+		warn "         if you are not going to use qemu/network"
+		echo
+	fi
+fi
+
+myip=$(ifconfig $ifnm | sed -ne "s,.*inet \([^ ]*\) .*,\\1,p")
+myip=${myip:-xxx}
+
 ###############################################################################
 
 trap 'atexit' EXIT
@@ -674,7 +677,9 @@ if [ "$param" == "qemu-init" ]; then
 	info "make.sh executing: qemu-init"
 	if ! ifconfig $ifnm | grep -qe "inet .*$myip"; then
 		echo
-		perr "ERROR: network configuration is wrong, edit make.conf"
+		perr "ERROR: network configuration is wrong, abort"
+		echo
+		warn "SUGGEST: change 'ifnm' parameter in make.conf"
 		echo
 		realexit 1
 	fi 2>/dev/null
