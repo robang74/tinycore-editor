@@ -293,14 +293,14 @@ for i in /root /home/tc; do
 done 2>/dev/null
 chown -R tc.staff /home/tc
 
-echo -ne "\twaiting for the crypto keys: "
-rotdash $pid
-echo "OK"
-
 if [ "$tcpassword" != "" ]; then
 	echo -ne "\t" >&2
 	echo -e "$tcpassword\n$tcpassword" | passwd tc
 fi >/dev/null
+
+echo -ne "\twaiting for the crypto keys: "
+rotdash $pid
+echo "OK"
 
 if which sshd >/dev/null; then
 	sshd=1
