@@ -34,7 +34,7 @@ fi
 
 # Wait for hardware be ready
 echo -e "\n\e[1;36mWait for $tclabel\e[0m"
-for i in $(seq 1 6); do
+for i in $(seq 1 10); do
 	if gettcdev; then
 		break;
 	fi >/dev/null
