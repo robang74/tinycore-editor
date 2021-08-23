@@ -261,7 +261,7 @@
  	INT_OFF;
 +	if((exitstatus && eflag) || (e)) {
 +
-+		/* memmory leak is not a problem, we are exiting */
++		/* memory leak is not a problem, we are exiting */
 +
 +	} else {
 +		if(funcname)
