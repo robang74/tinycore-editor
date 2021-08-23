@@ -332,5 +332,7 @@ else
 fi 2>/dev/null
 
 infotime "Waiting for background jobs..."
-while pgrep tce-load; do sleep 0.2; done >/dev/null 2>&1
+echo -ne "\tca-certificates: "
+rotdash $(pgrep ca-certificates)
+echo "OK"
 
