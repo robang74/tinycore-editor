@@ -169,8 +169,8 @@ exit in myfalse() at line 32 == 32, EXITSTATUS: 1
 trap -- ')' ERR
 -----------
 tests/testD.sh: eval: line 4: syntax error: unexpected ")"
-FUNCNAME='cmdevalfalse'
-FUNCNAME=''
+FUNCNAME='cmdevalfalse' == 'cmdevalfalse'
+FUNCNAME='' == ''
 -----------
 trap -- 'echo ERR' ERR
 still running

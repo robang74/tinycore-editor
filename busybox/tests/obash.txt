@@ -174,8 +174,8 @@ tests/testD.sh: error trap: line 4: syntax error near unexpected token `)'
 tests/testD.sh: error trap: line 4: `)'
 tests/testD.sh: error trap: line 4: syntax error near unexpected token `)'
 tests/testD.sh: error trap: line 4: `)'
-FUNCNAME='cmdevalfalse'
-FUNCNAME=''
+FUNCNAME='cmdevalfalse' == 'cmdevalfalse'
+FUNCNAME='' == ''
 -----------
 trap -- 'echo ERR' ERR
 still running
