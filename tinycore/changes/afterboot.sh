@@ -332,8 +332,10 @@ else
 fi 2>/dev/null
 
 infotime "Waiting for background jobs..."
-echo -ne "\tca-certificates: "
-rotdash $(pgrep ca-certificates)
-touch /run/ca-certificates.done
-echo "OK"
+if [ -e /usr/local/tce.installed/ca-certificates ]; then
+	echo -ne "\tca-certificates: "
+	rotdash $(pgrep ca-certificates)
+	touch /run/ca-certificates.done
+	echo "OK"
+fi
 
