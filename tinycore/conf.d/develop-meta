@@ -12,5 +12,8 @@ wd=$(dirname $0)
 time $wd/binutils
 time $wd/openssl-1.1.1
 
-nohup $wd/ca-certificates >/dev/null 2>&1 &
+if true; then
+	$wd/ca-certificates
+	touch /run/ca-certificates.done
+fi >/dev/null 2>&1 &
 

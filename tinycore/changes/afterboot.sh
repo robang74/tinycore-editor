@@ -40,16 +40,35 @@ function devdir() {
 }
 
 function tceload() {
+	opt="-i"
+	if [ "$1" == "-bg" ]; then
+		opt="-bi"
+		shift
+	fi
 	test -z "$1" && return 1
 	user=$(cat /etc/sysconfig/tcuser)
 	user=${user:-tc}
-	su $user -c "tce-load -i $*" | \
+	su $user -c "tce-load $opt $*" | \
 		grep -v -e "is already installed!" \
 			-e "Updating certificates" \
 			-e "added.* removed" | \
 			tr \\n ' ' | grep .. || \
 				echo "no extra tcz!" &
 	rotdash $!
+	if [ "$opt" == "-bi" ]; then
+		one=${1/.tcz/}
+		if [ -x /usr/local/tce.installed/$one ]; then
+			/usr/local/tce.installed/$one
+			touch /run/$one.done
+		fi >/dev/null 2>&1 &
+	fi	
+}
+
+function waitcacerts() {
+	for i in $(pgrep ca-certificates); do
+		rotdash $i
+	done
+	touch /run/ca-certificates.done
 }
 
 ###############################################################################
@@ -179,7 +198,7 @@ if [ -d $tcdir/tcz ]; then
 	infotime -n "Loading TCZ archives: "
 	tceload $metalist | tr \\n \\0
 	tceload $tczlist || echo
-	tceload $cacert >/dev/null 2>&1 &
+	tceload -bg $cacert
 	cd - >/dev/null
 	ldconfig
 if false; then
@@ -196,7 +215,7 @@ if false; then
 		fi
 	fi >/dev/null &
 	rotdash $!
-	echo OK
+	echo "OK"
 fi
 fi
 
@@ -262,30 +281,42 @@ if which dhclient >/dev/null; then
 else
 	netmsg="\tusing udhcpc..."
 	dhclient="udhcpc -T1 -t$dhctmo -ni"
-fi 2>/dev/null
+fi
 
 if [ -e $tcdir/flags/ETH0-STATIC.UP ]; then
 	echo -e "\tusing static settings..."
 	source $tcdir/flags/ETH0-STATIC.UP
+	nodhcp=1
 else
 	ifconfig eth0 up
 fi
 
-if [ "$netopts" != "" ] && ifconfig eth0 | grep -q "inet "; then
-	netset=1
-	echo -ne "\tstatic eth0  : OK"
-elif ! grep -qw nodhcp /proc/cmdline; then
+if grep -qw nodhcp /proc/cmdline; then
+	echo -e "\tcommand line nodhcp"
+	nodhcp=1
+fi
+if [ "$nodhcp" == "1" ]; then
+	echo -ne "\tstatic eth0  : "
+	if ifconfig eth0 | grep -q "inet "; then
+		netset=1
+		echo "OK"
+	else
+		echo "KO"
+	fi
+else
 	netset=1
 	echo -e "$netmsg"
 	echo -ne "\tenabling eth0: "
-	if $dhclient eth0 >/dev/null 2>&1; then
+	if ifconfig eth0 | grep -q "inet "; then
+		echo "OK"
+	elif $dhclient eth0 >/dev/null 2>&1; then
 		echo "OK"
 	else
 		echo "KO"
 	fi &
 	rotdash $!
 fi
-while true; do
+while [ "$nodhcp" != "1" ]; do
 	test -e $tcdir/flags/VLAN-ENA.BLE || break
 	if ifconfig eth0 | grep -q "inet "; then
 		break;
@@ -305,6 +336,7 @@ while true; do
 	done 2>/dev/null
 	break
 done
+
 if [ "$netset" != "1" ]; then
 	echo -e "\tno settings found."
 else infotime "Upraising SSH for {tc, $tcpassword}..." ########################
@@ -358,12 +390,13 @@ fi 2>/dev/null
 infotime "Waiting for background jobs..."
 if [ -x /usr/local/tce.installed/ca-certificates ]; then
 	echo -ne "\tca-certificates: "
-	for i in $(pgrep ca-certificates); do
-		rotdash $i
-	done
-	touch /run/ca-certificates.done
-	echo "OK"
+	if grep -qw nowait /proc/cmdline; then
+		echo "nowait"
+	else
+		waitcacerts
+		echo "OK"
+	fi
 fi
 echo -ne "\tremounting-ro: "
-rotdash $lastpid; echo OK
+rotdash $lastpid; echo "OK"
 
