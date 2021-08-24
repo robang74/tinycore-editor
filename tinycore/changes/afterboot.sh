@@ -65,9 +65,8 @@ function tceload() {
 }
 
 function waitcacerts() {
-	for i in $(pgrep ca-certificates); do
-		rotdash $i
-	done
+# RAF: using rotdash v2.0: multiple pids allowed
+	rotdash $(pgrep ca-certificates)
 	touch /run/ca-certificates.done
 }
 
