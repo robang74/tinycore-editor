@@ -186,10 +186,10 @@ if [ -d $tcdir/tcz ]; then
 	infotime -n "Installing TCZ archives: "
 	if true; then
 		cd /usr/local/tce.installed
-		list=$(find . -not -type d | grep -v "ca-certificates")
+		list=$(ls -1t | grep -v "ca-certificates")
 		for i in $list; do
-			test -x $i || continue; $i
-			echo $? >/run/$(basename $i).rc
+			test -x $i || continue; ./$i
+			echo $? >/run/$i.rc
 		done
 		if [ -x ./ca-certificates ]; then
 			./ca-certificates &
@@ -357,7 +357,9 @@ fi 2>/dev/null
 infotime "Waiting for background jobs..."
 if [ -x /usr/local/tce.installed/ca-certificates ]; then
 	echo -ne "\tca-certificates: "
-	rotdash $(pgrep ca-certificates)
+	for i in $(pgrep ca-certificates); do
+		rotdash $i
+	done
 	touch /run/ca-certificates.done
 	echo "OK"
 fi
