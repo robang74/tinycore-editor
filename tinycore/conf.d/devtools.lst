@@ -55,3 +55,8 @@ util-linux_base-dev.tcz
 wget.tcz
 zlib_base-dev.tcz
 zsync.tcz
+gettext.tcz
+gettext-dev.tcz
+libtool.tcz
+libtool-dev.tcz
+libltdl.tcz
