@@ -43,7 +43,7 @@ function tceload() {
 	test -z "$1" && return 1
 	user=$(cat /etc/sysconfig/tcuser)
 	user=${user:-tc}
-	su $user -c "tce-load -bi $*" | \
+	su $user -c "tce-load -i $*" | \
 		grep -v -e "is already installed!" \
 			-e "Updating certificates" \
 			-e "added.* removed" | \
@@ -171,18 +171,18 @@ if [ -d $tcdir/tcz ]; then
 	cd $tcdir/tcz
 	metalist=$(ls -1 *-meta.tcz 2>/dev/null)
 	tczlist=$(ls -1 *.tcz 2>/dev/null | grep -ve "-meta.tcz$")
-#	calast="ca-certificates.tcz"
-#	if echo "$tczlist" | grep -q "$calast"; then
-#		tczlist=$(echo "$tczlist" | grep -v "$calast")
-#		cacert="$calast"
-#	fi
+	calast="ca-certificates.tcz"
+	if echo "$tczlist" | grep -q "$calast"; then
+		tczlist=$(echo "$tczlist" | grep -v "$calast")
+		cacert="$calast"
+	fi
 	infotime -n "Loading TCZ archives: "
 	tceload $metalist | tr \\n \\0
 	tceload $tczlist || echo
-#	tceload $cacert >/dev/null 2>&1 &
+	tceload $cacert >/dev/null 2>&1 &
 	cd - >/dev/null
 	ldconfig
-
+if false; then
 	infotime -n "Installing TCZ archives: "
 	if true; then
 		cd /usr/local/tce.installed
@@ -197,6 +197,7 @@ if [ -d $tcdir/tcz ]; then
 	fi >/dev/null &
 	rotdash $!
 	echo OK
+fi
 fi
 
 ###############################################################################
