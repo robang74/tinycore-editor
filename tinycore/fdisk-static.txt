@@ -1,0 +1,18 @@
+wget https://github.com/karelzak/util-linux/archive/refs/tags/v2.37.2.tar.gz
+tar xvzf v2.37.2.tar.gz
+cd util-linux-2.37.2
+./autogen.sh
+
+export CFLAGS=-static
+export SUID_CFLAGS=-static
+export SUID_LDFLAGS=-static
+export CPPFLAGS=-static
+export LDFLAGS=-static
+
+./configure --disable-shared --without-tinfo --without-ncurses --disable-pylibmount
+
+make clean
+make fdisk -j4
+strip --strip-unneeded fdisk
+sstrip fdisk
+
