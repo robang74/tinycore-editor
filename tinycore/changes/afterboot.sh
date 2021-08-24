@@ -117,7 +117,7 @@ infotime "Mounting local drives in read only..." ##############################
 
 disks=$(grep -e "sd[a-d][0-4]$" /proc/partitions | tr -s ' ' | cut -d' ' -f5)
 for i in $disks; do
-	warntime "remounting $i"
+#	warntime "remounting $i"
 	if grep -qe "^/dev/$i " /proc/mounts; then
 		mount -o remount,ro /mnt/$i
 	else
