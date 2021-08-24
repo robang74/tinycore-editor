@@ -60,7 +60,8 @@ else
 	if [ "$tcdir" == "" ]; then
 		tcdir=${tcdev/dev/mnt}
 		mkdir -p $tcdir
-		mount -o ro $tcdev $tcdir
+		chown root.staff $tcdir
+		mount -o ro,gid=50,umask=002 $tcdev $tcdir
 		if ! grep -qe "^$tcdev $tcdir " /proc/mounts; then
 			tcdir=""
 		fi

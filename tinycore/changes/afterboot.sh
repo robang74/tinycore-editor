@@ -185,8 +185,13 @@ chown -R tc.staff /home/tc
 
 ###############################################################################
 
-if [ -d $tcdir/tcz ]; then
-	cd $tcdir/tcz
+if [ -d $tcdir/tce/optional ]; then
+	tczdir=$tcdir/tce/optional
+elif [ -d $tcdir/cde/optional ]; then
+	tczdir=$tcdir/cde/optional
+fi
+if [ -d $tcdir/tce/optional -o -d $tcdir/cde/optional ]; then
+	cd $tczdir
 	metalist=$(ls -1 *-meta.tcz 2>/dev/null)
 	tczlist=$(ls -1 *.tcz 2>/dev/null | grep -ve "-meta.tcz$")
 	calast="ca-certificates.tcz"

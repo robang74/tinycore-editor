@@ -248,10 +248,14 @@ function tccopyall() {
 		cp -rf busybox/patches $tcldir && \
 			echo -e "\ttransfer busybox/patches -> /$tcldir/"
 	fi
-	if [ "$1" == "tce" ]; then
+	if [ "$1" == "" ]; then
 		tczdir=$tcldir/tce/optional
 		mkdir -p $tcldir/tce
 		echo "$tczlist" >$tcldir/tce/onboot.lst
+	elif [ "$1" == "iso" ]; then
+		tczdir=$tcldir/cde/optional
+		mkdir -p $tcldir/cde
+		echo "$tczlist" >$tcldir/cde/onboot.lst
 	else
 		tczdir=$tcldir/tcz
 	fi
