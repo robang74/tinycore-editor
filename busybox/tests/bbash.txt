@@ -91,11 +91,6 @@ onerror() at line 16 == 16
 exit in () at line 37 == 37 with pippo but not pluto
 #############################################
 
-################## TEST 9 ##################
-shell: busybox ash
-LINENO=0
-#############################################
-
 ################## TEST A ##################
 ciao! at line 29 == 29, FUNCNAME = ''
 hello by mytest() at line 22 == 22
@@ -166,9 +161,12 @@ exit in myfalse() at line 32 == 32, EXITSTATUS: 1
 #############################################
 
 ################## TEST D ##################
+shell: busybox ash
+LINENO=0
 trap -- ')' ERR
 -----------
 tests/testD.sh: eval: line 4: syntax error: unexpected ")"
+tests/testD.sh: line 4: syntax error: unexpected ")"
 FUNCNAME='cmdevalfalse' == 'cmdevalfalse'
 FUNCNAME='' == ''
 -----------
@@ -177,5 +175,7 @@ still running
 ERR
 1
 still running after false
+tests/testD.sh: eval: line 43: syntax error: unexpected ")"
+done
 #############################################
 

@@ -91,11 +91,6 @@ onerror() at line 16 == 16
 exit in () at line 1 == 37 with pippo but not pluto
 #############################################
 
-################## TEST 9 ##################
-shell: bash
-LINENO=0
-#############################################
-
 ################## TEST A ##################
 ciao! at line 29 == 29, FUNCNAME = ''
 hello by mytest() at line 22 == 22
@@ -166,6 +161,8 @@ exit in myfalse() at line 1 == 32, EXITSTATUS: 1
 #############################################
 
 ################## TEST D ##################
+shell: bash
+LINENO=0
 trap -- ')' ERR
 -----------
 tests/testD.sh: error trap: line 4: syntax error near unexpected token `)'
@@ -182,5 +179,8 @@ still running
 ERR
 1
 still running after false
+tests/testD.sh: eval: line 44: syntax error near unexpected token `)'
+tests/testD.sh: eval: line 44: `)'
+done
 #############################################
 

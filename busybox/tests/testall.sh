@@ -3,7 +3,7 @@
 if [ "$1" != "" ]; then
 	all="$@"
 else
-	all="$(echo {1..9} {A..D})"
+	all="$(echo {1..9} {A..E})"
 fi
 
 for i in $all; do

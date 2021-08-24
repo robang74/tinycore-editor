@@ -451,3 +451,54 @@
  
  	} else {
  		if(funcname)
+--- src.0/shell/ash.c	2021-08-24 11:49:16.910478347 +0200
++++ src.2/shell/ash.c	2021-08-24 11:48:21.842478029 +0200
+@@ -9287,23 +9287,35 @@ evaltree(union node *n, int flags)
+ 
+ 	if (checkexit & status) {
+ 		if(errflag) {
+-				static bool recursive = 0;
+-				if(exception_type == EXERROR) {
+-					doingtrap = 0;
+-					recursive = 0;
+-					exception_type = -1;
+-				} else
++				static bool recursive = 0, savetrap;
++				static int savelineno;
+ 				if(!recursive) {
+-					int savelineno = lineno;
+-					savestatus = exitstatus;
+-					doingtrap = 1;
+-					recursive = 1;
+-					evalstring(trap[NSIG], 0);
++					int err;
++					struct jmploc *volatile savehandler = exception_handler;
++					struct jmploc jmploc;
++
++					err = setjmp(jmploc.loc); /* was = setjmp(jmploc.loc) * 2; */
++					if (!err) {
++						exception_handler = &jmploc;
++					
++						savestatus = exitstatus;
++						savetrap = doingtrap;
++						savelineno = lineno;
++						doingtrap = 1;
++						recursive = 1;
++
++						evalstring(trap[NSIG], 0);
++					}
++
++					exception_handler = savehandler;
++					if (err && exception_type != EXERROR)
++						longjmp(exception_handler->loc, 1);
++					
+ 					recursive = 0;
+-					doingtrap = 0;
+ 					lineno = savelineno;
++					doingtrap = savetrap;
+ 					exitstatus = savestatus;
+-			}
++				}
+ 		}
+ 		if(eflag)
+ 			exitshell();
