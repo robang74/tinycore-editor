@@ -61,7 +61,14 @@ else
 		tcdir=${tcdev/dev/mnt}
 		mkdir -p $tcdir
 		chown root.staff $tcdir
-		mount -o ro,gid=50,umask=002 $tcdev $tcdir
+		if mount -o ro,gid=50,umask=002,sync $tcdev $tcdir; then
+			if [ -d $tcdir/tce/optional ]; then
+				rm -f /etc/sysconfig/tcedir
+				ln -sf $tcdir/tce /etc/sysconfig/tcedir
+			fi
+		else
+			mount -o ro $tcdev $tcdir
+		fi 2>/dev/null
 		if ! grep -qe "^$tcdev $tcdir " /proc/mounts; then
 			tcdir=""
 		fi

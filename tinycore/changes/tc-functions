@@ -186,7 +186,7 @@ usleep_progress() {
 runasuser() {
  if [ "$USER" == "root" ]; then
    user=$(cat /etc/sysconfig/tcuser)
-   echo "Don't run this as root, fall back to $user" >&2
+#  echo "Don't run this as root, fall back to $user" >&2
 #  ATTENTION: set -- ciao "bella ciao" does not work because
 #             the space between the two words split them as
 #             set -- ciao bella ciao has been used instead.
