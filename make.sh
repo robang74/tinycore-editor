@@ -879,6 +879,9 @@ if [ "$param" == "ssh-copy" -a "$option" == "8GB" ]; then
 	echo -e "\ttransfering everything to $tcip:$ntdir..."
 	myscp DATA/* root@$tcip:$ntdir && \
 		echo -e "\ttransfered everything to $tcip:$ntdir -- OK"
+	echo -e "\tWait for syncing the remote drive..."
+	myssh 0 root sync
+	echo
 fi
 
 if [ "$param" == "ssh-copy" -a "$option" != "8GB" ]; then
@@ -897,7 +900,9 @@ if [ "$param" == "ssh-copy" -a "$option" != "8GB" ]; then
 	echo -e "\ttransfering everything to $tcip:$tcdir..."
 	myscp * root@$tcip:$tcdir && \
 		echo -e "\ttransfered everything to $tcip:$tcdir -- OK"
-	realsync="sync; echo 1 >/proc/sys/kernel/sysrq; echo s >/proc/sysrq-trigger; sync"
+	echo -e "\tWait for syncing the remote drive..."
+	myssh 0 root sync
+	echo
 	cd ..
 	rm -rf $tcldir
 fi
