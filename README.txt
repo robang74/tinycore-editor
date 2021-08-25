@@ -160,6 +160,13 @@
     change the packages configuration (conf.d/*.lst), you will need to redo
     all meta packages and this is time consuming.
 
+20. The USB image written on a USB key will create a secondary partition as
+    large as the USB at the first boot. This partition will be formatted in
+    NTFS if sshonly, usbkey meta packages are choosen and in EXT4 if the
+    develop package is inserted in the list. This allows you to use the USB
+    key as a rescue/maintanance/storage usbkey or using it as a developing
+    system in which you can compile directly on the EXT4 secondary partition.
+
 ###############################################################################
 			USEFULL LINKS TO VISIT
 ###############################################################################
