@@ -129,7 +129,7 @@ function myssh() {
 	tout=${tout/1000d/10}
 	$runasuser "exec -a myssh $timeout $luit sshpass -p $pass ssh -o StrictHostKeyChecking=no -o ConnectTimeout=$tout $user@$tcip \"$@\""
 	if [ "$luit" != "" ]; then
-		reset
+		tset -c
 	fi
 }
 
