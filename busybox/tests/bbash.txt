@@ -85,5 +85,18 @@ ERR ONE, at line 121
 -----------------16----------------------
 trap -- 'echo ERR MAIN' ERR
 ERR MAIN
+-----------------17----------------------
+tests/testE.sh: line 144: can't create /access-denied: Permission denied
+ERR myfault at line 144
+bash reports line 142 but fault is at line 144
+-----------------------------------------
+tests/testE.sh: eval: line 152: syntax error: unexpected ")"
+ERR myfault2 at line 152
+ERR at line 162
+tests/testE.sh: eval: line 163: syntax error: unexpected ")"
+ERR at line 163
+tests/testE.sh: line 164: can't create /access-denied: Permission denied
+ERR at line 164
+EXIT at line 158
 #############################################
 

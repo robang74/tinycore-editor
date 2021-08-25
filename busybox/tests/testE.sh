@@ -137,3 +137,34 @@ trap
 cleantrap
 false
 
+echo "-----------------17----------------------"
+
+function myfault() {
+	trap 'echo ERR $FUNCNAME at line $LINENO' ERR
+	(:) >/access-denied
+	if [ "$(echo {1..2})" != "1 2" ]; then
+		echo "bash reports line 142 but fault is at line 144"
+	fi
+}
+
+function myfault2() {
+	trap 'echo ERR $FUNCNAME at line $LINENO' ERR
+	command eval ")"
+}
+
+exec 2>&1
+
+trap "echo ERR $FUNCNAME at line $LINENO" ERR
+trap "echo EXIT $FUNCNAME at line $LINENO" EXIT
+
+myfault
+echo "-----------------------------------------"
+myfault2
+command eval ")"
+(:) >/access-denied
+
+
+
+
+
+
