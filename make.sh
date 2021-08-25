@@ -129,7 +129,7 @@ function myssh() {
 	tout=${tout/1000d/10}
 	$runasuser "exec -a myssh $timeout $luit sshpass -p $pass ssh -o StrictHostKeyChecking=no -o ConnectTimeout=$tout $user@$tcip \"$@\""
 	if [ "$luit" != "" ]; then
-		reset
+		reset 2>&1 | sed -e "s,$(printf '\33c'),," >&2
 		echo
 	fi
 }
