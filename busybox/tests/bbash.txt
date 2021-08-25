@@ -179,3 +179,90 @@ tests/testD.sh: eval: line 43: syntax error: unexpected ")"
 done
 #############################################
 
+################## TEST E ##################
+ERR ONE, funcone at line 5
+ERR ONE, at line 27
+ERR ONE, at line 27 is acceptable in busybox ash
+funcone exit status = 0 == 1
+ERR ONE, at line 32
+-----------------01----------------------
+ERR ONE, funcone at line 5
+ERR ONE, at line 38
+funcone exit status = 1 == 1
+ERR ONE, at line 40
+-----------------02----------------------
+ERR ONE, funcone at line 5
+ERR ONE, functwo at line 10
+ERR ONE, at line 44
+ERR ONE, at line 45
+-----------------03----------------------
+ERR ONE, functhree at line 14
+ERR ONE, funcone at line 5
+ERR ONE, functwo at line 10
+ERR ONE, functhree at line 15
+ERR ONE, functhree at line 15 is acceptable in busybox ash
+ERR ONE, functhree at line 19
+ERR ONE, at line 49
+in this test bash seems incoherent about functhree line 15
+ERR ONE, at line 53
+-----------------04----------------------
+-----------------05----------------------
+ERR ONE, funcone at line 5
+ERR ONE, functwo at line 10
+ERR ONE, at line 64
+ERR ONE, at line 61 is acceptable in busybox ash
+ERR ONE, at line 68
+-----------------06----------------------
+ERR ONE, funcone at line 5
+ERR ONE, functwo at line 10
+ERR ONE, functhree at line 15
+ERR ONE, functhree at line 15 is acceptable in busybox ash
+ERR ONE, functhree at line 19
+ERR ONE, at line 72
+ERR ONE, at line 73
+-----------------07----------------------
+ERR ONE, at line 77
+ERR ONE, at line 78
+-----------------08----------------------
+ERR MAIN
+ERR ONE, funcone at line 5
+ERR ONE, at line 85
+-----------------09----------------------
+ERR ONE, funcone at line 5
+ERR ONE, functwo at line 10
+ERR ONE, at line 89
+ERR ONE, at line 90
+-----------------10----------------------
+ERR ONE, funcone at line 5
+ERR ONE, functwo at line 10
+ERR ONE, functhree at line 15
+ERR ONE, functhree at line 15 is acceptable in busybox ash
+ERR ONE, functhree at line 19
+ERR ONE, at line 94
+ERR ONE, at line 95
+-----------------11----------------------
+ERR ONE, at line 99
+ERR ONE, at line 100
+-----------------12----------------------
+ERR MAIN
+ERR ONE, funcone at line 5
+ERR ONE, at line 108
+-----------------13----------------------
+ERR ONE, funcone at line 5
+ERR ONE, functwo at line 10
+ERR ONE, at line 112
+ERR ONE, at line 113
+-----------------14----------------------
+ERR ONE, functhree at line 14
+ERR ONE, funcone at line 5
+ERR ONE, functwo at line 10
+ERR ONE, functhree at line 15
+ERR ONE, functhree at line 15 is acceptable in busybox ash
+ERR ONE, functhree at line 19
+ERR ONE, at line 117
+in this test bash seems incoherent about functhree line 15
+ERR ONE, at line 121
+-----------------15----------------------
+-----------------16----------------------
+#############################################
+

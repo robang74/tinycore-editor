@@ -502,3 +502,75 @@
  		}
  		if(eflag)
  			exitshell();
+--- src.0/shell/ash.c	2021-08-25 10:54:35.617723605 +0200
++++ src.4/shell/ash.c	2021-08-25 10:27:25.831441239 +0200
+@@ -9163,8 +9163,6 @@ static int evalcommand(union node *, int
+ static int evalbltin(const struct builtincmd *, int, char **, int);
+ static void prehash(union node *);
+ 
+-#define errflag (trap[NSIG] && (Eflag || (!Eflag && !funcline)))
+-
+ /*
+  * Evaluate a parse tree.  The value is left in the global variable
+  * exitstatus.
+@@ -9211,7 +9209,7 @@ evaltree(union node *n, int flags)
+ 	case NCMD:
+ 		evalfn = evalcommand;
+  checkexit:
+-		if ((errflag) && !(flags & EV_TESTED))
++		if (!(flags & EV_TESTED))
+ 			checkexit = ~0;
+ 		goto calleval;
+ 	case NFOR:
+@@ -9286,7 +9284,7 @@ evaltree(union node *n, int flags)
+ 	dotrap();
+ 
+ 	if (checkexit & status) {
+-		if(errflag) {
++		if (trap[NSIG]) {
+ 				static bool recursive = 0, savetrap;
+ 				static int savelineno;
+ 				if(!recursive) {
+@@ -9776,11 +9774,15 @@ evalfun(struct funcnode *func, int argc,
+ 	volatile struct shparam saveparam;
+ 	struct jmploc *volatile savehandler;
+ 	struct jmploc jmploc;
+-	int e, evaldone = 0;
++	int e;
+ 	int savelineno;
+ 	int savefuncline;
+-	char *savefuncname;
++	char *savefuncname, *savetrap = NULL;
+ 
++	if (!Eflag) {
++		savetrap = trap[NSIG];
++		trap[NSIG] = NULL;
++	}
+ 	savelineno = lineno;
+ 	saveparam = shellparam;
+ 	savefuncline = funcline;
+@@ -9804,17 +9806,20 @@ evalfun(struct funcnode *func, int argc,
+ 	shellparam.optoff = -1;
+ #endif
+ 	evaltree(func->n.ndefun.body, flags & EV_TESTED);
+-	evaldone = 1;
+  funcdone:
+ 	INT_OFF;
+ 	if((exitstatus && eflag) || (e)) {
+-
+-		/* memory leak is not a problem, we are exiting */
+-
++		/* we are exiting within the function */
++		if (savefuncname)
++			free(savefuncname);
++		if (savetrap)
++			free(savetrap);
+ 	} else {
+ 		if(funcname)
+ 			free(funcname);
+ 		funcname = savefuncname;
++		if (!trap[NSIG])
++			trap[NSIG] = savetrap;
+ 	}
+ 	funcline = savefuncline;
+ 	lineno = savelineno;
