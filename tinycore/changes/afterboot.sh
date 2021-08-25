@@ -190,21 +190,24 @@ if [ -d $tcdir/tce/optional ]; then
 elif [ -d $tcdir/cde/optional ]; then
 	tczdir=$tcdir/cde/optional
 fi
-if [ -d $tcdir/tce/optional -o -d $tcdir/cde/optional ]; then
+if [ "$tczdir" != "" ]; then
 	cd $tczdir
-	metalist=$(ls -1 *-meta.tcz 2>/dev/null)
-	tczlist=$(ls -1 *.tcz 2>/dev/null | grep -ve "-meta.tcz$")
-	calast="ca-certificates.tcz"
-	if echo "$tczlist" | grep -q "$calast"; then
-		tczlist=$(echo "$tczlist" | grep -v "$calast")
-		cacert="$calast"
+	onbootlist=$tczdir/../onboot.lst
+	metalist=$(grep -e "-meta\.tcz" $onbootlist 2>/dev/null)
+	tczlist=$(grep -ve "-meta\.tcz" $onbootlist 2>/dev/null)
+	if [ -n "$metalist" -o -n "$tczlist" ]; then
+		calast="ca-certificates.tcz"
+		if echo "$tczlist" | grep -q "$calast"; then
+			tczlist=$(echo "$tczlist" | grep -v "$calast")
+			cacert="$calast"
+		fi
+		infotime -n "Loading TCZ archives: "
+		tceload $metalist | tr \\n \\0
+		tceload $tczlist || echo
+		tceload -bg $cacert
+		ldconfig
 	fi
-	infotime -n "Loading TCZ archives: "
-	tceload $metalist | tr \\n \\0
-	tceload $tczlist || echo
-	tceload -bg $cacert
 	cd - >/dev/null
-	ldconfig
 if false; then
 	infotime -n "Installing TCZ archives: "
 	if true; then
