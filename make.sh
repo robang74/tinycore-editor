@@ -130,6 +130,7 @@ function myssh() {
 	$runasuser "exec -a myssh $timeout $luit sshpass -p $pass ssh -o StrictHostKeyChecking=no -o ConnectTimeout=$tout $user@$tcip \"$@\""
 	if [ "$luit" != "" ]; then
 		tset -c
+		echo
 	fi
 }
 
