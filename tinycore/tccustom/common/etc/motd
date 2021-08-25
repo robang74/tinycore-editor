@@ -12,7 +12,6 @@
    reboot|shutdown.sh	to reboot/shutdown the system using sysrq
    dev2chroot.sh	to chroot into installed Ubuntu
    usbsetboot.sh	to enable/disable the USB key boot
-   tcz2tce.sh		to change in TCE compliant or reverse
 
    bootable-usbdisk-create.sh 		to create a bootable usb disk
    data-usbdisk-partition-create.sh 	to create data partition

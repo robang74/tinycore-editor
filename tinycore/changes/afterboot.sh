@@ -76,7 +76,6 @@ tcpassword="tinycore"
 copylist="
 unlock.sh:unlock.sh
 reboot.sh:reboot.sh
-tcz2tce.sh:tcz2tce.sh
 shutdown.sh:shutdown.sh
 root-ssh.sh:root-ssh.sh
 tcldevdir.sh:tcldevdir.sh

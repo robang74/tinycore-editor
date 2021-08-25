@@ -891,12 +891,10 @@ if [ "$param" == "ssh-copy" -a "$option" != "8GB" ]; then
 	tccopyall
 	cd $tcldir
 	chownuser .
-	myssh 0 root "tcz2tce.sh back"
 	echo -e "\ttransfering everything to $tcip:$tcdir..."
 	myscp * root@$tcip:$tcdir && \
 		echo -e "\ttransfered everything to $tcip:$tcdir -- OK"
 	realsync="sync; echo 1 >/proc/sys/kernel/sysrq; echo s >/proc/sysrq-trigger; sync"
-	myssh 0 root "test -e $tcdir/tce && tcz2tce.sh >/dev/null; $realsync"
 	cd ..
 	rm -rf $tcldir
 fi

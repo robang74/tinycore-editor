@@ -74,11 +74,7 @@
     At the first boot, it will create a secondary NTFS partition as large
     as the entire USB disk space left free (USB disk size less 64 MB)
 
- 9. At the first boot you can decide to have a TCE compliant distro with this:
-
-	tcz2tce.sh
-
-    You can lately change your mind with tcz2tce.sh reverse
+ 9. ---------------------------------------------------------------------------
 
 10. To explore all make.sh features call it without any parameter.
 
