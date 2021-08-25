@@ -159,12 +159,30 @@ compile="CFLAGS='$CFLAGS' LDFLAGS='$LDFLAGS' make -j$(nproc)"
 trap 'onerror $LINENO $FUNCNAME' ERR
 set -Ee
 
+if [ "${1/dist/}" == "clean" ]; then
+	set -- $1 quiet
+fi
+
 if [ "$2" != "quiet" ]; then
 	echo
 	warn "Working folder is $PWD"
 	warn "Architecture: x86 ${arch/-m/} bit"
 	warn "Version: $version"
 	echo
+
+	if [ ! -e ../tinycore/.arch ]; then
+		echo $tcsize >../tinycore/.arch
+		chownuser .arch
+	fi
+	tcsnow=$(cat ../tinycore/.arch)
+	if [ "$tcsnow" != "$tcsize" ]; then
+		echo
+		perr "ERROR: previous download have been done for x86 $tcsnow bits, abort"
+		echo
+		warn "SUGGEST: run '$myname distclean' or change ARCH in tinycore.conf"
+		echo
+		realexit 1
+	fi
 else
 	echo
 	exec &> >(grep -v "./_install")

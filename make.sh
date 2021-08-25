@@ -421,7 +421,6 @@ for i in $rootlist; do
 done
 
 if [ "$broot" == "1" ]; then
-	echo "make.sh $param requires being root..."
 	if [ "$USER" != "root" ]; then
 		set -m
 		if ! timeout 0.2 sudo -n true; then
@@ -458,6 +457,20 @@ while true; do
 	warn "Config files: tinycore/tinycore.conf"
 	warn "Architecture: x86 $tcsize bit"
 	warn "Version: $TC.x"
+
+	if [ ! -e .arch ]; then
+		echo $tcsize >.arch
+		chownuser .arch
+	fi
+	tcsnow=$(cat .arch)
+	if [ "$tcsnow" != "$tcsize" ]; then
+		echo
+		perr "ERROR: previous download have been done for x86 $tcsnow bits, abort"
+		echo
+		warn "SUGGEST: run '$myname distclean' or change ARCH in tinycore.conf"
+		echo
+		realexit 1
+	fi
 
 	for i in $tczmeta; do
 		test -e tcz/$i.list || continue

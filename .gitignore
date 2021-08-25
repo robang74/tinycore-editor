@@ -8,8 +8,8 @@
 /tinycore/tccustom32.tgz
 /tinycore/tccustom64.tgz
 /tinycore/tinycore.conf
-/tinycore/.downloaded
 /tinycore/vmlinuz
+/tinycore/.arch
 /tinycore/tcz/*
 /busybox/src
 /busybox/busybox.tar.bz2
