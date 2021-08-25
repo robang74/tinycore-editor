@@ -120,12 +120,15 @@ function myssh() {
 		fi
 	fi
 	if [ "$SUDO_USER" == "" ]; then
-		tout=${tout/1000d/10}
-		$luit sshpass -p $pass ssh -o StrictHostKeyChecking=no -o ConnectTimeout=$tout $user@$tcip "$@"
+		runasuser="bash -c "
+		timeout=""
 	else
-		su -m $SUDO_USER -c "exec -a myssh timeout $tout $luit sshpass -p $pass ssh -o StrictHostKeyChecking=no $user@$tcip \"$@\""
+		runasuser="su -m $SUDO_USER -c"
+		timeout="timeout $tout"
 	fi
-	if [ "$1" == "" ]; then
+	tout=${tout/1000d/10}
+	$runasuser "exec -a myssh $timeout $luit sshpass -p $pass ssh -o StrictHostKeyChecking=no -o ConnectTimeout=$tout $user@$tcip \"$@\""
+	if [ "$luit" != "" ]; then
 		reset
 	fi
 }
