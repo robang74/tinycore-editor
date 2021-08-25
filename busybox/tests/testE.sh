@@ -127,4 +127,13 @@ false
 
 echo "-----------------16----------------------"
 
+function cleantrap() {
+	false
+	trap -- ERR
+}
+
+trap "echo ERR MAIN" ERR
+trap
+cleantrap
+false
 
