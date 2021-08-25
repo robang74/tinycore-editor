@@ -58,7 +58,9 @@ if [ "$1" == "open" -o "$1" == "update" ]; then
 	cat ../changes/rcS > etc/init.d/rcS
 	cat ../changes/tce-load > usr/bin/tce-load
 	cat ../changes/tc-functions > etc/init.d/tc-functions
-	cat ../changes/tce-setup > usr/bin/tce-setup 2>/dev/null
+	if [ -e ../changes/tce-setup ]; then
+		cat ../changes/tce-setup > usr/bin/tce-setup
+	fi
 	echo "$tczmeta" | grep -w "develop" >etc/sysconfig/devel
 	test -e lib64 || ln -sf lib lib64
 	echo "opened folder: $tmpdir"
