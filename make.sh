@@ -119,7 +119,12 @@ function myssh() {
 			luit="luit -encoding ISO-8859-1"
 		fi
 	fi
-	su -m $SUDO_USER -c "exec -a myssh timeout $tout $luit sshpass -p $pass ssh -o StrictHostKeyChecking=no $user@$tcip \"$@\""
+	if [ "$SUDO_USER" == "" ]; then
+		tout=${tout/1000d/10}
+		$luit sshpass -p $pass ssh -o StrictHostKeyChecking=no -o ConnectTimeout=$tout $user@$tcip "$@"
+	else
+		su -m $SUDO_USER -c "exec -a myssh timeout $tout $luit sshpass -p $pass ssh -o StrictHostKeyChecking=no $user@$tcip \"$@\""
+	fi
 	if [ "$1" == "" ]; then
 		reset
 	fi
@@ -296,10 +301,18 @@ function sshgettcdir() {
 function sshfingerprintclean() {
 	if [ "$sshkeycln" == "yes" ]; then
 		if [ ! -d ~/.ssh ]; then
-			yes "" | su -l $SUDO_USER -c "ssh-keygen"
+			if [ "$SUDO_USER" == "" ]; then
+				yes "" | ssh-keygen
+			else
+				yes "" | su -l $SUDO_USER -c "ssh-keygen"
+			fi
 		fi 2>/dev/null
 		if [ -e ~/.ssh/known_hosts ]; then
-			su -l $SUDO_USER -c "ssh-keygen -R $tcip"
+			if [ "$SUDO_USER" == "" ]; then
+				ssh-keygen -R $tcip
+			else
+				su -l $SUDO_USER -c "ssh-keygen -R $tcip"
+			fi
 		fi
 		sshkeycln=no
 	fi >/dev/null
@@ -365,17 +378,6 @@ function perr() {
 
 myname="$(basename $0)"
 
-if [ "$USER" != "root" ]; then
-	set -m
-	if ! timeout 0.2 sudo -n true; then
-		echo
-		warn "WARNING: $myname requires root permissions"
-		echo
-	fi 2>/dev/null
-	sudo $0 "$@"
-	exit $?
-fi
-
 if [ "$1" != "--real" ]; then
 	if isatarget $1; then
 		options="$1"
@@ -408,6 +410,29 @@ param="$1"
 shift
 option="$1"
 shift
+
+rootlist="qemu-init qemu-test qemu qemu-stop image iso"
+
+for i in $rootlist; do
+	if [ "$param" == "$i" -o "$param" == "" ]; then
+		broot=1
+		break;
+	fi
+done
+
+if [ "$broot" == "1" ]; then
+	echo "make.sh $param requires being root..."
+	if [ "$USER" != "root" ]; then
+		set -m
+		if ! timeout 0.2 sudo -n true; then
+			echo
+			warn "WARNING: $myname requires root permissions"
+			echo
+		fi 2>/dev/null
+		sudo $0 "$param $option $*"
+		exit $?
+	fi
+fi
 
 syslist="rootfs.gz modules.gz vmlinuz"
 trglist="ssh-copy image iso"
@@ -873,13 +898,15 @@ if [ "$param" == "ssh-end" ]; then
 		myssh 0 root "data-usbdisk-partition-create.sh && echo DONE" | grep -q DONE
 	fi
 	myssh 0 root "unlock.sh;
-dd if=/dev/zero of=$tcdir/zero; 
-sync; rm -f $tcdir/zero; shutdown"
+mount -o remount,async $tcdir;
+dd if=/dev/zero of=$tcdir/zero;
+sync; rm -f $tcdir/zero; 
+/sbin/poweroff"
 	info "make.sh executing: waiting for the qemu system shut down"
 	k=0
 	sleep 1
-	while myssh 1 tc "whoami" >/dev/null 2>&1; do
-		pgrep qemu >/dev/null
+	while myssh 1 tc "whoami" 2>&1 | grep -wq "tc"; do
+		pgrep qemu >/dev/null || break
 		k=$[k+1]
 		if [[ $k -gt 10 ]]; then
 			myssh 10 root "shutdown.sh" || true
