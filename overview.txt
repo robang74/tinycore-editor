@@ -7,9 +7,9 @@
 
  To create the bootable usb key use this command:
 
-	LINUX: zcat tcl-64MB-usb.disk.gz > /dev/sd${letter}
+	LINUX: zcat tcl-usb.disk.gz > /dev/sd${letter}
 
-	WINDOWS: rufus select tcl-64MB-usb.disk.gz and write
+	WINDOWS: rufus select tcl-usb.disk.gz and write
 
  USB firt partition label: T1NYC0R3 (but you can change it in rcS)
 
@@ -29,7 +29,7 @@
 
  HOW TO UPDATE THE IMAGE WITH QEMU
 
- To update the 64MB usb image do: ./make.sh all
+ To update the usb image do: ./make.sh all
  After, to recreate the 8GB image: ./make.sh all 8GB
 
  These procedure requires that qemu-system-i386 is installed
@@ -39,8 +39,8 @@
 
  ############ HOW TO MODIFY THE IMAGE ############
  
- zcat tcl-64MB-usb.disk.gz >tcl-64MB-usb.disk
- sudo losetup --partscan /dev/loop8 tcl-64MB-usb.disk
+ zcat tcl-usb.disk.gz >tcl-usb.disk
+ sudo losetup --partscan /dev/loop8 tcl-usb.disk
  mkdir -p tcldisk
  sudo mount /dev/loop8p1 tcldisk
 
@@ -49,14 +49,14 @@
  sudo rm -f tcldisk/zero
  sudo umount tcldisk
  sudo losetup -D /dev/loop8
- gzip -9c tcl-64MB-usb.disk >tcl-64MB-usb.disk.gz
+ gzip -9c tcl-usb.disk >tcl-usb.disk.gz
 
 	
  ###### HOW TO CREATE AN INSTALLATION IMAGE ######
 
- zcat tcl-64MB-usb.disk.gz > tcl-64MB-usb.disk
- dd if=/dev/zero bs=1M count=7500 >>tcl-64MB-usb.disk
- mv tcl-64MB-usb.disk tcl-8GB-usb.disk
+ zcat tcl-usb.disk.gz > tcl-usb.disk
+ dd if=/dev/zero bs=1M count=7500 >>tcl-usb.disk
+ mv tcl-usb.disk tcl-8GB-usb.disk
  echo -e "n\n p\n 2\n \n \n N\n t\n 2\n 7\n w" | \
  	fdisk tcl-8GB-usb.disk
  sudo losetup --partscan /dev/loop8 tcl-8GB-usb.disk
@@ -71,7 +71,7 @@
 
  tcldisk=<your device>
  ntfspart=${tcldisk}2
- zcat tcl-64MB-usb.disk.gz >$tcldisk
+ zcat tcl-usb.disk.gz >$tcldisk
  echo -e "n\n p\n 2\n \n \n N\n t\n 2\n 7\n w" | \
         sudo fdisk $tcldisk
  sudo mkfs -t ntfs -F -Q $ntfspart

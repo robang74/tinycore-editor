@@ -19,7 +19,7 @@ sudo dnsmasq --interface=brkvm --bind-interfaces --dhcp-range=$tcip,$tcip
 # sudo iptables -I FORWARD -m physdev --physdev-is-bridged -j ACCEPT
 # sudo sysctl -w net.ipv4.ip_forward=1
 
-drvboot="format=raw,file=tcl-64MB-usb.disk"
+drvboot="format=raw,file=tcl-usb.disk"
 drvdata="format=raw,file=storage-10MB.disk"
 sudo qemu-system-i386 --enable-kvm -m 256 -boot c -net nic -net bridge,br=brkvm -drive $drvboot -drive $drvdata
 
