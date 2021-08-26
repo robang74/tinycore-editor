@@ -148,7 +148,7 @@ else
 fi
 
 # Finally check for CD Extensions if requested
-if [ "$CDE" ]; then
+if [ "$CDE" -a ! "$ONLYBASE" ]; then
 	# Some cd drives are slow - if cde was requested, wait for udev to settle
 	[ ! -s /etc/sysconfig/cdroms ] && udevadm settle --timeout 5
 
@@ -160,7 +160,7 @@ if [ "$CDE" ]; then
 fi
 
 # If nothing loaded then also check for pseudo CD, e.g., isohybrid
-if [ "$CDE" -a -z "$CDELIST" ]; then
+if [ "$CDE" -a -z "$CDELIST" -a ! "$ONLYBASE" ]; then
 	sleep 5
 	DEV="$(tc_autoscan 'cde' 'd')"
 	process_CD

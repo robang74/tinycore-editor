@@ -265,7 +265,7 @@ function tccopyall() {
 		tczdir=$tcldir/cde/optional
 		mkdir -p $tcldir/cde
 		echo "$tczlist" >$tcldir/cde/onboot.lst
-		sed -i "s,append,append cde," $tcldir/boot/syslinux/syslinux.cfg
+#		sed -i "s,append,append cde," $tcldir/boot/syslinux/syslinux.cfg
 	else
 		tczdir=$tcldir/tcz
 	fi
