@@ -239,10 +239,10 @@ stage="Disk partitions preparation"
 tag 30 "${stage}"
 
 if true; then
-	mkfs -t ext4 -F $rstdiskp1 -L LINUX
+	mkfs.ext4 -F $rstdiskp1 -L LINUX
 	mkswap -L SWAP  $rstdiskp2
-	mkfs -t ext4 -F $rstdiskp3 -L VARLOG
-	mkfs -t ext4 -F $rstdiskp4 -L VARDATA
+	mkfs.ext4 -F $rstdiskp3 -L VARLOG
+	mkfs.ext4 -F $rstdiskp4 -L VARDATA
 fi >/dev/null
 
 stage="Root filesystem transfer"
