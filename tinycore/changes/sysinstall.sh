@@ -256,7 +256,7 @@ mkdir -p $rootdir/var/data
 mount $rstdiskp4 $rootdir/var/data
 
 if [ "$showtransfer" == "yes" ]; then
-	set -m
+#	set -m
 	tar xzf $datadir/$fsfile -mC $rootdir &
 	k=0
 	n=40
@@ -270,7 +270,7 @@ if [ "$showtransfer" == "yes" ]; then
 		fi
 		sleep 1
 	done
-	if fg; then true; fi >/dev/null 2>&1
+#	if fg; then true; fi >/dev/null 2>&1
 else
 	tar xzf $datadir/$fsfile -mC $rootdir
 fi
