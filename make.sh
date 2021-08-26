@@ -318,7 +318,7 @@ function sshfingerprintclean() {
 			else
 				su -l $SUDO_USER -c "ssh-keygen -R $tcip"
 			fi
-		fi
+		fi 2>/dev/null
 		sshkeycln=no
 	fi >/dev/null
 }
@@ -594,20 +594,6 @@ if [ "$devloop" == "" ]; then
 	devloop="/dev/loop$(getfreeloop)"
 fi
 
-if [ "$ifnm" != "" ]; then
-	if ! ifconfig $ifnm >/dev/null; then
-		echo
-		perr "ERROR: selected network interface is not correct"
-		echo
-		warn "SUGGEST: change 'ifnm' in make.conf or set to void"
-		warn "         if you are not going to use qemu/network"
-		echo
-	fi
-fi
-
-myip=$(ifconfig $ifnm | sed -ne "s,.*inet \([^ ]*\) .*,\\1,p")
-myip=${myip:-xxx}
-
 ###############################################################################
 
 trap 'atexit' EXIT
@@ -760,7 +746,9 @@ stayalive=no
 if [ "$param" == "qemu-init" ]; then
 	tdone=1
 	info "make.sh executing: qemu-init"
-	if ! ifconfig $ifnm | grep -qe "inet .*$myip"; then
+	ifnm=${ifnm:-XXX}
+	myip=$(ifconfig $ifnm | sed -ne "s,.*inet \([^ ]*\) .*,\\1,p")
+	if [ "myip" == "" ]; then
 		echo
 		perr "ERROR: network configuration is wrong, abort"
 		echo
