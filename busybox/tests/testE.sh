@@ -167,6 +167,8 @@ command eval ")"
 
 echo "-----------------19----------------------"
 
+trap 'echo EXIT $FUNCNAME at line $LINENO == 178' EXIT
+
 function myexit() {
 	true
 	exit 1

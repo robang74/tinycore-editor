@@ -275,6 +275,6 @@ ERR at line 165
 tests/testE.sh: line 166: /access-denied: Permission denied
 ERR at line 166
 -----------------19----------------------
-EXIT myexit at line 1
+EXIT myexit at line 1 == 178
 #############################################
 

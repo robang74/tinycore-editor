@@ -279,6 +279,6 @@ ERR at line 165
 tests/testE.sh: line 166: can't create /access-denied: Permission denied
 ERR at line 166
 -----------------19----------------------
-EXIT myexit at line 176
+EXIT myexit at line 178 == 178
 #############################################
 
