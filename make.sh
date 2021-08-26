@@ -433,8 +433,12 @@ if [ "$broot" == "1" ]; then
 			warn "WARNING: $myname requires root permissions"
 			echo
 		fi 2>/dev/null
+		prev=$(gsettings get org.gnome.desktop.media-handling automount-open 2>/dev/null)
+		gsettings set org.gnome.desktop.media-handling automount-open false 2>/dev/null
 		sudo $0 "$param $option $*"
-		exit $?
+		rc=$?
+		gsettings set org.gnome.desktop.media-handling automount-open $prev 2>/dev/null
+		exit $rc
 	fi
 fi
 

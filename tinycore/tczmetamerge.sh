@@ -180,16 +180,21 @@ fi
 source tinycore.conf
 
 echo
+rc=0
 deps=""
 merged=""
+prev=$(su $SUDO_USER -c "gsettings get org.gnome.desktop.media-handling automount-open 2>/dev/null")
+su $SUDO_USER -c "gsettings set org.gnome.desktop.media-handling automount-open false 2>/dev/null"
 for i in $tczmeta; do
 	if [ ! -e conf.d/$i.lst ]; then
-		exit 1
+		rc=1
+		break
 	fi
 	list=$(cat conf.d/$i.lst)
 	list=$(get_tczlist_full tcz $list)
 	metamerge $i $list
 	merged+=" $list"
 done
+su $SUDO_USER -c "gsettings set org.gnome.desktop.media-handling automount-open $prev 2>/dev/null"
 echo
-
+exit $rc
