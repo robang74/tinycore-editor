@@ -54,9 +54,9 @@ function mountdevdir() {
 }
 
 function unmountall() {
-	set +ex
-	echo -n "Umounting everything on chroot..."
-	if true; then
+	set +e
+	echo -n "Umounting everything on chroot... "
+	errlog=$(if true; then
 		umount $rootdir/run
 		mount --make-rslave $rootdir/dev
 		umount -R $rootdir/dev
@@ -68,12 +68,13 @@ function unmountall() {
 		umount $rootdir/var/data
 		umount $rootdir/var/log
 		umount $rootdir
-	fi 2>/dev/null
+	fi 2>&1)
 	if grep -qe " $rootdir " /proc/mounts; then
-		perr " KO\n"
+		perr "KO\n"
 	else
-		comp " OK\n"
+		comp "OK\n"
 	fi
+	echo "$errlog" >&2
 }
 
 function exec2chroot() {
