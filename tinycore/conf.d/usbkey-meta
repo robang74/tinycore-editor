@@ -10,5 +10,5 @@ set -x
 wd=$(dirname $0)
 
 time $wd/bash
-time $wd/fuse
+time $wd/fuse >/dev/null
 
