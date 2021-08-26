@@ -184,10 +184,12 @@ chown -R tc.staff /home/tc
 
 ###############################################################################
 
-if [ -d $tcdir/tce/optional ]; then
-	tczdir=$tcdir/tce/optional
-elif [ -d $tcdir/cde/optional ]; then
-	tczdir=$tcdir/cde/optional
+if ! grep -q "base only" /proc/cmdline; then
+	if [ -d $tcdir/tce/optional ]; then
+		tczdir=$tcdir/tce/optional
+	elif [ -d $tcdir/cde/optional ]; then
+		tczdir=$tcdir/cde/optional
+	fi
 fi
 if [ "$tczdir" != "" ]; then
 	cd $tczdir
