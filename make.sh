@@ -268,7 +268,7 @@ function tccopyall() {
 	else
 		tczdir=$tcldir/tcz
 	fi
-	mkdir -p $tczdir
+	mkdir -p $tczdir/upgrade $tczdir/../ondemand
 	tczlistfull=$(get_tczlist_full tinycore/tcz $tczlist)
 	for i in $tczlistfull; do
 		i=${i/.tcz/}.tcz
