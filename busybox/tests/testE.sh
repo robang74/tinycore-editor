@@ -154,17 +154,24 @@ function myfault2() {
 
 exec 2>&1
 
-trap "echo ERR $FUNCNAME at line $LINENO" ERR
-trap "echo EXIT $FUNCNAME at line $LINENO" EXIT
+trap 'echo ERR $FUNCNAME at line $LINENO' ERR
+trap 'echo EXIT $FUNCNAME at line $LINENO' EXIT
 
 myfault
-echo "-----------------------------------------"
+
+echo "-----------------18----------------------"
+
 myfault2
 command eval ")"
 (:) >/access-denied
 
+echo "-----------------19----------------------"
 
+function myexit() {
+	true
+	exit 1
+}
 
-
-
+set -e
+myexit
 
