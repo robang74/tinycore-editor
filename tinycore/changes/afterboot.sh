@@ -282,6 +282,13 @@ pid=$!
 infotime "Upraising network and VLANs..." #####################################
 
 dhctmo=10
+if grep -qw nowait /proc/cmdline; then
+	waitfor='>/dev/null & echo nowait'
+	dhctmo=30
+else
+	waitfor='& rotdash $!'
+fi
+
 if which dhclient >/dev/null; then
 	netmsg="\tusing dhclient..."
 	dhclient="timeout $dhctmo dhclient"
@@ -315,32 +322,30 @@ else
 	netset=1
 	echo -e "$netmsg"
 	echo -ne "\tenabling eth0: "
-	if ifconfig eth0 | grep -q "inet "; then
-		echo "OK"
-	elif $dhclient eth0 >/dev/null 2>&1; then
-		echo "OK"
-	else
-		echo "KO"
-	fi &
-	rotdash $!
+	eval "if ifconfig eth0 | grep -q 'inet '; then	\
+		echo OK;				\
+	elif $dhclient eth0 >/dev/null 2>&1; then	\
+		echo OK;				\
+	else						\
+		echo KO;				\
+	fi $waitfor"
 fi
 while [ "$nodhcp" != "1" ]; do
-	test -e $tcdir/flags/VLAN-ENA.BLE || break
-	if ifconfig eth0 | grep -q "inet "; then
-		break;
-	fi
+	test -e $tcdir/flags/RAILWAYS.TXT || break
+#	if ifconfig eth0 | grep -q "inet "; then
+#		break;
+#	fi
 	netset=1
 	modprobe 8021q
 	for i in 1 2; do
 		echo -ne "\tenabling eth0.$i: "
 		vconfig add eth0 $i
 		ifconfig eth0.$i up
-		if $dhclient eth0.$i >/dev/null; then
-			echo "OK"
-		else
-			echo "KO"
-		fi &
-		rotdash $!
+		eval "if $dhclient eth0.$i >/dev/null; then	\
+			echo OK;				\
+		else						\
+			echo KO;				\
+		fi $waitfor"
 	done 2>/dev/null
 	break
 done
