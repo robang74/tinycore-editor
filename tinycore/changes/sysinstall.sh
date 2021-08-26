@@ -105,7 +105,6 @@ export datadir=""
 export rstdisk=""
 export bootdisk=""
 export rootsize=24
-export homedir=/home/lubuntuq7
 export rootdir=/mnt/root
 export fsfile=system.tgz
 export upfile=update.tgz
@@ -278,10 +277,6 @@ fi
 
 stage="Root filesystem update and configure"
 tag 90 "${stage}"
-
-mkdir -p $rootdir/$homedir/conf
-echo "TTL" > $rootdir/$homedir/conf/modulename.conf
-echo "v0.0.1" > $rootdir/$homedir/conf/version.conf
 
 if [ -f $datadir/$upfile ]; then
 	tar xzf $datadir/$upfile -moC $rootdir
