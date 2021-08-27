@@ -281,10 +281,21 @@ pid=$!
 
 infotime "Upraising network and VLANs..." #####################################
 
+function ethenable() {
+	echo "if ifconfig $1 | grep -q 'inet '; then	\
+		echo OK;				\
+	elif $dhclient $1 >/dev/null; then		\
+		echo OK;				\
+	else						\
+		echo KO;				\
+	fi $waitfor" >/tmp/ethenable.$1.sh
+	chmod a+x /tmp/ethenable.$1.sh
+	nohup /tmp/ethenable.$1.sh
+}
+
 dhctmo=10
 if grep -qw nowait /proc/cmdline; then
-	waitfor='>/dev/null & echo nowait'
-	dhctmo=30
+	waitfor='>/dev/null 2>&1 & echo nowait'
 else
 	waitfor='& rotdash $!'
 fi
@@ -295,7 +306,7 @@ if which dhclient >/dev/null; then
 	mkdir -p /var/db
 else
 	netmsg="\tusing udhcpc..."
-	dhclient="udhcpc -T1 -t$dhctmo -ni"
+	dhclient="udhcpc -T1 -t$dhctmo -bi"
 fi
 
 if [ -e $tcdir/flags/ETH0-STATIC.UP ]; then
@@ -322,30 +333,20 @@ else
 	netset=1
 	echo -e "$netmsg"
 	echo -ne "\tenabling eth0: "
-	eval "if ifconfig eth0 | grep -q 'inet '; then	\
-		echo OK;				\
-	elif $dhclient eth0 >/dev/null 2>&1; then	\
-		echo OK;				\
-	else						\
-		echo KO;				\
-	fi $waitfor"
+	ethenable eth0
 fi
 while [ "$nodhcp" != "1" ]; do
 	test -e $tcdir/flags/RAILWAYS.TXT || break
-#	if ifconfig eth0 | grep -q "inet "; then
-#		break;
-#	fi
+	if ifconfig eth0 | grep -q "inet "; then
+		break;
+	fi
 	netset=1
 	modprobe 8021q
 	for i in 1 2; do
-		echo -ne "\tenabling eth0.$i: "
 		vconfig add eth0 $i
 		ifconfig eth0.$i up
-		eval "if $dhclient eth0.$i >/dev/null; then	\
-			echo OK;				\
-		else						\
-			echo KO;				\
-		fi $waitfor"
+		echo -ne "\tenabling eth0.$i: "
+		ethenable eth0.$i
 	done 2>/dev/null
 	break
 done
