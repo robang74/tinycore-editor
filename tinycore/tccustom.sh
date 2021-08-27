@@ -9,7 +9,11 @@ set -e
 
 cd $(dirname $0)
 
-for i in 32 64; do
+if [ "$1" == "" ]; then
+	set -- 32 64
+fi
+
+for i in $@; do
 	rm -rf $tmpdir
 	mkdir $tmpdir
 	cp -arf tccustom/common/* $tmpdir
