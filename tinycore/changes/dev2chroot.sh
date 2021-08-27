@@ -53,15 +53,24 @@ function mountdevdir() {
 	return $ret
 }
 
+function rumount() {
+	j=${1%/}
+	for i in $(sed -ne "s,.* \($j/[^ ]*\) .*,\\1,p" /proc/mounts | sort -r) $j; do
+		umount $i
+	done
+}
+
 function unmountall() {
 	set +e
 	echo -n "Umounting everything on chroot... "
 	errlog=$(if true; then
 		umount $rootdir/run
 		mount --make-rslave $rootdir/dev
-		umount -R $rootdir/dev
+#		umount -R $rootdir/dev
+		rumount $rootdir/dev
 		mount --make-rslave $rootdir/sys
-		umount -R $rootdir/sys
+#		umount -R $rootdir/sys
+		rumount $rootdir/sys
 		umount $rootdir/proc
 		umount $rootdir/mnt/tcp2
 		umount $rootdir/mnt/tcp1
