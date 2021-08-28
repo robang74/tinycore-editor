@@ -1,12 +1,12 @@
-#!/bin/bash -x
+#!/bin/bash
 #
 # Author: Roberto A. Foglietta
 #
 
 cd $(dirname $0)
 
-if [ ! -e busybox/busybox.conf ]; then
-	cat busybox/busybox.conf.orig >busybox/busybox.conf
+if [ ! -e busybox/busybox.sh.conf ]; then
+	cat busybox/busybox.sh.conf.orig >busybox/busybox.sh.conf
 fi
 if [ ! -e tinycore/tinycore.conf ]; then
 	cat tinycore/tinycore.conf.orig >tinycore/tinycore.conf
@@ -392,7 +392,7 @@ function perr() {
 
 ###############################################################################
 
-chownuser busybox/busybox.conf tinycore/tinycore.conf make.conf
+chownuser busybox/busybox.sh.conf tinycore/tinycore.conf make.conf
 
 myname="$(basename $0)"
 
@@ -626,7 +626,7 @@ tdone=0
 if [ "$param" == "reset" ]; then
 	tdone=1
 	info "make.sh executing: reset"
-	rm -f busybox/busybox.conf tinycore/tinycore.conf make.conf
+	rm -f busybox/busybox.sh.conf tinycore/tinycore.conf make.conf
 	rm -f tcl-usb.disk.gz tinycore/rootfs.gz
 	$0 clean all
 	tinycore/provides/tcgetdistro.sh
