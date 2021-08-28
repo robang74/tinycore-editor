@@ -629,7 +629,10 @@ if [ "$param" == "reset" ]; then
 	rm -f busybox/busybox.sh.conf tinycore/tinycore.conf make.conf
 	rm -f tcl-usb.disk.gz tinycore/rootfs.gz
 	$0 clean all
-	tinycore/provides/tcgetdistro.sh
+	busybox/busybox.sh distclean
+	if [ "$option" != "no-download" ]; then
+		$0 download
+	fi
 fi
 
 if [ "$param" == "download" ]; then
@@ -1016,7 +1019,7 @@ if [ "$param" == "distclean" ]; then
 	tinycore/provides/tcgetdistro.sh clean
 	busybox/busybox.sh distclean
 	rm -rf tinycore/tcz/*
-	$0 clean all
+	$0 reset no-download
 fi
 
 if [ "$param" == "iso" -o "$param" == "image" ]; then
