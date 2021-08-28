@@ -18,7 +18,7 @@ function infotime() {
 		opt="$1"
 		shift
 	fi
-	tm="$(printf '%5.2f' $(cat /proc/uptime | cut -d' ' -f1))"
+	tm=$(printf '%5s' $(cat /proc/uptime | cut -d' ' -f1))
 	info $opt "[$tm] $1"
 }
 

@@ -9,7 +9,7 @@ function uptimeshow() {
 }
 
 function infotime() {
-	tm="$(printf '%5.2f' $(cat /proc/uptime | cut -d' ' -f1))"
+	tm=$(printf '%5s' $(cat /proc/uptime | cut -d' ' -f1))
 	echo -e "\e[1;36m[$tm] $1\e[0m"
 }
 
