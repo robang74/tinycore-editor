@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -x
 #
 # Author: Roberto A. Foglietta
 #
@@ -164,7 +164,7 @@ function waitforssh() {
 		if ! pgrep qemu; then
 			return 1
 		fi >/dev/null
-	done 2>/dev/null
+	done #2>/dev/null
 	return 0
 }
 
@@ -554,22 +554,22 @@ while true; do
 	fi
 	cd - >/dev/null
 
-	eval $(grep -e "tcpassword=" tinycore/changes/afterboot.sh | head -n1)
-	if [ "$tcpassword" == "" ]; then
-		echo
-		perr "ERROR: tcpassword is not defined in tinycore/changes/afterboot.sh"
-		echo
-		exit 1
-	elif [ "$tcpassword" != "tinycore" ]; then
-		echo
-		warn "WARNING: standard password for user tc is changed, check it out"
-		echo "         please check tinycore/changes/root-ssh.sh"
-		echo "         please check tinycore/changes/tccustom.tgz:/etc/motd"
-		echo
-	fi
-
 	break
 done
+
+eval $(grep -e "tcpassword=" tinycore/changes/afterboot.sh | head -n1)
+if [ "$tcpassword" == "" ]; then
+	echo
+	perr "ERROR: tcpassword is not defined in tinycore/changes/afterboot.sh"
+	echo
+	exit 1
+elif [ "$tcpassword" != "tinycore" ]; then
+	echo
+	warn "WARNING: standard password for user tc is changed, check it out"
+	echo "         please check tinycore/changes/root-ssh.sh"
+	echo "         please check tinycore/changes/tccustom.tgz:/etc/motd"
+	echo
+fi
 
 if [ "$param" == "ssh-copy" -a "$option" == "8GB" ]; then
 	if isanipaddr $1; then
