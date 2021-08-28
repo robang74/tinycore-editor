@@ -138,9 +138,17 @@ mydir=$PWD
 
 tcdir=$(realpath ../tinycore)
 cd $tcdir
-source tinycore.conf
+if [ -f tinycore.conf ]; then
+	source tinycore.conf
+else
+	source tinycore.conf.orig
+fi
 cd - >/dev/null
-source busybox.sh.conf
+if [ -f busybox.sh.conf ]; then
+	source busybox.sh.conf
+else
+	source busybox.sh.conf.orig
+fi
 
 if echo "$source" | grep -qe "\.git$"; then
 	version="latest-git"

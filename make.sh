@@ -5,6 +5,15 @@
 
 cd $(dirname $0)
 
+if [ ! -e busybox/busybox.conf ]; then
+	cat busybox/busybox.conf.orig >busybox/busybox.conf
+fi
+if [ ! -e tinycore/tinycore.conf ]; then
+	cat tinycore/tinycore.conf.orig >tinycore/tinycore.conf
+fi
+if [ ! -e make.conf -a -e make.conf.orig ]; then
+	cat make.conf.orig >make.conf
+fi
 if [ -e make.conf ]; then
 	source make.conf
 fi
@@ -230,7 +239,7 @@ function gettczlist() {
 function tccopyall() {
 	test -n "$tcldir"
 	cd tinycore
-	./tccustom.sh
+	./tccustom.sh $tcsize
 	ln -sf ../tccustom$tcsize.tgz changes/tccustom.tgz
 	chownuser tccustom*.tgz changes
 	if [ -e ../busybox/src/busybox ]; then
@@ -380,6 +389,8 @@ function perr() {
 }
 
 ###############################################################################
+
+chownuser busybox/busybox.conf tinycore/tinycore.conf make.conf
 
 myname="$(basename $0)"
 

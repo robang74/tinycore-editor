@@ -39,7 +39,11 @@ myname=$(basename $0)
 cd $(dirname $0)
 WRKDIR="$PWD"
 
-source tinycore.conf
+if [ ! -e tinycore.conf ]; then
+	source tinycore.conf.orig
+else
+	source tinycore.conf
+fi
 
 echo
 echo "Working folder is $WRKDIR"

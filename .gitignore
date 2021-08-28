@@ -13,6 +13,7 @@
 /tinycore/tcz/*
 /busybox/src
 /busybox/busybox.tar.bz2
+/busybox/busybox.sh.conf
 /busybox/config.nosuid
 /busybox/config.suid
 /busybox/patches/busybox-1.27.1-wget-make-default-timeout-configurable.patch
