@@ -64,7 +64,7 @@ function setconfig() {
 	checkconfig $1
 	echo $1 > .config.type
 	cat ../config.$1 >.config
-	if [ -e ../config.$1.patch ]; then
+	if [ -e ../config.$1.patch -a ! -e ../.patches_applied.close ]; then
 		patch -Np1 -i ../config.$1.patch
 	fi
 }
@@ -296,7 +296,7 @@ if [ "$1" == "open" ]; then
 		mod=1
 		tar xjf busybox.tar.bz2
 		mv -f busybox-$version src
-		rm -f .patches_applied*
+		rm -f .patches_applied
 	fi
 	if [ ! -e .patches_applied -a ! -e .patches_applied.close ]; then
 		mod=1
@@ -503,6 +503,10 @@ if [ "$1" == "close" ]; then
 	info "busybox.sh executing close..."
 	checkfordir src open
 	cd src
+	if [ -e .config ]; then
+		cat .config > ../config.nosuid
+		chownuser ../config.nosuid
+	fi
 	sudo rm -rf _install rootfs .config*
 	make clean
 	cd ..
@@ -526,9 +530,9 @@ if [ "$1" == "distclean" ]; then
 	rm -f busybox.tar.bz2 .patches_applied*
 	rm -f config.suid config.nosuid
 	rm -rf src
-	cd patches
-	rm -f $patchlist
-	cd ..
+	for i in $(grep -e "^/busybox/patches/" ../.gitignore); do
+		rm -f ../$i
+	done
 fi
 
 if [ "$done" != "1" ]; then
