@@ -41,6 +41,7 @@ distclean
 image
 download
 busybox
+reset
 iso
 "
 
@@ -84,6 +85,7 @@ function usage() {
 	echo -e "\t\t distclean"
 	echo -e "\t\t download"
 	echo -e "\t\t busybox"
+	echo -e "\t\t reset"
 	echo -e "\t\t iso"
 	echo
 }
@@ -427,7 +429,7 @@ shift
 option="$1"
 shift
 
-rootlist="qemu-init qemu-test qemu qemu-stop image iso"
+rootlist="qemu-init qemu-test qemu qemu-stop image iso clean"
 
 for i in $rootlist; do
 	if [ "$param" == "$i" -o "$param" == "" ]; then
@@ -551,22 +553,23 @@ while true; do
 		../tczconvxz.sh
 	fi
 	cd - >/dev/null
+
+	eval $(grep -e "tcpassword=" tinycore/changes/afterboot.sh | head -n1)
+	if [ "$tcpassword" == "" ]; then
+		echo
+		perr "ERROR: tcpassword is not defined in tinycore/changes/afterboot.sh"
+		echo
+		exit 1
+	elif [ "$tcpassword" != "tinycore" ]; then
+		echo
+		warn "WARNING: standard password for user tc is changed, check it out"
+		echo "         please check tinycore/changes/root-ssh.sh"
+		echo "         please check tinycore/changes/tccustom.tgz:/etc/motd"
+		echo
+	fi
+
 	break
 done
-
-eval $(grep -e "tcpassword=" tinycore/changes/afterboot.sh | head -n1)
-if [ "$tcpassword" == "" ]; then
-	echo
-	perr "ERROR: tcpassword is not defined in tinycore/changes/afterboot.sh"
-	echo
-	exit 1
-elif [ "$tcpassword" != "tinycore" ]; then
-	echo
-	warn "WARNING: standard password for user tc is changed, check it out"
-	echo "         please check tinycore/changes/root-ssh.sh"
-	echo "         please check tinycore/changes/tccustom.tgz:/etc/motd"
-	echo
-fi
 
 if [ "$param" == "ssh-copy" -a "$option" == "8GB" ]; then
 	if isanipaddr $1; then
@@ -619,6 +622,15 @@ eval $(grep "^tclabel=" tinycore/changes/rcS)
 sshkeycln=yes
 warning=""
 tdone=0
+
+if [ "$param" == "reset" ]; then
+	tdone=1
+	info "make.sh executing: reset"
+	rm -f busybox/busybox.conf tinycore/tinycore.conf make.conf
+	rm -f tcl-usb.disk.gz tinycore/rootfs.gz
+	$0 clean all
+	tinycore/provides/tcgetdistro.sh
+fi
 
 if [ "$param" == "download" ]; then
 	tdone=1
@@ -983,10 +995,10 @@ fi
 if [ "$param" == "clean" ]; then
 	tdone=1
 	info "make.sh executing: clean $option"
-	while sudo umount $tcldir; do
+	while umount $tcldir; do
 		true
 	done 2>/dev/null
-	if sudo losetup -D $devloop; then
+	if losetup -D $devloop; then
 		true
 	fi 2>/dev/null
 	rm -f tcl-skeleton.disk tcl-usb.disk
