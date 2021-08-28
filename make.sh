@@ -164,7 +164,7 @@ function waitforssh() {
 		if ! pgrep qemu; then
 			return 1
 		fi >/dev/null
-	done #2>/dev/null
+	done 2>/dev/null
 	return 0
 }
 
