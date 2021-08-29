@@ -83,7 +83,8 @@ function unmountall() {
 	else
 		comp "OK\n"
 	fi
-	echo "$errlog" >&2
+	set +x
+	echo "$errlog" | grep -ve "^D*EBUG: "
 }
 
 function exec2chroot() {
