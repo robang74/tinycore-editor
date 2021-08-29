@@ -63,7 +63,7 @@ set +E
 
 functwo
 if [ "$(echo {1..2})" != "1 2" ]; then
-	echo "ERR ONE, at line 61 is acceptable in busybox ash"
+	echo "ERR ONE, at line 64 is acceptable in busybox ash"
 fi
 false
 
