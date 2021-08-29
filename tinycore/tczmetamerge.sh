@@ -165,69 +165,64 @@ export PATH=$PATH:/apps/bin:/usr/sbin:/usr/bin:/sbin:/bin
 set -e
 
 cd $(dirname $0)
+myname=$(basename $0)
 
 source tinycore.conf
 
-for i in $tczmeta; do
-	test -e tcz/$i.list || continue
-	if [ conf.d/$i.lst -nt tcz/$i.list ]; then
-		echo
-		perr "ERROR: conf.d/$i.lst is newer than tcz/$i.list"
-		echo
-		echo "If you did changes then delete and rebuild the meta packages"
-		echo "otherwise touch tinycore/tcz/$i.list to ignore this message"
-		echo
-		warn "SUGGEST: run '$(basename $0) clean' to delete them all"
-		warn "         run 'sudo $(basename $0)' to redo them all"
-		echo
-		exit 1
-	fi
-done
-
 if [ "$1" == "clean" ]; then
-	rm -f tcz/*-meta.tcz* 
-	rm -f tcz/tczmeta.list
+	rm -f tcz/*-meta.tcz* tcz/*.list
 	exit 0
 fi
 
 if [ "$1" != "force" ]; then
-	if [ ! -e tcz/tczmeta.list ]; then
-		cd tcz
-		for i in $(ls -1 *-meta.tcz); do
-			i=${i/-meta.tcz/}
-			echo -n "$i "
-		done >tczmeta.list 2>/dev/null
-		chownuser tczmeta.list
-		cd - >/dev/null
-	fi
+	for i in $tczmeta; do
+		test -e tcz/$i.list || continue
+		if [ conf.d/$i.lst -nt tcz/$i.list ]; then
+			echo
+			perr "ERROR: conf.d/$i.lst is newer than tcz/$i.list"
+			echo
+			echo "If you did changes then delete and rebuild the meta packages"
+			echo "otherwise touch tinycore/tcz/$i.list to ignore this message"
+			echo
+			warn "SUGGEST: delete all the meta packages and redo them all"
+			warn "         run '$myname clean' to delete them all"
+			warn "         run 'sudo $myname' to redo them all"
+			echo
+			exit 1
+		fi
+	done
 
-	tczmnow=$(cat tcz/tczmeta.list)
-	tczmnow=${tczmnow% }
-	n=$(echo -n "$tczmeta" | wc -c)
-	tczmnow=$(echo "$tczmnow" | head -c$n)
-	if [ "$tczmnow" != "" -a "$tczmnow" != "$tczmeta" ]; then
-		echo
-		perr "ERROR: tczmeta is changed in tinycore.conf since last time"
-		echo
-		warn "SUGGEST: delete all the meta packages and redo them all"
-		warn "         run '$(basename $0) clean' to delete them all"
-		warn "         run 'sudo $(basename $0)' to redo them all"
-		echo
-		exit 1
+	if [ -e tcz/tczmeta.list ]; then
+		tczmnow=$(cat tcz/tczmeta.list)
+		n=$(echo -n "$tczmeta" | wc -c)
+		tczmnow=$(echo "$tczmnow" | head -c$n)
+		if [ "$tczmnow" != "" -a "$tczmnow" != "$tczmeta" ]; then
+			echo
+			perr "ERROR: tczmeta is changed in tinycore.conf since last time"
+			echo
+			warn "SUGGEST: delete all the meta packages and redo them all"
+			warn "         run '$myname clean' to delete them all"
+			warn "         run 'sudo $myname' to redo them all"
+			echo
+			exit 1
+		fi
 	fi
-	[ "$1" == "test" ] && exit 0
 fi
+[ "$1" == "test" ] && exit 0
 
 if [ "$USER" != "root" ]; then
-	echo
-	echo "ERROR: $(basename $0) requires root privileges"
-	echo
-	exit 1
+	if ! timeout 0.2 sudo -n true; then
+		echo
+		warn "WARNING: $myname requires root permissions"
+		echo
+	fi 2>/dev/null
+	sudo ./$myname "$@"
+	exit $?
 fi
 
 if ! which unionfs-fuse >/dev/null; then
 	echo
-	echo "ERROR: $(basename $0) requires unionfs-fuse"
+	echo "ERROR: $myname requires unionfs-fuse"
 	echo
 	exit 1
 fi
