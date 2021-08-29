@@ -28,15 +28,13 @@ if [ "$USER" != "root" ]; then
 	exit 1
 fi
 
-devel=$(cat /etc/sysconfig/devel)
+type=$(cat /etc/sysconfig/p2type)
 tcdev=$(readlink /etc/sysconfig/tcdev)
 tcdir=$(readlink /etc/sysconfig/tcdir)
 dtdev=$(readlink /etc/sysconfig/dtdev)
 dtdir=$(readlink /etc/sysconfig/dtdir)
 dtdir=${dtdir:-$(devdir $dtdev)}
 dtdir=${dtdir:-${dtdev/dev/mnt}}
-devel=${devel:+ext4}
-type=${devel:-ntfs}
 bkdev=${tcdev%1}
 
 if [ "$type" == "ntfs" ]; then

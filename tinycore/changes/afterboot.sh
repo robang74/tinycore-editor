@@ -102,14 +102,12 @@ fi
 
 infotime "Lookup for tinycore partitions..." ##################################
 
-devel=$(cat /etc/sysconfig/devel)
+type=$(cat /etc/sysconfig/p2type)
 tcdev=$(readlink /etc/sysconfig/tcdev)
 tcdir=$(readlink /etc/sysconfig/tcdir)
 dtdev=$(readlink /etc/sysconfig/dtdev)
 dtdir=$(readlink /etc/sysconfig/dtdir)
 dtdir=${dtdir:-$(devdir $dtdev)}
-devel=${devel:+ext4}
-type=${devel:-ntfs}
 
 if [ "$tcdev" == "" ]; then
 	echo

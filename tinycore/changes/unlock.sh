@@ -17,14 +17,14 @@ if [ "$USER" != "root" ]; then
 	exit 1
 fi
 
-devel=$(cat /etc/sysconfig/devel)
+type=$(cat /etc/sysconfig/p2type)
 tcdev=$(readlink /etc/sysconfig/tcdev)
 tcdir=$(readlink /etc/sysconfig/tcdir)
 dtdev=$(readlink /etc/sysconfig/dtdev)
 dtdir=$(readlink /etc/sysconfig/dtdir)
 dtdir=${dtdir:-$(devdir $dtdev)}
-mount=${devel:+mount}
-mount=${devel:-ntfs-3g}
+mount=${type/ext4/mount}
+mount=${type/ntfs/ntfs-3g}
 
 if [ "$tcdir" == "" ]; then
 	tcdir=${tcdev/dev/mnt}

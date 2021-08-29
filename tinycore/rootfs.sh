@@ -23,6 +23,14 @@ function chownuser() {
 	chown -R $guid "$@"
 }
 
+function setp2type() {
+	if echo "$tczmeta" | grep -qw "develop"; then
+		echo ext4
+	else
+		echo ntfs
+	fi >etc/sysconfig/p2type
+}
+
 ###############################################################################
 
 export PATH=/home/tc/.local/bin:/usr/local/sbin:/usr/local/bin
@@ -57,6 +65,7 @@ if [ "$1" == "open" -o "$1" == "update" ]; then
 	fi
 	mkdir $tmpdir
 	cd $tmpdir
+	setp2type
 	echo -n "open data: "
 	zcat ../rootfs.gz | sudo cpio -i -H newc -d 2>&1
 	cat ../changes/rcS > etc/init.d/rcS
@@ -65,7 +74,6 @@ if [ "$1" == "open" -o "$1" == "update" ]; then
 	if [ -e ../changes/tce-setup ]; then
 		cat ../changes/tce-setup > usr/bin/tce-setup
 	fi
-	echo "$tczmeta" | grep -w "develop" >etc/sysconfig/devel
 	test -e lib64 || ln -sf lib lib64
 	echo "opened folder: $tmpdir"
 	cd ..
@@ -77,8 +85,8 @@ if [ "$1" == "close" -o "$1" == "update" ]; then
 		errexit "directory $tmpdir NOT found, abort"
 	fi
 	cd $tmpdir
+	setp2type
 	echo -n "close data: "
-	echo "$tczmeta" | grep -w "develop" >etc/sysconfig/devel
 	if sudo find . | sudo cpio -o -H newc | gzip > ../rootfs.gz; then
 		cd ..
 		rm -rf $tmpdir
