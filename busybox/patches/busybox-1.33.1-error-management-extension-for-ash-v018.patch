@@ -475,7 +475,7 @@
 +					struct jmploc *volatile savehandler = exception_handler;
 +					struct jmploc jmploc;
 +
-+					err = setjmp(jmploc.loc); /* was = setjmp(jmploc.loc) * 2; */
++					err = setjmp(jmploc.loc);
 +					if (!err) {
 +						exception_handler = &jmploc;
 +					
