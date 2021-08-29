@@ -57,6 +57,7 @@ function metamerge() {
 		cd ..
 		comp "$meta-meta.tcz exists, skipping"
 		deps+=" $meta-meta.tcz"
+		echo
 		return 0
 	fi
 	info "Merging $meta in $meta-meta.tcz ..."
@@ -163,6 +164,60 @@ export PATH=$PATH:/apps/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
 set -e
 
+cd $(dirname $0)
+
+source tinycore.conf
+
+for i in $tczmeta; do
+	test -e tcz/$i.list || continue
+	if [ conf.d/$i.lst -nt tcz/$i.list ]; then
+		echo
+		perr "ERROR: conf.d/$i.lst is newer than tcz/$i.list"
+		echo
+		echo "If you did changes then delete and rebuild the meta packages"
+		echo "otherwise touch tinycore/tcz/$i.list to ignore this message"
+		echo
+		warn "SUGGEST: run '$(basename $0) clean' to delete them all"
+		warn "         run 'sudo $(basename $0)' to redo them all"
+		echo
+		exit 1
+	fi
+done
+
+if [ "$1" == "clean" ]; then
+	rm -f tcz/*-meta.tcz* 
+	rm -f tcz/tczmeta.list
+	exit 0
+fi
+
+if [ "$1" != "force" ]; then
+	if [ ! -e tcz/tczmeta.list ]; then
+		cd tcz
+		for i in $(ls -1 *-meta.tcz); do
+			i=${i/-meta.tcz/}
+			echo -n "$i "
+		done >tczmeta.list 2>/dev/null
+		chownuser tczmeta.list
+		cd - >/dev/null
+	fi
+
+	tczmnow=$(cat tcz/tczmeta.list)
+	tczmnow=${tczmnow% }
+	n=$(echo -n "$tczmeta" | wc -c)
+	tczmnow=$(echo "$tczmnow" | head -c$n)
+	if [ "$tczmnow" != "" -a "$tczmnow" != "$tczmeta" ]; then
+		echo
+		perr "ERROR: tczmeta is changed in tinycore.conf since last time"
+		echo
+		warn "SUGGEST: delete all the meta packages and redo them all"
+		warn "         run '$(basename $0) clean' to delete them all"
+		warn "         run 'sudo $(basename $0)' to redo them all"
+		echo
+		exit 1
+	fi
+	[ "$1" == "test" ] && exit 0
+fi
+
 if [ "$USER" != "root" ]; then
 	echo
 	echo "ERROR: $(basename $0) requires root privileges"
@@ -177,14 +232,15 @@ if ! which unionfs-fuse >/dev/null; then
 	exit 1
 fi
 
-source tinycore.conf
-
 echo
+echo "gsettings for avoid automount windows displaying..."
+prev=$(su -l $SUDO_USER -c "gsettings get org.gnome.desktop.media-handling automount-open 2>/dev/null")
+su -l $SUDO_USER -c "gsettings set org.gnome.desktop.media-handling automount-open false 2>/dev/null"
+echo
+
 rc=0
 deps=""
 merged=""
-prev=$(su $SUDO_USER -c "gsettings get org.gnome.desktop.media-handling automount-open 2>/dev/null")
-su $SUDO_USER -c "gsettings set org.gnome.desktop.media-handling automount-open false 2>/dev/null"
 for i in $tczmeta; do
 	if [ ! -e conf.d/$i.lst ]; then
 		rc=1
@@ -195,6 +251,8 @@ for i in $tczmeta; do
 	metamerge $i $list
 	merged+=" $list"
 done
-su $SUDO_USER -c "gsettings set org.gnome.desktop.media-handling automount-open $prev 2>/dev/null"
-echo
+echo "$tczmeta" > tcz/tczmeta.list
+chownuser tcz/tczmeta.list
+
+su -l $SUDO_USER -c "gsettings set org.gnome.desktop.media-handling automount-open $prev 2>/dev/null"
 exit $rc
