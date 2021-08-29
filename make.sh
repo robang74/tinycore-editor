@@ -4,6 +4,7 @@
 #
 
 cd $(dirname $0)
+myname=$(basename $0)
 
 if [ ! -e busybox/busybox.sh.conf ]; then
 	cat busybox/busybox.sh.conf.orig >busybox/busybox.sh.conf
@@ -394,8 +395,6 @@ function perr() {
 
 chownuser busybox/busybox.sh.conf tinycore/tinycore.conf make.conf
 
-myname="$(basename $0)"
-
 if [ "$1" != "--real" ]; then
 	if isatarget $1; then
 		options="$1"
@@ -411,10 +410,9 @@ if [ "$1" != "--real" ]; then
 				shift
 			fi
 		fi
-		$0 --real $options || realexit $?
-		rc=$?
-		test "$1" == "" && realexit $rc
-		$0 $@
+		./$myname --real $options || realexit $?
+		test "$1" == "" && realexit 0
+		./$myname $@
 		realexit $?
 	else
 		usage
@@ -440,7 +438,6 @@ done
 
 if [ "$broot" == "1" ]; then
 	if [ "$USER" != "root" ]; then
-		set -m
 		if ! timeout 0.2 sudo -n true; then
 			echo
 			warn "WARNING: $myname requires root permissions"
@@ -448,7 +445,7 @@ if [ "$broot" == "1" ]; then
 		fi 2>/dev/null
 		prev=$(gsettings get org.gnome.desktop.media-handling automount-open 2>/dev/null)
 		gsettings set org.gnome.desktop.media-handling automount-open false 2>/dev/null
-		sudo $0 "$param $option $*"
+		sudo ./$myname $param $option $@
 		rc=$?
 		gsettings set org.gnome.desktop.media-handling automount-open $prev 2>/dev/null
 		exit $rc
@@ -617,10 +614,10 @@ if [ "$param" == "reset" ]; then
 	info "make.sh executing: reset"
 	rm -f busybox/busybox.sh.conf tinycore/tinycore.conf make.conf
 	rm -f tcl-usb.disk.gz tinycore/rootfs.gz
-	$0 clean all
+	./$myname clean all
 	busybox/busybox.sh distclean
 	if [ "$option" != "no-download" ]; then
-		$0 download
+		./$myname download
 	fi
 fi
 
@@ -730,7 +727,7 @@ if [ "$param" == "image" -a "$option" == "8GB" ]; then
 	tdone=1
 	info "make.sh executing: image 8GB"
 	if [ ! -e tcl-usb.disk.gz -a ! -e tcl-usb.disk ]; then
-		$0 image
+		./$myname image
 	else
 		echo
 		warn "WARNING: using existing USB image for 8GB image creation"
@@ -803,15 +800,15 @@ if [ "$param" == "qemu-test" ]; then
 		if [ -e tcl-usb.disk ]; then
 			warn "WARNING: using current tcl-usb.disk"
 		else
-			$0 image
+			./$myname image
 		fi
 	fi
 	action=${option:-image}
 	action=${option/8GB/image 8GB}
-	$0 $action && $0 qemu-init && \
-		$0 qemu $option
+	./$myname $action && ./$myname qemu-init && \
+		./$myname qemu $option
 	test "$?" != "0" && realexit 1
-	$0 ssh-root
+	./$myname ssh-root
 fi
 
 if [ "$param" == "qemu" ]; then
@@ -819,7 +816,7 @@ if [ "$param" == "qemu" ]; then
 	info "make.sh executing: qemu $option"
 	warning="SUGGEST: target open or image to deploy the disk images"
 	if [ "$option" == "iso" ]; then
-		test -e tclinux.iso || $0 iso
+		test -e tclinux.iso || ./$myname iso
 	elif [ "$option" == "8GB" -a ! -e tcl-8GB-usb.disk ]; then
 		exit 1
 	elif [ "$option" != "8GB" -a ! -e tcl-usb.disk ]; then
@@ -1008,7 +1005,7 @@ if [ "$param" == "distclean" ]; then
 	tinycore/provides/tcgetdistro.sh clean
 	busybox/busybox.sh distclean
 	rm -rf tinycore/tcz/*
-	$0 reset no-download
+	./$myname reset no-download
 fi
 
 if [ "$param" == "iso" -o "$param" == "image" ]; then
