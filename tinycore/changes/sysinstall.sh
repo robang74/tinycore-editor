@@ -33,14 +33,17 @@ function rstdisk_umount_all() {
 	sync
 	ret=0
 	for i in $rstdiskp4 $rstdiskp3 $rstdiskp2 $rstdiskp1; do
-		umount $i
+		mntdir=$(devdir $i)
+		if [ "$mntdir" ]; then
+			umount $mntdir || true
+		fi
 		if grep -qe "^$i " /proc/mounts; then
-			mount -o remount,ro $i || true
+			mount -o remount,ro $mntdir || true
 		fi
 		if grep -qe "^$i .* rw," /proc/mounts; then
 			ret=$((ret+1))
 		fi
-	done 2>/dev/null
+	done
 	return $ret
 }
 
