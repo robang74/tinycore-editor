@@ -161,7 +161,7 @@ archtune=${arch/-m64/$cputune64}
 archtune=${archtune/-m32/$cputune32}
 export CFLAGS="$arch $archtune $ccopts"
 export LDFLAGS="$arch"
-compile="CFLAGS='$CFLAGS' LDFLAGS='$LDFLAGS' make -j$(nproc)"
+compile="CFLAGS='$CFLAGS' LDFLAGS='$LDFLAGS'"
 
 ###############################################################################
 
