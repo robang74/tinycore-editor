@@ -33,5 +33,6 @@ pkg-config.tcz
 readline.tcz
 tar.tcz
 udev-lib.tcz
+unionfs-fuse.tcz
 util-linux.tcz
 wget.tcz
