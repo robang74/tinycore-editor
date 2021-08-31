@@ -4,6 +4,7 @@
 #
 
 function realexit() {
+	echo $1 >/run/tcchroot.exit
 	trap - EXIT
 	exit $1
 }
@@ -172,7 +173,7 @@ if grep -qe " $rootdir " /proc/mounts; then
 	echo
 	perr "The $rootdir is just mounted, abort"
 	echo
-	exit 1
+	realexit 1
 fi
 
 if echo "${blkdev}" | grep -q "mmcblk"; then
