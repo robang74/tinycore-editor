@@ -110,6 +110,7 @@ function atexit() {
 }
 
 function myssh() {
+	local tout user pass luit runasuser timeout
 	if [[ $1 -eq 0 ]]; then
 		tout=1000d
 	else
@@ -147,6 +148,7 @@ function myssh() {
 }
 
 function myscp() {
+	local pass
 	if echo -- "$@" | grep -q "root@"; then
 		pass="root"
 	elif echo -- "$@" | grep -q "tc@"; then
@@ -170,7 +172,6 @@ function waitforssh() {
 }
 
 function tcrootunlock() {
-	tcsshdconfig=/usr/local/etc/ssh/sshd_config
 	if ls -1 sshkeys.pub/*.pub >/dev/null 2>&1; then
 		if myssh 1 root "whoami" | grep -q root; then
 			myssh 0 root "unlock.sh"
@@ -182,6 +183,7 @@ function tcrootunlock() {
 }
 
 function tcdircopy() {
+	local src dst
 	src=$(echo "$1" | cut -d: -f1)
 	dst=$(echo "$1" | cut -d: -f2)
 	eval sudo cp -rfL $src $tcldir/$dst && \
@@ -189,7 +191,7 @@ function tcdircopy() {
 }
 
 function get_tczlist_full() {
-	declare deps i tczdir=$1 getdeps
+	local deps i tczdir=$1 getdeps
 	getdeps=$tczdir/../provides/tcdepends.sh
 	shift
 	for i in $@; do
@@ -202,7 +204,7 @@ function get_tczlist_full() {
 }
 
 function tczmetamask() {
-	declare i deps="" skipmeta="$2"
+	local i deps="" skipmeta="$2"
 	[ -d "$1" ] || return 1
 	echo "skipmeta: $skipmeta" >&2
 	for i in $tczmeta; do
@@ -221,7 +223,7 @@ function tczmetamask() {
 }
 
 function gettczlist() {
-	declare i j tczlist="" deps="" adding
+	local i j tczlist="" deps="" adding
 	[ -d "$1" ] || return 1
 	for i in $tczmeta; do
 		if [ ! -e $1/conf.d/$i.lst ]; then
@@ -240,6 +242,7 @@ function gettczlist() {
 }
 
 function tccopyall() {
+	local i tczdir
 	test -n "$tcldir"
 	cd tinycore
 	./tccustom.sh $tcsize
@@ -358,7 +361,7 @@ function storage_32GB_create()
 }
 
 function chownuser() {
-	declare user guid
+	local user guid
 	user=$SUDO_USER
 	user=${user:-$USER}
 	guid=$(grep -e "^$user:" /etc/passwd | cut -d: -f3-4)
@@ -366,7 +369,7 @@ function chownuser() {
 }
 
 function isatarget() {
-	declare i
+	local i
 	for i in $targets; do
 		if [ "$1" == "$i" ]; then
 			return 0

@@ -17,7 +17,7 @@ function perr() {
 }
 
 function chownuser() {
-	declare user guid
+	local user guid
 	user=$SUDO_USER
 	user=${user:-$USER}
 	guid=$(grep -e "^$user:" /etc/passwd | cut -d: -f3-4)
@@ -37,8 +37,8 @@ function unmountall() {
 }
 
 function metamerge() {
-	declare i n udir meta list
-	meta=$1
+	local tceinst=e/usr/local/tce.installed
+	local fname n i udir list meta=$1
 	shift
 	test "$1" == "" && return 0
 	if [ "$meta" == "test" ]; then
@@ -76,7 +76,6 @@ function metamerge() {
 
 	n=1
 	rm -rf e
-	tceinst=e/usr/local/tce.installed
 	mkdir -p $tceinst
 	chmod 0775 $tceinst
 	chown 0.50 $tceinst
@@ -145,7 +144,7 @@ function metamerge() {
 }
 
 function get_tczlist_full() {
-	declare deps i tczdir=$1 getdeps
+	local deps i tczdir=$1 getdeps
 	getdeps=$tczdir/../provides/tcdepends.sh
 	shift
 	for i in $@; do

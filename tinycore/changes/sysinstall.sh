@@ -31,12 +31,10 @@ function usage() {
 
 function rstdisk_umount_all() {
 	sync
-	ret=0
+	local i mntdir ret=0
 	for i in $rstdiskp4 $rstdiskp3 $rstdiskp2 $rstdiskp1; do
 		mntdir=$(devdir $i)
-		if [ "$mntdir" ]; then
-			umount $mntdir || true
-		fi
+		umount $mntdir 2>/dev/null || true
 		if grep -qe "^$i " /proc/mounts; then
 			mount -o remount,ro $mntdir || true
 		fi
@@ -60,6 +58,7 @@ function alert_exit() {
 }
 
 function atexit() {
+	local error lines i errline
 	set +ex
 	rstdisk_umount_all
 	tag  99 "$stage FAILED, abort"
@@ -83,7 +82,7 @@ function isanumber() {
 }
 
 function partready() {
-	part=$(basename $1)
+	local part=$(basename $1)
 	if ! grep -qe "$part$" /proc/partitions; then
 		sleep 1
 	fi

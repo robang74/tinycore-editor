@@ -32,8 +32,7 @@ function perr() {
 }
 
 function download() {
-	rc=1
-	opt=-c
+	local rc=1 opt=-c
 	case "$1" in
 	-ne) opt=""; rc=0; shift
 		;;

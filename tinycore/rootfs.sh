@@ -17,6 +17,7 @@ function errexit() {
 }
 
 function chownuser() {
+	local user guid
 	user=$SUDO_USER
 	user=${user:-$USER}
 	guid=$(grep -e "^$user:" /etc/passwd | cut -d: -f3-4)

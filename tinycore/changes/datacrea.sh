@@ -4,7 +4,7 @@
 #
 
 function partready() {
-	part=$(basename $1)
+	local part=$(basename $1)
 	if ! grep -qe "$part$" /proc/partitions; then
 		sleep 1
 	fi

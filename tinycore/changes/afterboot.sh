@@ -13,7 +13,7 @@ function info() {
 }
 
 function infotime() {
-	opt=""
+	local tm opt=""
 	if [ "$1" == "-n" ]; then
 		opt="$1"
 		shift
@@ -23,7 +23,7 @@ function infotime() {
 }
 
 function warntime() {
-	opt=""
+	local opt=""
 	if [ "$1" == "-n" ]; then
 		opt="$1"
 		shift
@@ -40,7 +40,7 @@ function devdir() {
 }
 
 function tceload() {
-	opt="-i"
+	local user one opt="-i"
 	if [ "$1" == "-bg" ]; then
 		opt="-bi"
 		shift

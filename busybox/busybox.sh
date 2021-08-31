@@ -70,7 +70,7 @@ function setconfig() {
 }
 
 function chownuser() {
-	declare user guid
+	local user guid
 	user=$SUDO_USER
 	user=${user:-$USER}
 	guid=$(grep -e "^$user:" /etc/passwd | cut -d: -f3-4)
@@ -78,6 +78,7 @@ function chownuser() {
 }
 
 function usermake() {
+	local nproc
 	nproc=$(nproc 2>/dev/null || true)
 	nproc=${nproc:-2}
 	nproc=1 #RAF: sometimes the compilation fails with -j > 1
@@ -90,8 +91,7 @@ function realexit() {
 }
 
 function download() {
-	rc=1
-	opt=-c
+	local rc=1 opt=-c
 	if [ "$1" == "-ne" ]; then
 		opt=
 		rc=0
@@ -111,7 +111,7 @@ function download() {
 }
 
 function onerror() {
-	rc=$?
+	local rc=$?
 	echo
 	perr "ERROR: $myname failed${2+ in $2()} at line $1, rc: $rc"
 	echo

@@ -32,8 +32,7 @@ function perr() {
 }
 
 function download() {
-	rc=1
-	opt=-c
+	local rc=1 opt=-c
 	if [ "$1" == "-ne" ]; then
 		opt=
 		rc=0

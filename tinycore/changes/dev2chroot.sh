@@ -9,6 +9,7 @@ function realexit() {
 }
 
 function atexit() {
+	local error lines errline
 	set +ex
 	echo
 	unmountall
@@ -31,12 +32,10 @@ function devdir() {
 }
 
 function mountdevdir() {
-	OLDFNAME=$FUNCNAME
-	FUNCNAME="mountdevdir()"
 	mkdir -p $2 2>/dev/null
 	test -b "$1" || return 1
 	grep -qe "$(basename $1)$" /proc/partitions
-	curdir=$(devdir $1)
+	local curdir=$(devdir $1)
 	if [ -d "$curdir" ]; then
 		if [ "$3" == "rw" ]; then
 			mount -o remount,rw $curdir
@@ -48,13 +47,10 @@ function mountdevdir() {
 	else
 		mount -r $1 $2
 	fi
-	ret=$?
-	FUNCNAME=$OLDFNAME
-	return $ret
 }
 
 function rumount() {
-	j=${1%/}
+	local i j=${1%/}
 	for i in $(sed -ne "s,.* \($j/[^ ]*\) .*,\\1,p" /proc/mounts | sort -r) $j; do
 		umount $i
 	done
@@ -90,7 +86,7 @@ function unmountall() {
 function exec2chroot() {
 	set +e
 	trap - EXIT
-	declare execss script
+	local execss script
 	execss=/root/exec2chroot.sh
 	script=$rootdir/$execss
 	echo "sed -e 's,\\\.,,g' /etc/issue; cd $1; $2" > $script
