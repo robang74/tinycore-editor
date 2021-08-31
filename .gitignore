@@ -8,6 +8,7 @@
 /tinycore/tccustom32.tgz
 /tinycore/tccustom64.tgz
 /tinycore/tinycore.conf
+/tinycore/chrootfs.tgz
 /tinycore/vmlinuz
 /tinycore/.arch
 /tinycore/tcz/*
