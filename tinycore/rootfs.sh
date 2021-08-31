@@ -66,7 +66,6 @@ if [ "$1" == "open" -o "$1" == "update" ]; then
 	fi
 	mkdir $tmpdir
 	cd $tmpdir
-	setp2type
 	echo -n "open data: "
 	zcat ../rootfs.gz | sudo cpio -i -H newc -d 2>&1
 	cat ../changes/rcS > etc/init.d/rcS
@@ -75,6 +74,7 @@ if [ "$1" == "open" -o "$1" == "update" ]; then
 	if [ -e ../changes/tce-setup ]; then
 		cat ../changes/tce-setup > usr/bin/tce-setup
 	fi
+	setp2type
 	test -e lib64 || ln -sf lib lib64
 	echo "opened folder: $tmpdir"
 	cd ..
