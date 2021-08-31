@@ -86,7 +86,6 @@ if [ "$1" == "close" -o "$1" == "update" ]; then
 		errexit "directory $tmpdir NOT found, abort"
 	fi
 	cd $tmpdir
-	setp2type
 	echo -n "close data: "
 	if sudo find . | sudo cpio -o -H newc | gzip > ../rootfs.gz; then
 		cd ..
