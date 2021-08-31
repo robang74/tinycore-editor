@@ -10,14 +10,19 @@ if [ "$USER" != "root" ]; then
 	exit 1
 fi
 
-echo
-echo "Shutdown the system in 3 seconds..."
-echo
-
-sync
 echo 1 > /proc/sys/kernel/sysrq
 echo s > /proc/sysrq-trigger
 echo u > /proc/sysrq-trigger
+
+echo
+echo "Syncing, timeout 60 seconds..."
+echo
+
+timeout 60 sync
+
+echo
+echo "Shutdown the system in 3 seconds..."
+echo
 
 sleep 3 || exit 1
 
