@@ -5,7 +5,7 @@
 
 function usage() {
 	echo
-	echo "USAGE: $myname [open|close|update|clean|distclean]"
+	echo "USAGE: $myname [chroot|open|close|update|clean|distclean]"
 	echo
 }
 
@@ -32,6 +32,15 @@ function setp2type() {
 	fi >etc/sysconfig/p2type
 }
 
+function chroot_atexit() {
+	umount $tmpdir.bash 2>/dev/null || true
+	rm -rf $WRKDIR/$tmpdir.bash
+	rm -rf $WRKDIR/$tmpdir
+	echo
+	echo "chroot clean: OK"
+	echo
+}
+
 ###############################################################################
 
 export PATH=/home/tc/.local/bin:/usr/local/sbin:/usr/local/bin
@@ -52,6 +61,37 @@ if [ ! -e tinycore.conf ]; then
 	source tinycore.conf.orig
 else
 	source tinycore.conf
+fi
+
+if [ "$1" == "chroot" ]; then
+	trap 'printf "\nERROR at line $LINENO, abort\n\n"' ERR
+	trap "chroot_atexit" EXIT
+	set -e
+	./$myname open
+	tar xzf tccustom$tcsize.tgz -moC $tmpdir
+	tar xzf revoxid$tcsize.tgz -moC $tmpdir
+	mkdir $tmpdir.bash
+	for i in bash readline ncursesw; do
+		mount tcz/$i.tcz $tmpdir.bash
+		if [ -d $tmpdir.bash/usr/local/bin ]; then
+			cp -arf $tmpdir.bash/usr/local/bin $tmpdir
+		fi
+		cp -arf $tmpdir.bash/usr/local/lib $tmpdir
+		umount $tmpdir.bash
+	done
+	rm -rf $tmpdir.bash
+	cd $tmpdir
+	rm -f etc/sysconfig/p2type
+	tar czf ../chrootfs.tgz .
+	cd ..
+	if which advdef >/dev/null; then
+		advdef -z3 chrootfs.tgz
+		rm -f chrootfs.tgz.tmp*
+	else
+		echo "Install advdef to compress further the chrootfs.tgz"
+	fi
+	chownuser chrootfs.tgz
+	exit 0
 fi
 
 echo
