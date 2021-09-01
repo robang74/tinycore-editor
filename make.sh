@@ -1007,6 +1007,7 @@ if [ "$param" == "distclean" ]; then
 	info "make.sh executing: distclean"
 	tinycore/provides/tcgetdistro.sh clean
 	busybox/busybox.sh distclean
+	tinycore/rootfs.sh distclean
 	rm -rf tinycore/tcz/*
 	./$myname reset no-download
 fi
