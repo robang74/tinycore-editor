@@ -392,12 +392,15 @@ fi ############################################################################
 
 kmap=$(sed -e "s,.* kmap=\([^ ]*\) .*,\1," /proc/cmdline)
 if [ -e /usr/share/kmap/$kmap.kmap ]; then
-	infotime "Loading keyboard map '$kmap' by kernel ..."
+	infotime "Loading keyboard map '$kmap' by kernel..."
 	loadkmap < /usr/share/kmap/$kmap.kmap
 else
 	infotime "Loading Italian keyboard map..."
 	loadkmap < /usr/share/kmap/qwerty/it.kmap
 fi 2>/dev/null
+
+infotime "Setting a reboot trigger on label $tclabel..."
+nohup $tcdir/custom/sysrestart.sh $tclabel >/dev/null 2>&1 &
 
 infotime "Waiting for background jobs..."
 if [ -x /usr/local/tce.installed/ca-certificates ]; then

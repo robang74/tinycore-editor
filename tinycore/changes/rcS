@@ -85,6 +85,7 @@ else
 			echo
 			echo -e "\e[1;37m############# AFTER BOOT SCRIPT START #############\e[0m"
 			echo
+			export tclabel
 			$tcdir/afterboot.sh
 		fi
 	fi
