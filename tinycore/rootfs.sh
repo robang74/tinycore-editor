@@ -147,7 +147,9 @@ fi
 
 if [ "$1" == "distclean" ]; then
 	ok=1
+	rm -rf $tmpdir
 	rm -rf rootfs.gz
+	rm -rf chrootfs.tgz
 	echo "distclean: OK"
 fi
 

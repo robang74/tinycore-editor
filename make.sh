@@ -616,7 +616,7 @@ if [ "$param" == "reset" ]; then
 	tdone=1
 	info "make.sh executing: reset"
 	rm -f busybox/busybox.sh.conf tinycore/tinycore.conf make.conf
-	rm -f tcl-usb.disk.gz tinycore/rootfs.gz
+	rm -f tcl-usb.disk.gz tinycore/rootfs.gz tinycore/chrootfs.tgz
 	./$myname clean all
 	busybox/busybox.sh distclean
 	if [ "$option" != "no-download" ]; then
