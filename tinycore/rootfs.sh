@@ -69,7 +69,6 @@ if [ "$1" == "chroot" ]; then
 	set -e
 	./$myname open
 	tar xzf tccustom$tcsize.tgz -moC $tmpdir
-	tar xzf revoxid$tcsize.tgz -moC $tmpdir
 	mkdir $tmpdir.bash
 	for i in bash readline ncursesw; do
 		mount tcz/$i.tcz $tmpdir.bash
