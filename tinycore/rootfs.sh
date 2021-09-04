@@ -33,8 +33,8 @@ function setp2type() {
 }
 
 function chroot_atexit() {
-	umount $tmpdir.bash 2>/dev/null || true
-	rm -rf $WRKDIR/$tmpdir.bash
+	umount $tmptczdir 2>/dev/null || true
+	rm -rf $WRKDIR/$tmptczdir
 	rm -rf $WRKDIR/$tmpdir
 	echo
 	echo "chroot clean: OK"
@@ -89,6 +89,10 @@ if [ "$1" == "chroot" ]; then
 				fi
 			done
 		done
+		if [ -d $tmptczdir/usr/local/share ]; then
+			mkdir -p $tmpdir/usr/local/share
+			cp -arf $tmptczdir/usr/local/share $tmpdir/usr/local
+		fi
 		umount $tmptczdir
 	done
 	rm -rf $tmptczdir
