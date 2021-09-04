@@ -46,6 +46,8 @@ function chroot_atexit() {
 export PATH=/home/tc/.local/bin:/usr/local/sbin:/usr/local/bin
 export PATH=$PATH:/apps/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
+tczlist="bash readline ncursesw dropbear"
+
 ok=0
 if [ "$USER" != "root" ]; then
 	sudo $0 "$@"
@@ -69,18 +71,30 @@ if [ "$1" == "chroot" ]; then
 	set -e
 	./$myname open
 	tar xzf tccustom$tcsize.tgz -moC $tmpdir
-	mkdir $tmpdir.bash
-	for i in bash readline ncursesw dropbear; do
-		mount tcz/$i.tcz $tmpdir.bash
-		if [ -d $tmpdir.bash/usr/local/bin ]; then
-			cp -arf $tmpdir.bash/usr/local/bin $tmpdir
-		fi
-		if [ -d $tmpdir.bash/usr/local/lib ]; then
-			cp -arf $tmpdir.bash/usr/local/lib $tmpdir
-		fi
-		umount $tmpdir.bash
+
+	echo
+	echo "gsettings for avoid automount windows displaying..."
+	prev=$(su -l $SUDO_USER -c "gsettings get org.gnome.desktop.media-handling automount-open 2>/dev/null")
+	su -l $SUDO_USER -c "gsettings set org.gnome.desktop.media-handling automount-open false 2>/dev/null"
+	echo
+
+	tmptczdir=$tmpdir.tcz
+	mkdir $tmptczdir
+	for i in $tczlist; do
+		mount tcz/$i.tcz $tmptczdir
+		for i in bin lib; do
+			for j in . usr usr/local; do
+				if [ -d $tmptczdir/$j/$i ]; then
+					cp -arf $tmptczdir/$j/$i $tmpdir
+				fi
+			done
+		done
+		umount $tmptczdir
 	done
-	rm -rf $tmpdir.bash
+	rm -rf $tmptczdir
+
+	su -l $SUDO_USER -c "gsettings set org.gnome.desktop.media-handling automount-open $prev 2>/dev/null"
+
 	cd $tmpdir
 	rm -f etc/sysconfig/p2type
 	tar czf ../chrootfs.tgz .
