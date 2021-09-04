@@ -70,12 +70,14 @@ if [ "$1" == "chroot" ]; then
 	./$myname open
 	tar xzf tccustom$tcsize.tgz -moC $tmpdir
 	mkdir $tmpdir.bash
-	for i in bash readline ncursesw; do
+	for i in bash readline ncursesw dropbear; do
 		mount tcz/$i.tcz $tmpdir.bash
 		if [ -d $tmpdir.bash/usr/local/bin ]; then
 			cp -arf $tmpdir.bash/usr/local/bin $tmpdir
 		fi
-		cp -arf $tmpdir.bash/usr/local/lib $tmpdir
+		if [ -d $tmpdir.bash/usr/local/lib ]; then
+			cp -arf $tmpdir.bash/usr/local/lib $tmpdir
+		fi
 		umount $tmpdir.bash
 	done
 	rm -rf $tmpdir.bash
