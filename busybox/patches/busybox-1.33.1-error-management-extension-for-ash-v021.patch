@@ -25,7 +25,7 @@ index a33ab0626..3bde7ec31 100644
  
  #define msg_illnum "Illegal number: %s"
  
-+#define NLAST (NSIG+1) /* increased by 1: trap ERR handler */
++#define NTRAPS (NSIG+1) /* increased by 1: trap ERR handler */
 +
  /*
   * We enclose jmp_buf in a structure so that we can declare pointers to
@@ -54,7 +54,7 @@ index a33ab0626..3bde7ec31 100644
  	uint8_t gotsig[NSIG - 1]; /* offset by 1: "signal" 0 is meaningless */
  	uint8_t may_have_traps; /* 0: definitely no traps are set, 1: some traps may be set */
 -	char *trap[NSIG];
-+	char *trap[NLAST];
++	char *trap[NTRAPS];
  	char **trap_ptr;        /* used only by "trap hack" */
  
  	/* Rarely referenced stuff */
@@ -132,7 +132,7 @@ index a33ab0626..3bde7ec31 100644
  
  	INT_OFF;
 -	for (tp = trap; tp < &trap[NSIG]; tp++) {
-+	for (tp = trap; tp < &trap[NLAST]; tp++) {
++	for (tp = trap; tp < &trap[NTRAPS]; tp++) {
  		if (*tp && **tp) {      /* trap not NULL or "" (SIG_IGN) */
  			if (trap_ptr == trap)
  				free(*tp);
@@ -194,38 +194,38 @@ index a33ab0626..3bde7ec31 100644
 -		raise_exception(EXEND);
 +	if (checkexit & status) {
 +		if (trap[TRAP_ERR]) {
-+				static bool recursive = 0;
-+				if (!recursive) {
-+					int err;
-+					struct jmploc *volatile savehandler = exception_handler;
-+					struct jmploc jmploc;
++			static bool recursive = 0;
++			if (!recursive) {
++				int err;
++				struct jmploc *volatile savehandler = exception_handler;
++				struct jmploc jmploc;
 +
-+					err = setjmp(jmploc.loc);
-+					if (!err) {
-+						exception_handler = &jmploc;
++				err = setjmp(jmploc.loc);
++				if (!err) {
++					exception_handler = &jmploc;
 +
-+						savestatus = exitstatus;
-+						recursive = 1;
-+						doingtrap++;
++					savestatus = exitstatus;
++					recursive = 1;
++					doingtrap++;
 +
-+						evalstring(trap[TRAP_ERR], 0);
-+					}
-+
-+					exception_handler = savehandler;
-+					if (err && exception_type != EXERROR)
-+						longjmp(exception_handler->loc, 1);
-+
-+					doingtrap--;
-+					recursive = 0;
-+					exitstatus = savestatus;
++					evalstring(trap[TRAP_ERR], 0);
 +				}
++
++				exception_handler = savehandler;
++				if (err && exception_type != EXERROR)
++					longjmp(exception_handler->loc, 1);
++
++				doingtrap--;
++				recursive = 0;
++				exitstatus = savestatus;
++			}
 +		}
 +		if (eflag)
 +			exitshell();
 +	}
  	if (flags & EV_EXIT)
 -		raise_exception(EXEND);
-+			exitshell();
++		exitshell();
  
  	popstackmark(&smark);
  	TRACE(("leaving evaltree (no interrupts)\n"));
@@ -359,7 +359,7 @@ index a33ab0626..3bde7ec31 100644
  	ap = argptr;
  	if (!*ap) {
 -		for (signo = 0; signo < NSIG; signo++) {
-+		for (signo = 0; signo < NLAST; signo++) { /* increased by 1: trap ERR handler */
++		for (signo = 0; signo < NTRAPS; signo++) { /* increased by 1: trap ERR handler */
  			char *tr = trap_ptr[signo];
  			if (tr) {
  				/* note: bash adds "SIG", but only if invoked
