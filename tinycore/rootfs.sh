@@ -82,10 +82,10 @@ if [ "$1" == "chroot" ]; then
 	mkdir $tmptczdir
 	for i in $tczlist; do
 		mount tcz/$i.tcz $tmptczdir
-		for i in bin lib; do
+		for k in bin lib; do
 			for j in . usr usr/local; do
-				if [ -d $tmptczdir/$j/$i ]; then
-					cp -arf $tmptczdir/$j/$i $tmpdir
+				if [ -d $tmptczdir/$j/$k ]; then
+					cp -arf $tmptczdir/$j/$k $tmpdir
 				fi
 			done
 		done
