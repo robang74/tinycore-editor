@@ -1,40 +1,49 @@
-From 6c4e7410f2171beca327f3d078eb71cd1f9db5bc Mon Sep 17 00:00:00 2001
+From ae85d5b5791cf3754c550a7d37250a2cd9657292 Mon Sep 17 00:00:00 2001
 From: "Roberto A. Foglietta" <roberto.foglietta@gmail.com>
-Date: Sun, 5 Sep 2021 14:13:59 +0200
-Subject: [PATCH] busybox-1.33.1: error management extension for ash (test
+Date: Sun, 5 Sep 2021 14:45:29 +0200
+Subject: [PATCH]  busybox-1.33.1: error management extension for ash (test
  suite)
 
 ---
- shell/ash_test/ash-ERR-mgmt/funcs.sh    |  24 ++++
- shell/ash_test/ash-ERR-mgmt/test1.right |   9 ++
- shell/ash_test/ash-ERR-mgmt/test1.tests |  38 +++++
- shell/ash_test/ash-ERR-mgmt/test2.right |   9 ++
- shell/ash_test/ash-ERR-mgmt/test2.tests |  38 +++++
- shell/ash_test/ash-ERR-mgmt/test4.right |  14 ++
- shell/ash_test/ash-ERR-mgmt/test4.tests |  38 +++++
- shell/ash_test/ash-ERR-mgmt/test5.right |  12 ++
- shell/ash_test/ash-ERR-mgmt/test5.tests |  38 +++++
- shell/ash_test/ash-ERR-mgmt/test6.right |   3 +
- shell/ash_test/ash-ERR-mgmt/test6.tests |  38 +++++
- shell/ash_test/ash-ERR-mgmt/test7.right |  11 ++
- shell/ash_test/ash-ERR-mgmt/test7.tests |  38 +++++
- shell/ash_test/ash-ERR-mgmt/test8.right |  14 ++
- shell/ash_test/ash-ERR-mgmt/test8.tests |  38 +++++
- shell/ash_test/ash-ERR-mgmt/testA.right |  12 ++
- shell/ash_test/ash-ERR-mgmt/testA.tests |  38 +++++
- shell/ash_test/ash-ERR-mgmt/testB.right |  23 +++
- shell/ash_test/ash-ERR-mgmt/testB.tests |  62 ++++++++
- shell/ash_test/ash-ERR-mgmt/testC.right |  25 ++++
- shell/ash_test/ash-ERR-mgmt/testC.tests |  62 ++++++++
- shell/ash_test/ash-ERR-mgmt/testD.right |  16 +++
- shell/ash_test/ash-ERR-mgmt/testD.tests |  44 ++++++
- shell/ash_test/ash-ERR-mgmt/testE.right | 100 +++++++++++++
- shell/ash_test/ash-ERR-mgmt/testE.tests | 179 ++++++++++++++++++++++++
- shell/ash_test/ash-ERR-mgmt/testF.right |   4 +
- shell/ash_test/ash-ERR-mgmt/testF.tests |  12 ++
- shell/ash_test/ash-ERR-mgmt/testG.right |   1 +
- shell/ash_test/ash-ERR-mgmt/testG.tests |   9 ++
- 29 files changed, 949 insertions(+)
+ shell/ash_test/ash-ERR-mgmt/funcs.sh          |  24 +++
+ shell/ash_test/ash-ERR-mgmt/test1.right       |   9 +
+ shell/ash_test/ash-ERR-mgmt/test1.tests       |  38 ++++
+ shell/ash_test/ash-ERR-mgmt/test2.right       |   9 +
+ shell/ash_test/ash-ERR-mgmt/test2.tests       |  38 ++++
+ shell/ash_test/ash-ERR-mgmt/test4.right       |  14 ++
+ shell/ash_test/ash-ERR-mgmt/test4.tests       |  38 ++++
+ shell/ash_test/ash-ERR-mgmt/test5.right       |  12 ++
+ shell/ash_test/ash-ERR-mgmt/test5.tests       |  38 ++++
+ shell/ash_test/ash-ERR-mgmt/test6.right       |   3 +
+ shell/ash_test/ash-ERR-mgmt/test6.tests       |  38 ++++
+ shell/ash_test/ash-ERR-mgmt/test7.right       |  11 ++
+ shell/ash_test/ash-ERR-mgmt/test7.tests       |  38 ++++
+ shell/ash_test/ash-ERR-mgmt/test8.right       |  14 ++
+ shell/ash_test/ash-ERR-mgmt/test8.tests       |  38 ++++
+ shell/ash_test/ash-ERR-mgmt/testA.right       |  12 ++
+ shell/ash_test/ash-ERR-mgmt/testA.tests       |  38 ++++
+ shell/ash_test/ash-ERR-mgmt/testB.right       |  23 +++
+ shell/ash_test/ash-ERR-mgmt/testB.tests       |  62 ++++++
+ shell/ash_test/ash-ERR-mgmt/testC.right       |  25 +++
+ shell/ash_test/ash-ERR-mgmt/testC.tests       |  62 ++++++
+ shell/ash_test/ash-ERR-mgmt/testD.right       |  16 ++
+ shell/ash_test/ash-ERR-mgmt/testD.tests       |  44 +++++
+ shell/ash_test/ash-ERR-mgmt/testE.right       | 100 ++++++++++
+ shell/ash_test/ash-ERR-mgmt/testE.tests       | 179 ++++++++++++++++++
+ shell/ash_test/ash-ERR-mgmt/testF.right       |   4 +
+ shell/ash_test/ash-ERR-mgmt/testF.tests       |  12 ++
+ shell/ash_test/ash-ERR-mgmt/testG.right       |   1 +
+ shell/ash_test/ash-ERR-mgmt/testG.tests       |   9 +
+ shell/ash_test/ash-misc/shift1.right          |   2 +-
+ shell/ash_test/ash-misc/tickquote1.right      |   2 +-
+ .../ash-parsing/groups_and_keywords2.right    |   2 +-
+ shell/ash_test/ash-psubst/emptytick.right     |   4 +-
+ .../ash_test/ash-vars/param_expand_alt.right  |   4 +-
+ .../ash-vars/param_expand_assign.right        |  14 +-
+ .../param_expand_bash_substring.right         |  10 +-
+ .../ash-vars/param_expand_default.right       |   2 +-
+ .../param_expand_indicate_error.right         |  32 ++--
+ 38 files changed, 985 insertions(+), 36 deletions(-)
  create mode 100755 shell/ash_test/ash-ERR-mgmt/funcs.sh
  create mode 100644 shell/ash_test/ash-ERR-mgmt/test1.right
  create mode 100755 shell/ash_test/ash-ERR-mgmt/test1.tests
@@ -1188,6 +1197,167 @@ index 000000000..cd53154b1
 +trap 'rc=$?; echo ERR at in $FUNCNAME at $LINENO, exit with $rc; exit $rc' ERR
 +set -E
 +myfalse
+diff --git a/shell/ash_test/ash-misc/shift1.right b/shell/ash_test/ash-misc/shift1.right
+index b53453c3a..fdba79fd3 100644
+--- a/shell/ash_test/ash-misc/shift1.right
++++ b/shell/ash_test/ash-misc/shift1.right
+@@ -1,5 +1,5 @@
+ 2 3 4
+-0: shift: line 1: Illegal number: -1
++0: shift: line 0: Illegal number: -1
+ 1 2 3 4
+ 2 3 4
+ 3 4
+diff --git a/shell/ash_test/ash-misc/tickquote1.right b/shell/ash_test/ash-misc/tickquote1.right
+index 2e661bfe3..e55a31c2d 100644
+--- a/shell/ash_test/ash-misc/tickquote1.right
++++ b/shell/ash_test/ash-misc/tickquote1.right
+@@ -1 +1 @@
+-./tickquote1.tests: line 1: syntax error: unterminated quoted string
++./tickquote1.tests: line 0: syntax error: unterminated quoted string
+diff --git a/shell/ash_test/ash-parsing/groups_and_keywords2.right b/shell/ash_test/ash-parsing/groups_and_keywords2.right
+index 3fcbeb662..2ce38fe6e 100644
+--- a/shell/ash_test/ash-parsing/groups_and_keywords2.right
++++ b/shell/ash_test/ash-parsing/groups_and_keywords2.right
+@@ -1,3 +1,3 @@
+-./groups_and_keywords2.tests: eval: line 1: syntax error: unexpected ")"
++./groups_and_keywords2.tests: eval: line 2: syntax error: unexpected ")"
+ Fail:2
+ ./groups_and_keywords2.tests: line 8: syntax error: unexpected ")"
+diff --git a/shell/ash_test/ash-psubst/emptytick.right b/shell/ash_test/ash-psubst/emptytick.right
+index 459c4f735..8fe9839ca 100644
+--- a/shell/ash_test/ash-psubst/emptytick.right
++++ b/shell/ash_test/ash-psubst/emptytick.right
+@@ -1,8 +1,8 @@
+ 0
+ 0
+-./emptytick.tests: line 1: : Permission denied
++./emptytick.tests: line 2: : Permission denied
+ 127
+-./emptytick.tests: line 1: : Permission denied
++./emptytick.tests: line 3: : Permission denied
+ 127
+ 0
+ 0
+diff --git a/shell/ash_test/ash-vars/param_expand_alt.right b/shell/ash_test/ash-vars/param_expand_alt.right
+index 1303f8064..d10f1206f 100644
+--- a/shell/ash_test/ash-vars/param_expand_alt.right
++++ b/shell/ash_test/ash-vars/param_expand_alt.right
+@@ -1,5 +1,5 @@
+-SHELL: line 1: syntax error: bad substitution
+-SHELL: line 1: syntax error: bad substitution
++SHELL: line 0: syntax error: bad substitution
++SHELL: line 0: syntax error: bad substitution
+ __
+ _z_ _z_
+ _ _ _ _ _
+diff --git a/shell/ash_test/ash-vars/param_expand_assign.right b/shell/ash_test/ash-vars/param_expand_assign.right
+index 6e9ea1379..52eaef9f8 100644
+--- a/shell/ash_test/ash-vars/param_expand_assign.right
++++ b/shell/ash_test/ash-vars/param_expand_assign.right
+@@ -1,11 +1,11 @@
+-SHELL: line 1: syntax error: bad substitution
+-SHELL: line 1: syntax error: bad substitution
+-SHELL: line 1: syntax error: bad substitution
++SHELL: line 0: syntax error: bad substitution
++SHELL: line 0: syntax error: bad substitution
++SHELL: line 0: syntax error: bad substitution
+ 0
+-SHELL: line 1: 1: bad variable name
+-SHELL: line 1: 1: bad variable name
+-SHELL: line 1: 1: bad variable name
+-SHELL: line 1: 1: bad variable name
++SHELL: line 0: 1: bad variable name
++SHELL: line 0: 1: bad variable name
++SHELL: line 0: 1: bad variable name
++SHELL: line 0: 1: bad variable name
+ _aa
+ _aa
+ _aa
+diff --git a/shell/ash_test/ash-vars/param_expand_bash_substring.right b/shell/ash_test/ash-vars/param_expand_bash_substring.right
+index 687dd9002..22a0b2881 100644
+--- a/shell/ash_test/ash-vars/param_expand_bash_substring.right
++++ b/shell/ash_test/ash-vars/param_expand_bash_substring.right
+@@ -1,8 +1,8 @@
+-SHELL: line 1: syntax error: bad substitution
+-SHELL: line 1: syntax error: bad substitution
+-SHELL: line 1: syntax error: bad substitution
+-SHELL: line 1: syntax error: bad substitution
+-SHELL: line 1: syntax error: missing '}'
++SHELL: line 0: syntax error: bad substitution
++SHELL: line 0: syntax error: bad substitution
++SHELL: line 0: syntax error: bad substitution
++SHELL: line 0: syntax error: bad substitution
++SHELL: line 0: syntax error: missing '}'
+ 0
+ 1    =||
+ 1:1  =||
+diff --git a/shell/ash_test/ash-vars/param_expand_default.right b/shell/ash_test/ash-vars/param_expand_default.right
+index 7a42f67e8..0852105ca 100644
+--- a/shell/ash_test/ash-vars/param_expand_default.right
++++ b/shell/ash_test/ash-vars/param_expand_default.right
+@@ -1,4 +1,4 @@
+-SHELL: line 1: syntax error: bad substitution
++SHELL: line 0: syntax error: bad substitution
+ _0 _0
+ _ _ _ _word _word
+ _aaaa _aaaa _aaaa _aaaa _aaaa
+diff --git a/shell/ash_test/ash-vars/param_expand_indicate_error.right b/shell/ash_test/ash-vars/param_expand_indicate_error.right
+index 33afacee0..53ea07181 100644
+--- a/shell/ash_test/ash-vars/param_expand_indicate_error.right
++++ b/shell/ash_test/ash-vars/param_expand_indicate_error.right
+@@ -1,14 +1,14 @@
+-SHELL: line 1: syntax error: bad substitution
++SHELL: line 0: syntax error: bad substitution
+ 1
+ 0
+ ====
+ _
+-SHELL: line 1: 1: parameter not set
+-SHELL: line 1: 1: parameter not set or null
+-SHELL: line 1: 1: message1
+-SHELL: line 1: 1: message1
+-SHELL: line 1: 1: unset!
+-SHELL: line 1: 1: null or unset!
++SHELL: line 0: 1: parameter not set
++SHELL: line 0: 1: parameter not set or null
++SHELL: line 0: 1: message1
++SHELL: line 0: 1: message1
++SHELL: line 0: 1: unset!
++SHELL: line 0: 1: null or unset!
+ ====
+ _aaaa
+ _aaaa
+@@ -19,20 +19,20 @@ _aaaa
+ _aaaa
+ ====
+ _
+-SHELL: line 1: f: parameter not set
+-SHELL: line 1: f: parameter not set or null
+-SHELL: line 1: f: message3
+-SHELL: line 1: f: message3
+-SHELL: line 1: f: unset!
+-SHELL: line 1: f: null or unset!
++SHELL: line 0: f: parameter not set
++SHELL: line 0: f: parameter not set or null
++SHELL: line 0: f: message3
++SHELL: line 0: f: message3
++SHELL: line 0: f: unset!
++SHELL: line 0: f: null or unset!
+ ====
+ _
+ _
+-SHELL: line 1: f: parameter not set or null
++SHELL: line 0: f: parameter not set or null
+ _
+-SHELL: line 1: f: message4
++SHELL: line 0: f: message4
+ _
+-SHELL: line 1: f: null or unset!
++SHELL: line 0: f: null or unset!
+ ====
+ _fff
+ _fff
 -- 
 2.17.1
 
