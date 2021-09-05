@@ -1,0 +1,1193 @@
+From 6c4e7410f2171beca327f3d078eb71cd1f9db5bc Mon Sep 17 00:00:00 2001
+From: "Roberto A. Foglietta" <roberto.foglietta@gmail.com>
+Date: Sun, 5 Sep 2021 14:13:59 +0200
+Subject: [PATCH] busybox-1.33.1: error management extension for ash (test
+ suite)
+
+---
+ shell/ash_test/ash-ERR-mgmt/funcs.sh    |  24 ++++
+ shell/ash_test/ash-ERR-mgmt/test1.right |   9 ++
+ shell/ash_test/ash-ERR-mgmt/test1.tests |  38 +++++
+ shell/ash_test/ash-ERR-mgmt/test2.right |   9 ++
+ shell/ash_test/ash-ERR-mgmt/test2.tests |  38 +++++
+ shell/ash_test/ash-ERR-mgmt/test4.right |  14 ++
+ shell/ash_test/ash-ERR-mgmt/test4.tests |  38 +++++
+ shell/ash_test/ash-ERR-mgmt/test5.right |  12 ++
+ shell/ash_test/ash-ERR-mgmt/test5.tests |  38 +++++
+ shell/ash_test/ash-ERR-mgmt/test6.right |   3 +
+ shell/ash_test/ash-ERR-mgmt/test6.tests |  38 +++++
+ shell/ash_test/ash-ERR-mgmt/test7.right |  11 ++
+ shell/ash_test/ash-ERR-mgmt/test7.tests |  38 +++++
+ shell/ash_test/ash-ERR-mgmt/test8.right |  14 ++
+ shell/ash_test/ash-ERR-mgmt/test8.tests |  38 +++++
+ shell/ash_test/ash-ERR-mgmt/testA.right |  12 ++
+ shell/ash_test/ash-ERR-mgmt/testA.tests |  38 +++++
+ shell/ash_test/ash-ERR-mgmt/testB.right |  23 +++
+ shell/ash_test/ash-ERR-mgmt/testB.tests |  62 ++++++++
+ shell/ash_test/ash-ERR-mgmt/testC.right |  25 ++++
+ shell/ash_test/ash-ERR-mgmt/testC.tests |  62 ++++++++
+ shell/ash_test/ash-ERR-mgmt/testD.right |  16 +++
+ shell/ash_test/ash-ERR-mgmt/testD.tests |  44 ++++++
+ shell/ash_test/ash-ERR-mgmt/testE.right | 100 +++++++++++++
+ shell/ash_test/ash-ERR-mgmt/testE.tests | 179 ++++++++++++++++++++++++
+ shell/ash_test/ash-ERR-mgmt/testF.right |   4 +
+ shell/ash_test/ash-ERR-mgmt/testF.tests |  12 ++
+ shell/ash_test/ash-ERR-mgmt/testG.right |   1 +
+ shell/ash_test/ash-ERR-mgmt/testG.tests |   9 ++
+ 29 files changed, 949 insertions(+)
+ create mode 100755 shell/ash_test/ash-ERR-mgmt/funcs.sh
+ create mode 100644 shell/ash_test/ash-ERR-mgmt/test1.right
+ create mode 100755 shell/ash_test/ash-ERR-mgmt/test1.tests
+ create mode 100644 shell/ash_test/ash-ERR-mgmt/test2.right
+ create mode 100755 shell/ash_test/ash-ERR-mgmt/test2.tests
+ create mode 100644 shell/ash_test/ash-ERR-mgmt/test4.right
+ create mode 100755 shell/ash_test/ash-ERR-mgmt/test4.tests
+ create mode 100644 shell/ash_test/ash-ERR-mgmt/test5.right
+ create mode 100755 shell/ash_test/ash-ERR-mgmt/test5.tests
+ create mode 100644 shell/ash_test/ash-ERR-mgmt/test6.right
+ create mode 100755 shell/ash_test/ash-ERR-mgmt/test6.tests
+ create mode 100644 shell/ash_test/ash-ERR-mgmt/test7.right
+ create mode 100755 shell/ash_test/ash-ERR-mgmt/test7.tests
+ create mode 100644 shell/ash_test/ash-ERR-mgmt/test8.right
+ create mode 100755 shell/ash_test/ash-ERR-mgmt/test8.tests
+ create mode 100644 shell/ash_test/ash-ERR-mgmt/testA.right
+ create mode 100755 shell/ash_test/ash-ERR-mgmt/testA.tests
+ create mode 100644 shell/ash_test/ash-ERR-mgmt/testB.right
+ create mode 100755 shell/ash_test/ash-ERR-mgmt/testB.tests
+ create mode 100644 shell/ash_test/ash-ERR-mgmt/testC.right
+ create mode 100755 shell/ash_test/ash-ERR-mgmt/testC.tests
+ create mode 100644 shell/ash_test/ash-ERR-mgmt/testD.right
+ create mode 100755 shell/ash_test/ash-ERR-mgmt/testD.tests
+ create mode 100644 shell/ash_test/ash-ERR-mgmt/testE.right
+ create mode 100755 shell/ash_test/ash-ERR-mgmt/testE.tests
+ create mode 100644 shell/ash_test/ash-ERR-mgmt/testF.right
+ create mode 100755 shell/ash_test/ash-ERR-mgmt/testF.tests
+ create mode 100644 shell/ash_test/ash-ERR-mgmt/testG.right
+ create mode 100755 shell/ash_test/ash-ERR-mgmt/testG.tests
+
+diff --git a/shell/ash_test/ash-ERR-mgmt/funcs.sh b/shell/ash_test/ash-ERR-mgmt/funcs.sh
+new file mode 100755
+index 000000000..c5e98cb49
+--- /dev/null
++++ b/shell/ash_test/ash-ERR-mgmt/funcs.sh
+@@ -0,0 +1,24 @@
++#!/bin/ash
++
++function realexit() {
++	trap - EXIT
++	exit $1
++}
++
++function perr() {
++	echo -e "\e[1;31m$@\e[0m"
++}
++
++function onerror() {
++	rc=$?
++#	echo
++	echo "ERROR: $(basename $0) failed${2+ in $2()} at line $1, rc: $rc" 
++	echo "$FUNCNAME() at line $LINENO == 16"
++#	echo
++#	realexit $rc
++}
++
++function mytest() {
++	echo "hello at line $LINENO == 22"
++	false
++}
+diff --git a/shell/ash_test/ash-ERR-mgmt/test1.right b/shell/ash_test/ash-ERR-mgmt/test1.right
+new file mode 100644
+index 000000000..fdf18740e
+--- /dev/null
++++ b/shell/ash_test/ash-ERR-mgmt/test1.right
+@@ -0,0 +1,9 @@
++ciao! at line 29 == 29
++hello at line 22 == 22
++ERROR: test1.tests failed at line 30, rc: 1
++onerror() at line 16 == 16
++mytest should have failed at line 30
++pippo
++ERROR: test1.tests failed at line 34, rc: 1
++onerror() at line 16 == 16
++exit in () at line 34 == 34 with pippo but not pluto
+diff --git a/shell/ash_test/ash-ERR-mgmt/test1.tests b/shell/ash_test/ash-ERR-mgmt/test1.tests
+new file mode 100755
+index 000000000..3218b832a
+--- /dev/null
++++ b/shell/ash_test/ash-ERR-mgmt/test1.tests
+@@ -0,0 +1,38 @@
++#!/bin/ash
++
++function realexit() {
++	trap - EXIT
++	exit $1
++}
++
++function perr() {
++	echo -e "\e[1;31m$@\e[0m"
++}
++
++function onerror() {
++	rc=$?
++#	echo
++	echo "ERROR: $(basename $0) failed${2+ in $2()} at line $1, rc: $rc" 
++	echo "$FUNCNAME() at line $LINENO == 16"
++#	echo
++#	realexit $rc
++}
++
++function mytest() {
++	echo "hello at line $LINENO == 22"
++	false
++}
++
++trap 'onerror $LINENO $FUNCNAME' ERR
++trap 'echo exit in $FUNCNAME\(\) at line $LINENO == 34 with pippo but not pluto' EXIT
++
++echo "ciao! at line $LINENO == 29"
++mytest
++echo "mytest should have failed at line 30"
++echo "pippo"
++set -e
++false
++
++
++
++echo "pluto at line 38"
+diff --git a/shell/ash_test/ash-ERR-mgmt/test2.right b/shell/ash_test/ash-ERR-mgmt/test2.right
+new file mode 100644
+index 000000000..1a3443082
+--- /dev/null
++++ b/shell/ash_test/ash-ERR-mgmt/test2.right
+@@ -0,0 +1,9 @@
++ciao! at line 29 == 29
++hello at line 22 == 22
++ERROR: test2.tests failed at line 30, rc: 1
++onerror() at line 16 == 16
++mytest should have failed at line 30
++pippo
++ERROR: test2.tests failed at line 34, rc: 1
++onerror() at line 16 == 16
++exit at line 34 == 34 with pippo but not pluto
+diff --git a/shell/ash_test/ash-ERR-mgmt/test2.tests b/shell/ash_test/ash-ERR-mgmt/test2.tests
+new file mode 100755
+index 000000000..87d2b36f0
+--- /dev/null
++++ b/shell/ash_test/ash-ERR-mgmt/test2.tests
+@@ -0,0 +1,38 @@
++#!/bin/ash
++
++pwd=$(realpath $(dirname $0))
++
++. $pwd/funcs.sh
++
++
++
++
++
++
++
++
++
++
++
++
++
++
++
++
++
++
++
++
++trap 'onerror $LINENO $FUNCNAME' ERR
++trap 'echo exit at line $LINENO == 34 with pippo but not pluto' EXIT
++
++echo "ciao! at line $LINENO == 29"
++mytest
++echo "mytest should have failed at line 30"
++echo "pippo"
++set -e
++false
++
++
++
++echo "pluto at line 38"
+diff --git a/shell/ash_test/ash-ERR-mgmt/test4.right b/shell/ash_test/ash-ERR-mgmt/test4.right
+new file mode 100644
+index 000000000..c93e62e09
+--- /dev/null
++++ b/shell/ash_test/ash-ERR-mgmt/test4.right
+@@ -0,0 +1,14 @@
++hello by mytest() at line 22 == 22
++ERROR: test4.tests failed at line 30, rc: 1
++onerror() at line 16 == 16
++Tracing error in function starts here (set -E)
++hello by mytest() at line 22 == 22
++ERROR: test4.tests failed in mytest() at line 23, rc: 1
++onerror() at line 16 == 16
++ERROR: test4.tests failed at line 34, rc: 1
++onerror() at line 16 == 16
++ciao! at line 36 == 36
++hello by mytest() at line 22 == 22
++ERROR: test4.tests failed in mytest() at line 23, rc: 1
++onerror() at line 16 == 16
++exit in mytest() at line 23 == 23 without any onerror print
+diff --git a/shell/ash_test/ash-ERR-mgmt/test4.tests b/shell/ash_test/ash-ERR-mgmt/test4.tests
+new file mode 100755
+index 000000000..cad97a1d0
+--- /dev/null
++++ b/shell/ash_test/ash-ERR-mgmt/test4.tests
+@@ -0,0 +1,38 @@
++#!/bin/ash
++
++function realexit() {
++	trap - EXIT
++	exit $1
++}
++
++function perr() {
++	echo -e "\e[1;31m$@\e[0m"
++}
++
++function onerror() {
++	rc=$?
++#	echo
++	echo "ERROR: $(basename $0) failed${2+ in $2()} at line $1, rc: $rc" 
++	echo "$FUNCNAME() at line $LINENO == 16"
++#	echo
++#	realexit $rc
++}
++
++function mytest() {
++	echo "hello by $FUNCNAME() at line $LINENO == 22"
++	false
++	true
++}
++
++trap 'onerror $LINENO $FUNCNAME' ERR
++trap 'echo exit in $FUNCNAME\(\) at line $LINENO == 23 without any onerror print' EXIT
++mytest
++false
++echo "Tracing error in function starts here (set -E)"
++set -E
++mytest
++false
++set -e
++echo "ciao! at line $LINENO == 36"
++mytest
++
+diff --git a/shell/ash_test/ash-ERR-mgmt/test5.right b/shell/ash_test/ash-ERR-mgmt/test5.right
+new file mode 100644
+index 000000000..f8610a78c
+--- /dev/null
++++ b/shell/ash_test/ash-ERR-mgmt/test5.right
+@@ -0,0 +1,12 @@
++funcname in script: '' == ''
++ciao! at line 29 == 29
++hello at line 22 == 22
++ERROR: test5.tests failed at line 30, rc: 1
++onerror() at line 16 == 16
++mytest should have failed at line 30
++pippo
++ERROR: test5.tests failed at line 34, rc: 1
++onerror() at line 16 == 16
++this is a multi-line trap which begins at line 9 == 9
++exit at line 34 == 34 with pippo but not pluto
++this is a multi-line trap which ends at line 9 == 11
+diff --git a/shell/ash_test/ash-ERR-mgmt/test5.tests b/shell/ash_test/ash-ERR-mgmt/test5.tests
+new file mode 100755
+index 000000000..661be0d52
+--- /dev/null
++++ b/shell/ash_test/ash-ERR-mgmt/test5.tests
+@@ -0,0 +1,38 @@
++#!/bin/ash
++
++pwd=$(realpath $(dirname $0))
++
++. $pwd/funcs.sh
++
++
++
++trap "echo this is a multi-line trap which begins at line $LINENO == 9
++echo exit at line \$LINENO == 34 with pippo but not pluto
++echo this is a multi-line trap which ends at line $LINENO == 11" EXIT
++
++
++
++
++
++
++
++
++
++
++
++
++
++
++trap 'onerror $LINENO $FUNCNAME' ERR
++
++echo "funcname in script: '$FUNCNAME' == ''"
++echo "ciao! at line $LINENO == 29"
++mytest
++echo "mytest should have failed at line 30"
++echo "pippo"
++set -e
++false
++
++
++
++echo "pluto at line 38"
+diff --git a/shell/ash_test/ash-ERR-mgmt/test6.right b/shell/ash_test/ash-ERR-mgmt/test6.right
+new file mode 100644
+index 000000000..a6c740bd3
+--- /dev/null
++++ b/shell/ash_test/ash-ERR-mgmt/test6.right
+@@ -0,0 +1,3 @@
++ciao! at line 29 == 29
++hello by mytest() at line 22 == 22
++exit in mytest() at line 30 == 30 with pippo but not pluto
+diff --git a/shell/ash_test/ash-ERR-mgmt/test6.tests b/shell/ash_test/ash-ERR-mgmt/test6.tests
+new file mode 100755
+index 000000000..b677fd1a7
+--- /dev/null
++++ b/shell/ash_test/ash-ERR-mgmt/test6.tests
+@@ -0,0 +1,38 @@
++#!/bin/ash
++
++function realexit() {
++	trap - EXIT
++	exit $1
++}
++
++function perr() {
++	echo -e "\e[1;31m$@\e[0m"
++}
++
++function onerror() {
++	rc=$?
++#	echo
++	perr "ERROR: $(basename $0) failed${2+ in $2()} at line $1, rc: $rc" 
++	echo "$FUNCNAME() at line $LINENO == 16"
++#	echo
++#	realexit $rc
++}
++
++function mytest() {
++	echo "hello by $FUNCNAME() at line $LINENO == 22"
++	exit 0
++}
++
++trap 'onerror $LINENO $FUNCNAME' ERR
++trap 'echo exit in $FUNCNAME\(\) at line $LINENO == 30 with pippo but not pluto' EXIT
++
++echo "ciao! at line $LINENO == 29"
++mytest
++echo "pippo"
++set -E
++mytest
++echo "mytest should have failed at line 30 and it will again at line 36"
++set -e
++mytest
++
++echo "pluto at line 38"
+diff --git a/shell/ash_test/ash-ERR-mgmt/test7.right b/shell/ash_test/ash-ERR-mgmt/test7.right
+new file mode 100644
+index 000000000..566a53b99
+--- /dev/null
++++ b/shell/ash_test/ash-ERR-mgmt/test7.right
+@@ -0,0 +1,11 @@
++ciao! at line 29 == 29
++hello by mytest() at line 22 == 22
++pippo
++hello by mytest() at line 22 == 22
++ERROR: test7.tests failed in mytest() at line 23, rc: 1
++onerror() at line 16 == 16
++mytest should have failed at line 30 and it will again at line 36
++hello by mytest() at line 22 == 22
++ERROR: test7.tests failed in mytest() at line 23, rc: 1
++onerror() at line 16 == 16
++exit in mytest() at line 23 == 23 with pippo but not pluto
+diff --git a/shell/ash_test/ash-ERR-mgmt/test7.tests b/shell/ash_test/ash-ERR-mgmt/test7.tests
+new file mode 100755
+index 000000000..af4feff35
+--- /dev/null
++++ b/shell/ash_test/ash-ERR-mgmt/test7.tests
+@@ -0,0 +1,38 @@
++#!/bin/ash
++
++function realexit() {
++	trap - EXIT
++	exit $1
++}
++
++function perr() {
++	echo -e "\e[1;31m$@\e[0m"
++}
++
++function onerror() {
++	rc=$?
++#	echo
++	echo "ERROR: $(basename $0) failed${2+ in $2()} at line $1, rc: $rc" 
++	echo "$FUNCNAME() at line $LINENO == 16"
++#	echo
++#	realexit $rc
++}
++
++function mytest() {
++	echo "hello by $FUNCNAME() at line $LINENO == 22"
++	false
++	true
++}
++trap 'onerror $LINENO $FUNCNAME' ERR
++trap 'echo exit in $FUNCNAME\(\) at line $LINENO == 23 with pippo but not pluto' EXIT
++#exec 2>&1; set -x
++echo "ciao! at line $LINENO == 29"
++mytest
++echo "pippo"
++set -E
++mytest
++echo "mytest should have failed at line 30 and it will again at line 36"
++set -e
++mytest
++
++echo "pluto at line 38"
+diff --git a/shell/ash_test/ash-ERR-mgmt/test8.right b/shell/ash_test/ash-ERR-mgmt/test8.right
+new file mode 100644
+index 000000000..2f67d49b8
+--- /dev/null
++++ b/shell/ash_test/ash-ERR-mgmt/test8.right
+@@ -0,0 +1,14 @@
++ciao! at line 29 == 29
++hello by mytest() at line 22 == 22
++pippo, exit status 0 == 0
++LINENO=33 == 33, FUNCNAME='' == ''
++setoinvalid LINENO=10 == 10
++./test8.tests: set: line 10: illegal option -o invalid
++ERROR: test8.tests failed at line 34, rc: 1 != 0
++onerror() at line 16 == 16
++LINENO=35 == 35, FUNCNAME='' == ''
++LINENO=37
++./test8.tests: set: line 37: illegal option -o invalid
++ERROR: test8.tests failed at line 37, rc: 1 != 0
++onerror() at line 16 == 16
++exit in () at line 37 == 37 with pippo but not pluto
+diff --git a/shell/ash_test/ash-ERR-mgmt/test8.tests b/shell/ash_test/ash-ERR-mgmt/test8.tests
+new file mode 100755
+index 000000000..ab070be52
+--- /dev/null
++++ b/shell/ash_test/ash-ERR-mgmt/test8.tests
+@@ -0,0 +1,38 @@
++#!/bin/ash
++
++function realexit() {
++	trap - EXIT
++	exit $1
++}
++
++function setoinvalid() {
++	false
++	eval 'echo "$FUNCNAME LINENO=$LINENO == 10"; set -o invalid' 2>&1
++}
++function onerror() {
++	rc=$?
++#	echo
++	echo "ERROR: $(basename $0) failed${2+ in $2()} at line $1, rc: $rc != 0" 
++	echo "$FUNCNAME() at line $LINENO == 16"
++#	echo
++#	realexit $rc
++}
++
++function mytest() {
++	echo "hello by $FUNCNAME() at line $LINENO == 22"
++	false
++	true
++}
++trap 'onerror $LINENO $FUNCNAME' ERR
++trap 'echo exit in $FUNCNAME\(\) at line $LINENO == 37 with pippo but not pluto' EXIT
++#exec 2>&1; set -x
++echo "ciao! at line $LINENO == 29"
++mytest
++echo "pippo, exit status $? == 0"
++
++echo "LINENO=$LINENO == 33, FUNCNAME='' == '$FUNCNAME'"
++setoinvalid
++echo "LINENO=$LINENO == 35, FUNCNAME='' == '$FUNCNAME'"
++set -e
++eval 'echo LINENO=$LINENO; set -o invalid' 2>&1
++echo "pluto at line 38"
+diff --git a/shell/ash_test/ash-ERR-mgmt/testA.right b/shell/ash_test/ash-ERR-mgmt/testA.right
+new file mode 100644
+index 000000000..67ea05fd2
+--- /dev/null
++++ b/shell/ash_test/ash-ERR-mgmt/testA.right
+@@ -0,0 +1,12 @@
++ciao! at line 29 == 29, FUNCNAME = ''
++hello by mytest() at line 22 == 22
++ciao! at line 31 == 31, FUNCNAME = ''
++pippo
++./testA.tests: line 33: can't create /access-denied: Permission denied
++ERROR: testA.tests failed at line 33, rc: 2
++onerror() at line 16 == 16
++The script should have failed at line 33 with ERROR message, exitstatus 2 != 0
++hello by mytest() at line 22 == 22
++ERROR: testA.tests failed in mytest() at line 23, rc: 1
++onerror() at line 16 == 16
++exit in mytest() at line 23 == 23 with pippo but not pluto
+diff --git a/shell/ash_test/ash-ERR-mgmt/testA.tests b/shell/ash_test/ash-ERR-mgmt/testA.tests
+new file mode 100755
+index 000000000..2a5842b39
+--- /dev/null
++++ b/shell/ash_test/ash-ERR-mgmt/testA.tests
+@@ -0,0 +1,38 @@
++#!/bin/ash
++
++function realexit() {
++	trap - EXIT
++	exit $1
++}
++
++function perr() {
++	echo -e "\e[1;31m$@\e[0m"
++}
++
++function onerror() {
++	rc=$?
++#	echo
++	echo "ERROR: $(basename $0) failed${2+ in $2()} at line $1, rc: $rc" 
++	echo "$FUNCNAME() at line $LINENO == 16"
++#	echo
++#	realexit $rc
++}
++
++function mytest() {
++	echo "hello by $FUNCNAME() at line $LINENO == 22"
++	false
++	true
++}
++trap 'onerror $LINENO $FUNCNAME' ERR
++trap 'echo exit in $FUNCNAME\(\) at line $LINENO == 23 with pippo but not pluto' EXIT
++exec 2>&1; set -E
++echo "ciao! at line $LINENO == 29, FUNCNAME = '$FUNCNAME'"
++mytest || true
++echo "ciao! at line $LINENO == 31, FUNCNAME = '$FUNCNAME'"
++echo "pippo"
++(:) >/access-denied
++echo "The script should have failed at line 33 with ERROR message, exitstatus $? != 0"
++set -e
++mytest
++
++echo "pluto at line 38"
+diff --git a/shell/ash_test/ash-ERR-mgmt/testB.right b/shell/ash_test/ash-ERR-mgmt/testB.right
+new file mode 100644
+index 000000000..12fd916a3
+--- /dev/null
++++ b/shell/ash_test/ash-ERR-mgmt/testB.right
+@@ -0,0 +1,23 @@
++hello by myecho() at line 27
++FUNCNAME = , LINENO = 45, EXITSTATUS: 0
++FUNCNAME = , LINENO = 46
++hello by mytrue() at line 36
++FUNCNAME = , LINENO = 47, EXITSTATUS: 0
++FUNCNAME = , LINENO = 48
++hello by myfalse() at line 31
++FUNCNAME = , LINENO = 50
++hello by myfalse() at line 31
++FUNCNAME = , LINENO = 51, EXITSTATUS: 1
++FUNCNAME = , LINENO = 52
++hello by mytrue() at line 36
++FUNCNAME = , LINENO = 53, EXITSTATUS: 0
++FUNCNAME = , LINENO = 54
++hello by myfalse() at line 31
++ERROR: testB.tests failed in myfalse() at line 32, rc: 1
++onerror() at line 16 == 16
++ERROR: testB.tests failed at line 55, rc: 1
++onerror() at line 16 == 16
++FUNCNAME = , LINENO = 55, EXITSTATUS: 1
++FUNCNAME = , LINENO = 56
++hello by myexit() at line 22
++exit in myexit() at line 60 == 60, EXITSTATUS: 1
+diff --git a/shell/ash_test/ash-ERR-mgmt/testB.tests b/shell/ash_test/ash-ERR-mgmt/testB.tests
+new file mode 100755
+index 000000000..dcba01adb
+--- /dev/null
++++ b/shell/ash_test/ash-ERR-mgmt/testB.tests
+@@ -0,0 +1,62 @@
++#!/bin/ash
++
++function realexit() {
++	trap - EXIT
++	exit $1
++}
++
++function perr() {
++	echo -e "\e[1;31m$@\e[0m"
++}
++
++function onerror() {
++	rc=$?
++#	echo
++	echo "ERROR: $(basename $0) failed${2+ in $2()} at line $1, rc: $rc" 
++	echo "$FUNCNAME() at line $LINENO == 16"
++#	echo
++#	realexit $rc
++}
++
++function myexit() {
++	echo "hello by $FUNCNAME() at line $LINENO"
++	exit $1
++}
++
++function myecho() {
++	echo "hello by $FUNCNAME() at line $LINENO"
++}
++
++function myfalse() {
++	echo "hello by $FUNCNAME() at line $LINENO"
++	false
++}
++
++function mytrue() {
++	echo "hello by $FUNCNAME() at line $LINENO"
++	true
++}
++
++trap 'onerror $LINENO $FUNCNAME' ERR
++trap 'echo exit in $FUNCNAME\(\) at line $LINENO == 60, EXITSTATUS: $?' EXIT
++
++set -E
++
++myecho && echo "FUNCNAME = $FUNCNAME, LINENO = $LINENO, EXITSTATUS: $?"
++echo "FUNCNAME = $FUNCNAME, LINENO = $LINENO"
++mytrue && echo "FUNCNAME = $FUNCNAME, LINENO = $LINENO, EXITSTATUS: $?"
++echo "FUNCNAME = $FUNCNAME, LINENO = $LINENO"
++myfalse && echo "FUNCNAME = $FUNCNAME, LINENO = $LINENO, EXITSTATUS: $?"
++echo "FUNCNAME = $FUNCNAME, LINENO = $LINENO"
++myfalse || echo "FUNCNAME = $FUNCNAME, LINENO = $LINENO, EXITSTATUS: $?"
++echo "FUNCNAME = $FUNCNAME, LINENO = $LINENO"
++mytrue; echo "FUNCNAME = $FUNCNAME, LINENO = $LINENO, EXITSTATUS: $?"
++echo "FUNCNAME = $FUNCNAME, LINENO = $LINENO"
++myfalse; echo "FUNCNAME = $FUNCNAME, LINENO = $LINENO, EXITSTATUS: $?"
++echo "FUNCNAME = $FUNCNAME, LINENO = $LINENO"
++
++
++
++myexit 1 || echo "FUNCNAME = $FUNCNAME, LINENO = $LINENO, EXITSTATUS: $?"
++echo "should not print this!"
++
+diff --git a/shell/ash_test/ash-ERR-mgmt/testC.right b/shell/ash_test/ash-ERR-mgmt/testC.right
+new file mode 100644
+index 000000000..10a735397
+--- /dev/null
++++ b/shell/ash_test/ash-ERR-mgmt/testC.right
+@@ -0,0 +1,25 @@
++hello by myecho() at line 27
++FUNCNAME = , LINENO = 45, EXITSTATUS: 0
++FUNCNAME = , LINENO = 46
++hello by mytrue() at line 36
++FUNCNAME = , LINENO = 47, EXITSTATUS: 0
++FUNCNAME = , LINENO = 48
++hello by myfalse() at line 31
++FUNCNAME = , LINENO = 50
++hello by myfalse() at line 31
++FUNCNAME = , LINENO = 51, EXITSTATUS: 1
++FUNCNAME = , LINENO = 52
++hello by mytrue() at line 36
++FUNCNAME = , LINENO = 53, EXITSTATUS: 0
++FUNCNAME = , LINENO = 54
++hello by myfalse() at line 31
++ERROR: testC.tests failed in myfalse() at line 32, rc: 1
++onerror() at line 16 == 16
++ERROR: testC.tests failed at line 55, rc: 1
++onerror() at line 16 == 16
++FUNCNAME = , LINENO = 55, EXITSTATUS: 1
++FUNCNAME = , LINENO = 56
++hello by myfalse() at line 31
++ERROR: testC.tests failed in myfalse() at line 32, rc: 1
++onerror() at line 16 == 16
++exit in myfalse() at line 32 == 32, EXITSTATUS: 1
+diff --git a/shell/ash_test/ash-ERR-mgmt/testC.tests b/shell/ash_test/ash-ERR-mgmt/testC.tests
+new file mode 100755
+index 000000000..696c16eab
+--- /dev/null
++++ b/shell/ash_test/ash-ERR-mgmt/testC.tests
+@@ -0,0 +1,62 @@
++#!/bin/ash
++
++function realexit() {
++	trap - EXIT
++	exit $1
++}
++
++function perr() {
++	echo -e "\e[1;31m$@\e[0m"
++}
++
++function onerror() {
++	rc=$?
++#	echo
++	echo "ERROR: $(basename $0) failed${2+ in $2()} at line $1, rc: $rc" 
++	echo "$FUNCNAME() at line $LINENO == 16"
++#	echo
++#	realexit $rc
++}
++
++function myexit() {
++	echo "hello by $FUNCNAME() at line $LINENO"
++	exit $1
++}
++
++function myecho() {
++	echo "hello by $FUNCNAME() at line $LINENO"
++}
++
++function myfalse() {
++	echo "hello by $FUNCNAME() at line $LINENO"
++	false
++}
++
++function mytrue() {
++	echo "hello by $FUNCNAME() at line $LINENO"
++	true
++}
++
++trap 'onerror $LINENO $FUNCNAME' ERR
++trap 'echo exit in $FUNCNAME\(\) at line $LINENO == 32, EXITSTATUS: $?' EXIT
++
++set -E
++
++myecho && echo "FUNCNAME = $FUNCNAME, LINENO = $LINENO, EXITSTATUS: $?"
++echo "FUNCNAME = $FUNCNAME, LINENO = $LINENO"
++mytrue && echo "FUNCNAME = $FUNCNAME, LINENO = $LINENO, EXITSTATUS: $?"
++echo "FUNCNAME = $FUNCNAME, LINENO = $LINENO"
++myfalse && echo "FUNCNAME = $FUNCNAME, LINENO = $LINENO, EXITSTATUS: $?"
++echo "FUNCNAME = $FUNCNAME, LINENO = $LINENO"
++myfalse || echo "FUNCNAME = $FUNCNAME, LINENO = $LINENO, EXITSTATUS: $?"
++echo "FUNCNAME = $FUNCNAME, LINENO = $LINENO"
++mytrue; echo "FUNCNAME = $FUNCNAME, LINENO = $LINENO, EXITSTATUS: $?"
++echo "FUNCNAME = $FUNCNAME, LINENO = $LINENO"
++myfalse; echo "FUNCNAME = $FUNCNAME, LINENO = $LINENO, EXITSTATUS: $?"
++echo "FUNCNAME = $FUNCNAME, LINENO = $LINENO"
++
++
++set -e
++myfalse
++echo "should not print this!"
++
+diff --git a/shell/ash_test/ash-ERR-mgmt/testD.right b/shell/ash_test/ash-ERR-mgmt/testD.right
+new file mode 100644
+index 000000000..7f19c62c0
+--- /dev/null
++++ b/shell/ash_test/ash-ERR-mgmt/testD.right
+@@ -0,0 +1,16 @@
++shell: busybox ash
++LINENO=0
++trap -- ')' ERR
++-----------
++./testD.tests: eval: line 4: syntax error: unexpected ")"
++./testD.tests: line 4: syntax error: unexpected ")"
++FUNCNAME='cmdevalfalse' == 'cmdevalfalse'
++FUNCNAME='' == ''
++-----------
++trap -- 'echo ERR' ERR
++still running
++ERR
++1
++still running after false
++./testD.tests: eval: line 43: syntax error: unexpected ")"
++done
+diff --git a/shell/ash_test/ash-ERR-mgmt/testD.tests b/shell/ash_test/ash-ERR-mgmt/testD.tests
+new file mode 100755
+index 000000000..1292f3471
+--- /dev/null
++++ b/shell/ash_test/ash-ERR-mgmt/testD.tests
+@@ -0,0 +1,44 @@
++#!/bin/ash
++
++function cmdevalfalse() {
++	command eval false
++	echo "FUNCNAME='$FUNCNAME' == 'cmdevalfalse'"
++}
++
++cat >shrc <<EOF
++   :
++   :
++   :
++EOF
++
++if [ "$(echo {1..2})" == "1 2" ]; then
++	echo "shell: bash"
++	ENV=shrc bash -ic 'echo LINENO=$LINENO'
++else
++	echo "shell: busybox ash"
++	ENV=shrc ash -ic 'echo LINENO=$LINENO'
++fi
++rm -f shrc
++
++set -E
++exec 2>&1
++
++trap ")" ERR
++trap
++echo "-----------"
++cmdevalfalse
++echo "FUNCNAME='$FUNCNAME' == ''"
++echo "-----------"
++trap "echo ERR" ERR
++trap
++echo "still running"
++false
++echo $?
++echo "still running after false"
++
++trap '
++command eval ")"
++false
++' ERR
++false
++echo done
+diff --git a/shell/ash_test/ash-ERR-mgmt/testE.right b/shell/ash_test/ash-ERR-mgmt/testE.right
+new file mode 100644
+index 000000000..5e1e3a542
+--- /dev/null
++++ b/shell/ash_test/ash-ERR-mgmt/testE.right
+@@ -0,0 +1,100 @@
++ERR ONE, funcone at line 5
++ERR ONE, at line 27
++ERR ONE, at line 27 is acceptable in busybox ash
++funcone exit status = 0 == 1
++ERR ONE, at line 32
++-----------------01----------------------
++ERR ONE, funcone at line 5
++ERR ONE, at line 38
++funcone exit status = 1 == 1
++ERR ONE, at line 40
++-----------------02----------------------
++ERR ONE, funcone at line 5
++ERR ONE, functwo at line 10
++ERR ONE, at line 44
++ERR ONE, at line 45
++-----------------03----------------------
++ERR ONE, functhree at line 14
++ERR ONE, funcone at line 5
++ERR ONE, functwo at line 10
++ERR ONE, functhree at line 15
++ERR ONE, functhree at line 15 is acceptable in busybox ash
++ERR ONE, functhree at line 19
++ERR ONE, at line 49
++in this test bash seems incoherent about functhree line 15
++ERR ONE, at line 53
++-----------------04----------------------
++-----------------05----------------------
++ERR ONE, funcone at line 5
++ERR ONE, functwo at line 10
++ERR ONE, at line 64
++ERR ONE, at line 64 is acceptable in busybox ash
++ERR ONE, at line 68
++-----------------06----------------------
++ERR ONE, funcone at line 5
++ERR ONE, functwo at line 10
++ERR ONE, functhree at line 15
++ERR ONE, functhree at line 15 is acceptable in busybox ash
++ERR ONE, functhree at line 19
++ERR ONE, at line 72
++ERR ONE, at line 73
++-----------------07----------------------
++ERR ONE, at line 77
++ERR ONE, at line 78
++-----------------08----------------------
++ERR MAIN
++ERR ONE, funcone at line 5
++ERR ONE, at line 85
++-----------------09----------------------
++ERR ONE, funcone at line 5
++ERR ONE, functwo at line 10
++ERR ONE, at line 89
++ERR ONE, at line 90
++-----------------10----------------------
++ERR ONE, funcone at line 5
++ERR ONE, functwo at line 10
++ERR ONE, functhree at line 15
++ERR ONE, functhree at line 15 is acceptable in busybox ash
++ERR ONE, functhree at line 19
++ERR ONE, at line 94
++ERR ONE, at line 95
++-----------------11----------------------
++ERR ONE, at line 99
++ERR ONE, at line 100
++-----------------12----------------------
++ERR MAIN
++ERR ONE, funcone at line 5
++ERR ONE, at line 108
++-----------------13----------------------
++ERR ONE, funcone at line 5
++ERR ONE, functwo at line 10
++ERR ONE, at line 112
++ERR ONE, at line 113
++-----------------14----------------------
++ERR ONE, functhree at line 14
++ERR ONE, funcone at line 5
++ERR ONE, functwo at line 10
++ERR ONE, functhree at line 15
++ERR ONE, functhree at line 15 is acceptable in busybox ash
++ERR ONE, functhree at line 19
++ERR ONE, at line 117
++in this test bash seems incoherent about functhree line 15
++ERR ONE, at line 121
++-----------------15----------------------
++-----------------16----------------------
++trap -- 'echo ERR MAIN' ERR
++ERR MAIN
++-----------------17----------------------
++./testE.tests: line 144: can't create /access-denied: Permission denied
++ERR myfault at line 144
++bash reports line 142 but fault is at line 144
++-----------------18----------------------
++./testE.tests: eval: line 152: syntax error: unexpected ")"
++ERR myfault2 at line 152
++ERR at line 164
++./testE.tests: eval: line 165: syntax error: unexpected ")"
++ERR at line 165
++./testE.tests: line 166: can't create /access-denied: Permission denied
++ERR at line 166
++-----------------19----------------------
++EXIT myexit at line 178 == 178
+diff --git a/shell/ash_test/ash-ERR-mgmt/testE.tests b/shell/ash_test/ash-ERR-mgmt/testE.tests
+new file mode 100755
+index 000000000..768d4f0b9
+--- /dev/null
++++ b/shell/ash_test/ash-ERR-mgmt/testE.tests
+@@ -0,0 +1,179 @@
++#!/bin/ash
++
++function funcone() {
++	trap 'echo ERR ONE, $FUNCNAME at line $LINENO' ERR
++	false
++}
++
++function functwo() {
++	trap "echo ERR TWO, $FUNCNAME at line $LINENO" ERR
++	funcone
++}
++
++function functhree() {
++	false
++	functwo
++	if [ "$(echo {1..2})" != "1 2" ]; then
++		echo "ERR ONE, functhree at line 15 is acceptable in busybox ash"
++	fi
++	false
++}
++
++function funcfour() {
++	trap -- ERR
++	false
++}
++
++funcone
++if [ "$(echo {1..2})" != "1 2" ]; then
++	echo "ERR ONE, at line 27 is acceptable in busybox ash"
++fi
++echo "funcone exit status = $? == 1"
++false
++
++echo "-----------------01----------------------"
++
++set -E
++
++funcone
++echo "funcone exit status = $? == 1"
++false
++
++echo "-----------------02----------------------"
++
++functwo
++false
++
++echo "-----------------03----------------------"
++
++functhree
++if [ "$(echo {1..2})" != "1 2" ]; then
++	echo "in this test bash seems incoherent about functhree line 15"
++fi
++false
++
++echo "-----------------04----------------------"
++
++funcfour
++false
++
++echo "-----------------05----------------------"
++
++set +E
++
++functwo
++if [ "$(echo {1..2})" != "1 2" ]; then
++	echo "ERR ONE, at line 64 is acceptable in busybox ash"
++fi
++false
++
++echo "-----------------06----------------------"
++
++functhree
++false
++
++echo "-----------------07----------------------"
++
++funcfour
++false
++
++echo "-----------------08----------------------"
++
++trap "echo ERR MAIN" ERR
++
++false
++funcone
++
++echo "-----------------09----------------------"
++
++functwo
++false
++
++echo "-----------------10----------------------"
++
++functhree
++false
++
++echo "-----------------11----------------------"
++
++funcfour
++false
++
++echo "-----------------12----------------------"
++
++trap "echo ERR MAIN" ERR
++set -E
++
++false
++funcone
++
++echo "-----------------13----------------------"
++
++functwo
++false
++
++echo "-----------------14----------------------"
++
++functhree
++if [ "$(echo {1..2})" != "1 2" ]; then
++	echo "in this test bash seems incoherent about functhree line 15"
++fi
++false
++
++echo "-----------------15----------------------"
++
++funcfour
++false
++
++echo "-----------------16----------------------"
++
++function cleantrap() {
++	false
++	trap -- ERR
++}
++
++trap "echo ERR MAIN" ERR
++trap
++cleantrap
++false
++
++echo "-----------------17----------------------"
++
++function myfault() {
++	trap 'echo ERR $FUNCNAME at line $LINENO' ERR
++	(:) >/access-denied
++	if [ "$(echo {1..2})" != "1 2" ]; then
++		echo "bash reports line 142 but fault is at line 144"
++	fi
++}
++
++function myfault2() {
++	trap 'echo ERR $FUNCNAME at line $LINENO' ERR
++	command eval ")"
++}
++
++exec 2>&1
++
++trap 'echo ERR $FUNCNAME at line $LINENO' ERR
++trap 'echo EXIT $FUNCNAME at line $LINENO' EXIT
++
++myfault
++
++echo "-----------------18----------------------"
++
++myfault2
++command eval ")"
++(:) >/access-denied
++
++echo "-----------------19----------------------"
++
++trap 'echo EXIT $FUNCNAME at line $LINENO == 178' EXIT
++
++function myexit() {
++	true
++	exit 1
++}
++
++set -e
++myexit
++
+diff --git a/shell/ash_test/ash-ERR-mgmt/testF.right b/shell/ash_test/ash-ERR-mgmt/testF.right
+new file mode 100644
+index 000000000..1db5b06e5
+--- /dev/null
++++ b/shell/ash_test/ash-ERR-mgmt/testF.right
+@@ -0,0 +1,4 @@
++./testF.tests: eval: line 6: syntax error: unexpected ")"
++hello 1
++The next instruction is deadly for unpatched busybox ash also
++./testF.tests: eval: line 11: syntax error: unexpected ")"
+diff --git a/shell/ash_test/ash-ERR-mgmt/testF.tests b/shell/ash_test/ash-ERR-mgmt/testF.tests
+new file mode 100755
+index 000000000..2f78022e7
+--- /dev/null
++++ b/shell/ash_test/ash-ERR-mgmt/testF.tests
+@@ -0,0 +1,12 @@
++#!/bin/ash
++
++exec 2>&1
++
++trap 'eval ")"' ERR
++false
++echo hello 1
++if [ "$(echo {1..2})" != "1 2" ]; then
++	echo "The next instruction is deadly for unpatched busybox ash also"
++fi
++eval ")"
++echo hello 2
+diff --git a/shell/ash_test/ash-ERR-mgmt/testG.right b/shell/ash_test/ash-ERR-mgmt/testG.right
+new file mode 100644
+index 000000000..9f7f568dc
+--- /dev/null
++++ b/shell/ash_test/ash-ERR-mgmt/testG.right
+@@ -0,0 +1 @@
++ERR at in myfalse at 4, exit with 1
+diff --git a/shell/ash_test/ash-ERR-mgmt/testG.tests b/shell/ash_test/ash-ERR-mgmt/testG.tests
+new file mode 100755
+index 000000000..cd53154b1
+--- /dev/null
++++ b/shell/ash_test/ash-ERR-mgmt/testG.tests
+@@ -0,0 +1,9 @@
++#!/bin/ash
++
++function myfalse() {
++	false
++}
++
++trap 'rc=$?; echo ERR at in $FUNCNAME at $LINENO, exit with $rc; exit $rc' ERR
++set -E
++myfalse
+-- 
+2.17.1
+
