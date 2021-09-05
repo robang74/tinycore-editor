@@ -1,14 +1,14 @@
-From c9cf3d0419a2c30c4dd35e3676d9217e15e38deb Mon Sep 17 00:00:00 2001
+From 2ce4b43d7b0904a1049e20e57f08709442bc4dbf Mon Sep 17 00:00:00 2001
 From: "Roberto A. Foglietta" <roberto.foglietta@gmail.com>
-Date: Sun, 5 Sep 2021 12:24:02 +0200
+Date: Sun, 5 Sep 2021 12:35:31 +0200
 Subject: [PATCH] busybox-1.33.1: error management extension for ash v020
 
 ---
- shell/ash.c | 129 +++++++++++++++++++++++++++++++++++++++-------------
- 1 file changed, 97 insertions(+), 32 deletions(-)
+ shell/ash.c | 131 +++++++++++++++++++++++++++++++++++++++-------------
+ 1 file changed, 98 insertions(+), 33 deletions(-)
 
 diff --git a/shell/ash.c b/shell/ash.c
-index a33ab0626..e884b9f28 100644
+index a33ab0626..30f80e5d6 100644
 --- a/shell/ash.c
 +++ b/shell/ash.c
 @@ -336,7 +336,8 @@ static const char *const optletters_optnames[] = {
@@ -176,6 +176,15 @@ index a33ab0626..e884b9f28 100644
  		expredir(n->nredir.redirect);
  		pushredir(n->nredir.redirect);
  		status = redirectsafe(n->nredir.redirect, REDIR_PUSH);
+@@ -9190,7 +9209,7 @@ evaltree(union node *n, int flags)
+ 	case NCMD:
+ 		evalfn = evalcommand;
+  checkexit:
+-		if (eflag && !(flags & EV_TESTED))
++		if (!(flags & EV_TESTED))
+ 			checkexit = ~0;
+ 		goto calleval;
+ 	case NFOR:
 @@ -9264,10 +9283,39 @@ evaltree(union node *n, int flags)
  	 */
  	dotrap();
