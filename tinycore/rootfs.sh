@@ -35,10 +35,10 @@ function setp2type() {
 function umountdir() {
 	local i
 	for i in {1..5}; do
-		umount $1 || true
+		umount $1 2>/dev/null || true
 		grep -q "$1" /proc/mounts || break
 		sleep 1
-	done 2>/dev/null
+	done
 	grep -vq "$1" /proc/mounts
 }
 
@@ -92,6 +92,7 @@ if [ "$1" == "chroot" ]; then
 
 	mkdir $tmptczdir
 	for i in $tczlist; do
+		echo "Integrating $i.tcz..."
 		mount tcz/$i.tcz $tmptczdir
 		for k in bin lib; do
 			for j in . usr usr/local; do
@@ -110,6 +111,7 @@ if [ "$1" == "chroot" ]; then
 
 	su -l $SUDO_USER -c "gsettings set org.gnome.desktop.media-handling automount-open $prev 2>/dev/null"
 
+	echo
 	cd $tmpdir
 	rm -f etc/sysconfig/p2type
 	tar czf ../chrootfs.tgz .
