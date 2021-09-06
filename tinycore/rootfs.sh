@@ -55,6 +55,7 @@ if [ "$USER" != "root" ]; then
 fi
 
 tmpdir=rootfs.tmp
+tmptczdir=$tmpdir.tcz
 myname=$(basename $0)
 cd $(dirname $0)
 WRKDIR="$PWD"
@@ -78,7 +79,6 @@ if [ "$1" == "chroot" ]; then
 	su -l $SUDO_USER -c "gsettings set org.gnome.desktop.media-handling automount-open false 2>/dev/null"
 	echo
 
-	tmptczdir=$tmpdir.tcz
 	mkdir $tmptczdir
 	for i in $tczlist; do
 		mount tcz/$i.tcz $tmptczdir
