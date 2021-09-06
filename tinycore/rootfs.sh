@@ -72,10 +72,9 @@ cd $(dirname $0)
 WRKDIR="$PWD"
 
 if [ ! -e tinycore.conf ]; then
-	source tinycore.conf.orig
-else
-	source tinycore.conf
+	cp -f tinycore.conf.orig tinycore.conf
 fi
+source tinycore.conf
 
 if [ "$1" == "chroot" ]; then
 	trap 'printf "\nERROR at line $LINENO, abort\n\n"' ERR
@@ -83,9 +82,21 @@ if [ "$1" == "chroot" ]; then
 	set -e
 	../busybox/busybox.sh update
 	./$myname open
+	mkdir -p $tmpdir/etc/ssh/users
+	cp -arf ../sshkeys.pub/*.pub $tmpdir/etc/ssh/users
+	tar xzf changes/sshdhostkeys.tgz -moC $tmpdir/etc/ssh
 	tar xzf tccustom$tcsize.tgz -moC $tmpdir
+
+	for i in dev2chroot.sh reboot.sh shutdown.sh; do
+		cp -f changes/$i $tmpdir/bin
+		chmod a+x $tmpdir/bin/$i
+	done
+	echo "cd; sudo su -l root" >$tmpdir/bin/broot
+	chmod a+x $tmpdir/bin/broot
 	head -n5 $tmpdir/etc/motd >$tmpdir/etc/motd.new
 	mv -f $tmpdir/etc/motd.new $tmpdir/etc/motd
+	echo tc >$tmpdir/etc/sysconfig/tcuser
+	touch $tmpdir/etc/sysconfig/superuser
 
 	echo
 	echo "gsettings for avoid automount windows displaying..."
@@ -108,8 +119,13 @@ if [ "$1" == "chroot" ]; then
 			mkdir -p $tmpdir/usr/local/share
 			cp -arf $tmptczdir/usr/local/share $tmpdir/usr/local
 		fi
+		if [ -d $tmptczdir/usr/local/tce.installed ]; then
+			cp -arf $tmptczdir/usr/local/tce.installed $tmpdir/usr/local
+		fi
 		umountdir $tmptczdir
 	done
+	mkdir -p $tmpdir/usr/local/bin/
+	ln -sf /bin/dropbearmulti $tmpdir/usr/local/bin/dropbearmulti
 	rm -rf $tmptczdir
 
 	su -l $SUDO_USER -c "gsettings set org.gnome.desktop.media-handling automount-open $prev 2>/dev/null"
