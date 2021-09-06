@@ -84,6 +84,8 @@ if [ "$1" == "chroot" ]; then
 	../busybox/busybox.sh update
 	./$myname open
 	tar xzf tccustom$tcsize.tgz -moC $tmpdir
+	head -n5 $tmpdir/etc/motd >$tmpdir/etc/motd.new
+	mv -f $tmpdir/etc/motd.new $tmpdir/etc/motd
 
 	echo
 	echo "gsettings for avoid automount windows displaying..."
