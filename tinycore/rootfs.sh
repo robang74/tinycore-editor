@@ -32,8 +32,19 @@ function setp2type() {
 	fi >etc/sysconfig/p2type
 }
 
+function umountdir() {
+	local i
+	for i in {1..5}; do
+		umount $1 || true
+		grep -q "$1" /proc/mounts || break
+		sleep 1
+	done 2>/dev/null
+	grep -vq "$1" /proc/mounts
+}
+
 function chroot_atexit() {
-	umount $tmptczdir 2>/dev/null || true
+	set +e
+	umountdir $tmptczdir
 	rm -rf $WRKDIR/$tmptczdir
 	rm -rf $WRKDIR/$tmpdir
 	echo
@@ -93,7 +104,7 @@ if [ "$1" == "chroot" ]; then
 			mkdir -p $tmpdir/usr/local/share
 			cp -arf $tmptczdir/usr/local/share $tmpdir/usr/local
 		fi
-		umount $tmptczdir
+		umountdir $tmptczdir
 	done
 	rm -rf $tmptczdir
 
