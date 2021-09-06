@@ -81,6 +81,7 @@ if [ "$1" == "chroot" ]; then
 	trap 'printf "\nERROR at line $LINENO, abort\n\n"' ERR
 	trap "chroot_atexit" EXIT
 	set -e
+	../busybox/busybox.sh update
 	./$myname open
 	tar xzf tccustom$tcsize.tgz -moC $tmpdir
 
