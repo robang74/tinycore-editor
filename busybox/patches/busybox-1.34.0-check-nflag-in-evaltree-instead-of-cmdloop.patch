@@ -1,0 +1,66 @@
+From 41beb53787ec798a27f336c4758cb5ebd8f0c75a Mon Sep 17 00:00:00 2001
+From: Denys Vlasenko <vda.linux@googlemail.com>
+Date: Tue, 7 Sep 2021 01:52:21 +0200
+Subject: ash: eval: Check nflag in evaltree instead of cmdloop
+
+Upstream commit:
+
+    Date: Thu, 4 Jun 2020 21:53:55 +1000
+    eval: Check nflag in evaltree instead of cmdloop
+
+    This patch moves the nflag check from cmdloop into evaltree.  This
+    is so that nflag will be in force even if we enter the shell via a
+    path other than cmdloop, e.g., through sh -c.
+
+Signed-off-by: Denys Vlasenko <vda.linux@googlemail.com>
+---
+ shell/ash.c                          | 5 ++++-
+ shell/ash_test/ash-misc/set-n1.right | 3 +++
+ shell/ash_test/ash-misc/set-n1.tests | 2 ++
+ 3 files changed, 9 insertions(+), 1 deletion(-)
+ create mode 100644 shell/ash_test/ash-misc/set-n1.right
+ create mode 100755 shell/ash_test/ash-misc/set-n1.tests
+
+diff --git a/shell/ash.c b/shell/ash.c
+index cfe0433a8..2d2c09ba5 100644
+--- a/shell/ash.c
++++ b/shell/ash.c
+@@ -9299,6 +9299,9 @@ evaltree(union node *n, int flags)
+ 
+ 	setstackmark(&smark);
+ 
++	if (nflag)
++		goto out;
++
+ 	if (n == NULL) {
+ 		TRACE(("evaltree(NULL) called\n"));
+ 		goto out;
+@@ -13557,7 +13560,7 @@ cmdloop(int top)
+ 				out2str("\nUse \"exit\" to leave shell.\n");
+ 			}
+ 			numeof++;
+-		} else if (nflag == 0) {
++		} else {
+ 			int i;
+ 
+ 			/* job_warning can only be 2,1,0. Here 2->1, 1/0->0 */
+diff --git a/shell/ash_test/ash-misc/set-n1.right b/shell/ash_test/ash-misc/set-n1.right
+new file mode 100644
+index 000000000..ac01831a7
+--- /dev/null
++++ b/shell/ash_test/ash-misc/set-n1.right
+@@ -0,0 +1,3 @@
++set -n stops in -c?
++YES
++Ok:0
+diff --git a/shell/ash_test/ash-misc/set-n1.tests b/shell/ash_test/ash-misc/set-n1.tests
+new file mode 100755
+index 000000000..90d0f9146
+--- /dev/null
++++ b/shell/ash_test/ash-misc/set-n1.tests
+@@ -0,0 +1,2 @@
++$THIS_SH -c "echo 'set -n stops in -c?'; set -n; echo NO" && echo YES
++echo Ok:$?
+-- 
+cgit v1.2.3
+

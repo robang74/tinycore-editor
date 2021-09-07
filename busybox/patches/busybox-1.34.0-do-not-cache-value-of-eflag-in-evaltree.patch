@@ -1,0 +1,122 @@
+From f415e21a7dce1d4f4b760fddfaba85c551681e11 Mon Sep 17 00:00:00 2001
+From: Denys Vlasenko <vda.linux@googlemail.com>
+Date: Tue, 7 Sep 2021 01:54:23 +0200
+Subject: ash: eval: Do not cache value of eflag in evaltree
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Upsteam commit:
+
+    Date: Mon, 17 May 2021 15:19:23 +0800
+    eval: Do not cache value of eflag in evaltree
+
+    Patrick Brünn <P.Bruenn@beckhoff.com> wrote:
+    > Since we are migrating to Debian bullseye, we discovered a new behavior
+    > with our scripts, which look like this:
+    >>cleanup() {
+    >>        set +e
+    >>        rmdir ""
+    >>}
+    >>set -eu
+    >>trap 'cleanup' EXIT INT TERM
+    >>echo 'Hello world!'
+    >
+    > With old dash v0.5.10.2 this script would return 0 as we expected it.
+    > But since commit 62cf6955f8abe875752d7163f6f3adbc7e49ebae it returns
+    > the last exit code of our cleanup function.
+    ...
+    Thanks for the report.  This is actually a fairly old bug with
+    set -e that's just been exposed by the exit status change.  What's
+    really happening is that cleanup itself is triggering a set -e
+    exit incorrectly because evaltree cached the value of eflag prior
+    to the function call.
+
+Signed-off-by: Denys Vlasenko <vda.linux@googlemail.com>
+---
+ shell/ash.c                                  | 15 +++++++--------
+ shell/ash_test/ash-misc/exitcode_trap7.right |  2 ++
+ shell/ash_test/ash-misc/exitcode_trap7.tests |  7 +++++++
+ 3 files changed, 16 insertions(+), 8 deletions(-)
+ create mode 100644 shell/ash_test/ash-misc/exitcode_trap7.right
+ create mode 100755 shell/ash_test/ash-misc/exitcode_trap7.tests
+
+diff --git a/shell/ash_test/ash-misc/exitcode_trap7.right b/shell/ash_test/ash-misc/exitcode_trap7.right
+new file mode 100644
+index 000000000..07d66e9d9
+--- /dev/null
++++ b/shell/ash_test/ash-misc/exitcode_trap7.right
+@@ -0,0 +1,2 @@
++Start
++Ok:0
+diff --git a/shell/ash_test/ash-misc/exitcode_trap7.tests b/shell/ash_test/ash-misc/exitcode_trap7.tests
+new file mode 100755
+index 000000000..9772a7b8c
+--- /dev/null
++++ b/shell/ash_test/ash-misc/exitcode_trap7.tests
+@@ -0,0 +1,7 @@
++$THIS_SH -c '
++cleanup() { set +e; false; }
++set -eu
++trap cleanup EXIT
++echo Start
++'
++echo Ok:$?
+-- 
+cgit v1.2.3
+
+--- src/shell/ash.c	2021-09-07 05:03:11.231348468 +0200
++++ src.1/shell/ash.c	2021-09-07 05:02:04.710203902 +0200
+@@ -9213,8 +9213,7 @@ evaltree(union node *n, int flags)
+ 	case NCMD:
+ 		evalfn = evalcommand;
+  checkexit:
+-		if (!(flags & EV_TESTED))
+-			checkexit = ~0;
++		checkexit = ~flags & EV_TESTED;
+ 		goto calleval;
+ 	case NFOR:
+ 		evalfn = evalfor;
+@@ -9236,7 +9235,6 @@ evaltree(union node *n, int flags)
+ 	case NAND:
+ 	case NOR:
+ 	case NSEMI: {
+-
+ #if NAND + 1 != NOR
+ #error NAND + 1 != NOR
+ #endif
+@@ -9264,8 +9262,7 @@ evaltree(union node *n, int flags)
+ 		if (!status) {
+ 			n = n->nif.ifpart;
+ 			goto evaln;
+-		}
+-		if (n->nif.elsepart) {
++		} else if (n->nif.elsepart) {
+ 			n = n->nif.elsepart;
+ 			goto evaln;
+ 		}
+@@ -9287,7 +9284,7 @@ evaltree(union node *n, int flags)
+ 	 */
+ 	dotrap();
+ 
+-	if (checkexit & status) {
++	if (checkexit && status) {
+ 		if (trap[TRAP_ERR]) {
+ 			static bool recursive = 0;
+ 			if (!recursive) {
+@@ -9316,10 +9313,12 @@ evaltree(union node *n, int flags)
+ 			}
+ 		}
+ 		if (eflag)
+-			exitshell();
++			goto exexit;
+ 	}
+-	if (flags & EV_EXIT)
++	if (flags & EV_EXIT) {
++exexit:
+ 		exitshell();
++	}
+ 
+ 	popstackmark(&smark);
+ 	TRACE(("leaving evaltree (no interrupts)\n"));
+
