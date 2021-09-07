@@ -95,15 +95,6 @@ cgit v1.2.3
  			n = n->nif.elsepart;
  			goto evaln;
  		}
-@@ -9287,7 +9284,7 @@ evaltree(union node *n, int flags)
- 	 */
- 	dotrap();
- 
--	if (checkexit & status) {
-+	if (checkexit && status) {
- 		if (trap[TRAP_ERR]) {
- 			static bool recursive = 0;
- 			if (!recursive) {
 @@ -9316,10 +9313,12 @@ evaltree(union node *n, int flags)
  			}
  		}
@@ -120,3 +111,14 @@ cgit v1.2.3
  	popstackmark(&smark);
  	TRACE(("leaving evaltree (no interrupts)\n"));
 
+--- src/shell/ash.c	2021-09-07 11:43:08.266987424 +0200
++++ src.1/shell/ash.c	2021-09-07 11:41:11.182986748 +0200
+@@ -9284,7 +9284,7 @@ evaltree(union node *n, int flags)
+ 	 */
+ 	dotrap();
+ 
+-	if (checkexit & status) {
++	if (checkexit && status) {
+ 		static bool recursive = 0;
+ 		if (trap[TRAP_ERR] && !recursive) {
+ 			int err;

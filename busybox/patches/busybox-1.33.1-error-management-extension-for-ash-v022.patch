@@ -1,14 +1,14 @@
-From ad563df4793231b3c3601bbe4a107fc372fd35fa Mon Sep 17 00:00:00 2001
+From 42ac6761ef89aa25d5fbdc06d2b5379fc41f4ca4 Mon Sep 17 00:00:00 2001
 From: "Roberto A. Foglietta" <roberto.foglietta@gmail.com>
-Date: Sun, 5 Sep 2021 15:21:36 +0200
-Subject: [PATCH] busybox-1.33.1: error management extension for ash v021
+Date: Tue, 7 Sep 2021 11:38:23 +0200
+Subject: [PATCH] busybox-1.33.1 error management extension for ash v022
 
 ---
- shell/ash.c | 132 +++++++++++++++++++++++++++++++++++++++-------------
- 1 file changed, 99 insertions(+), 33 deletions(-)
+ shell/ash.c | 131 +++++++++++++++++++++++++++++++++++++++-------------
+ 1 file changed, 98 insertions(+), 33 deletions(-)
 
 diff --git a/shell/ash.c b/shell/ash.c
-index a33ab0626..3bde7ec31 100644
+index a33ab0626..911045f1b 100644
 --- a/shell/ash.c
 +++ b/shell/ash.c
 @@ -336,7 +336,8 @@ static const char *const optletters_optnames[] = {
@@ -139,26 +139,20 @@ index a33ab0626..3bde7ec31 100644
  			/* else: it "belongs" to trap_ptr vector, don't free */
  			*tp = NULL;
 -			if ((tp - trap) != 0)
-+			if ((tp - trap) != 0 && tp < &trap[NSIG])
++			if ((tp - trap) != 0 && (tp - trap) < NSIG)
  				setsignal(tp - trap);
  		}
  	}
-@@ -9091,6 +9109,7 @@ dotrap(void)
- 	if (!pending_sig)
- 		return;
- 
-+	doingtrap++;
- 	status = savestatus;
- 	last_status = status;
- 	if (status < 0) {
-@@ -9127,6 +9146,7 @@ dotrap(void)
+@@ -9122,7 +9140,9 @@ dotrap(void)
+ 		*g = 0;
+ 		if (!p)
+ 			continue;
++		doingtrap++;
+ 		evalstring(p, 0);
++		doingtrap--;
+ 		if (evalskip != SKIPFUNC)
  			exitstatus = status;
  	}
- 
-+	doingtrap--;
- 	savestatus = last_status;
- 	TRACE(("dotrap returns\n"));
- }
 @@ -9142,6 +9162,8 @@ static int evalcommand(union node *, int);
  static int evalbltin(const struct builtincmd *, int, char **, int);
  static void prehash(union node *);
@@ -186,39 +180,35 @@ index a33ab0626..3bde7ec31 100644
  			checkexit = ~0;
  		goto calleval;
  	case NFOR:
-@@ -9264,10 +9284,39 @@ evaltree(union node *n, int flags)
+@@ -9264,10 +9284,35 @@ evaltree(union node *n, int flags)
  	 */
  	dotrap();
  
 -	if (checkexit & status)
 -		raise_exception(EXEND);
 +	if (checkexit & status) {
-+		if (trap[TRAP_ERR]) {
-+			static bool recursive = 0;
-+			if (!recursive) {
-+				int err;
-+				struct jmploc *volatile savehandler = exception_handler;
-+				struct jmploc jmploc;
++		static bool recursive = 0;
++		if (trap[TRAP_ERR] && !recursive) {
++			int err;
++			struct jmploc *volatile savehandler = exception_handler;
++			struct jmploc jmploc;
 +
-+				err = setjmp(jmploc.loc);
-+				if (!err) {
-+					exception_handler = &jmploc;
-+
-+					savestatus = exitstatus;
-+					recursive = 1;
-+					doingtrap++;
-+
-+					evalstring(trap[TRAP_ERR], 0);
-+				}
-+
-+				exception_handler = savehandler;
-+				if (err && exception_type != EXERROR)
-+					longjmp(exception_handler->loc, 1);
-+
-+				doingtrap--;
-+				recursive = 0;
-+				exitstatus = savestatus;
++			doingtrap++;
++			recursive = 1;
++			err = setjmp(jmploc.loc);
++			if (!err) {
++				exception_handler = &jmploc;
++				savestatus = exitstatus;
++				evalstring(trap[TRAP_ERR], 0);
 +			}
++			recursive = 0;
++			doingtrap--;
++
++			exception_handler = savehandler;
++			if (err && exception_type != EXERROR)
++				longjmp(exception_handler->loc, 1);
++
++			exitstatus = savestatus;
 +		}
 +		if (eflag)
 +			exitshell();
@@ -229,7 +219,7 @@ index a33ab0626..3bde7ec31 100644
  
  	popstackmark(&smark);
  	TRACE(("leaving evaltree (no interrupts)\n"));
-@@ -9333,8 +9382,6 @@ evalfor(union node *n, int flags)
+@@ -9333,8 +9378,6 @@ evalfor(union node *n, int flags)
  	int status = 0;
  
  	errlinno = lineno = n->ncase.linno;
@@ -238,7 +228,7 @@ index a33ab0626..3bde7ec31 100644
  
  	arglist.list = NULL;
  	arglist.lastp = &arglist.list;
-@@ -9365,8 +9412,6 @@ evalcase(union node *n, int flags)
+@@ -9365,8 +9408,6 @@ evalcase(union node *n, int flags)
  	int status = 0;
  
  	errlinno = lineno = n->ncase.linno;
@@ -247,7 +237,7 @@ index a33ab0626..3bde7ec31 100644
  
  	arglist.list = NULL;
  	arglist.lastp = &arglist.list;
-@@ -9400,8 +9445,6 @@ evalsubshell(union node *n, int flags)
+@@ -9400,8 +9441,6 @@ evalsubshell(union node *n, int flags)
  	int status;
  
  	errlinno = lineno = n->nredir.linno;
@@ -256,7 +246,7 @@ index a33ab0626..3bde7ec31 100644
  
  	expredir(n->nredir.redirect);
  	if (!backgnd && (flags & EV_EXIT) && !may_have_traps)
-@@ -9729,10 +9772,18 @@ evalfun(struct funcnode *func, int argc, char **argv, int flags)
+@@ -9729,10 +9768,18 @@ evalfun(struct funcnode *func, int argc, char **argv, int flags)
  	struct jmploc *volatile savehandler;
  	struct jmploc jmploc;
  	int e;
@@ -275,7 +265,7 @@ index a33ab0626..3bde7ec31 100644
  	savehandler = exception_handler;
  	e = setjmp(jmploc.loc);
  	if (e) {
-@@ -9742,6 +9793,7 @@ evalfun(struct funcnode *func, int argc, char **argv, int flags)
+@@ -9742,6 +9789,7 @@ evalfun(struct funcnode *func, int argc, char **argv, int flags)
  	exception_handler = &jmploc;
  	shellparam.malloced = 0;
  	func->count++;
@@ -283,7 +273,7 @@ index a33ab0626..3bde7ec31 100644
  	funcline = func->n.ndefun.linno;
  	INT_ON;
  	shellparam.nparam = argc - 1;
-@@ -9753,7 +9805,16 @@ evalfun(struct funcnode *func, int argc, char **argv, int flags)
+@@ -9753,7 +9801,20 @@ evalfun(struct funcnode *func, int argc, char **argv, int flags)
  	evaltree(func->n.ndefun.body, flags & EV_TESTED);
   funcdone:
  	INT_OFF;
@@ -292,8 +282,12 @@ index a33ab0626..3bde7ec31 100644
 +	} else {
 +		free(funcname);
 +		funcname = savefuncname;
++	}
++	if (savetrap) {
 +		if (!trap[TRAP_ERR])
 +			trap[TRAP_ERR] = savetrap;
++		else
++			free(savetrap);
 +	}
  	funcline = savefuncline;
 +	lineno = savelineno;
@@ -309,15 +303,7 @@ index a33ab0626..3bde7ec31 100644
  
  	/* First expand the arguments. */
  	TRACE(("evalcommand(0x%lx, %d) called\n", (long)cmd, flags));
-@@ -10396,6 +10455,7 @@ evalcommand(union node *cmd, int flags)
- 	FORCE_INT_ON;
- 
-  out:
-+
- 	if (cmd->ncmd.redirect)
- 		popredir(/*drop:*/ cmd_is_exec);
- 	unwindredir(redir_stop);
-@@ -10774,13 +10834,15 @@ preadbuffer(void)
+@@ -10774,13 +10833,15 @@ preadbuffer(void)
  static void
  nlprompt(void)
  {
@@ -335,7 +321,7 @@ index a33ab0626..3bde7ec31 100644
  	needprompt = doprompt;
  }
  
-@@ -11012,7 +11074,7 @@ setinputstring(char *string)
+@@ -11012,7 +11073,7 @@ setinputstring(char *string)
  	g_parsefile->next_to_pgetc = string;
  	g_parsefile->left_in_line = strlen(string);
  	g_parsefile->buf = NULL;
@@ -344,7 +330,7 @@ index a33ab0626..3bde7ec31 100644
  	INT_ON;
  }
  
-@@ -12470,7 +12532,8 @@ checkend: {
+@@ -12470,7 +12531,8 @@ checkend: {
  
  		if (c == '\n' || c == PEOF) {
  			c = PEOF;
@@ -354,16 +340,16 @@ index a33ab0626..3bde7ec31 100644
  			needprompt = doprompt;
  		} else {
  			int len_here;
-@@ -13713,7 +13776,7 @@ trapcmd(int argc UNUSED_PARAM, char **argv UNUSED_PARAM)
+@@ -13713,7 +13775,7 @@ trapcmd(int argc UNUSED_PARAM, char **argv UNUSED_PARAM)
  	nextopt(nullstr);
  	ap = argptr;
  	if (!*ap) {
 -		for (signo = 0; signo < NSIG; signo++) {
-+		for (signo = 0; signo < NTRAPS; signo++) { /* increased by 1: trap ERR handler */
++		for (signo = 0; signo < NTRAPS; signo++) {
  			char *tr = trap_ptr[signo];
  			if (tr) {
  				/* note: bash adds "SIG", but only if invoked
-@@ -13722,7 +13785,7 @@ trapcmd(int argc UNUSED_PARAM, char **argv UNUSED_PARAM)
+@@ -13722,7 +13784,7 @@ trapcmd(int argc UNUSED_PARAM, char **argv UNUSED_PARAM)
  				 * We are printing short names: */
  				out1fmt("trap -- %s %s\n",
  						single_quote(tr),
@@ -372,16 +358,16 @@ index a33ab0626..3bde7ec31 100644
  		/* trap_ptr != trap only if we are in special-cased `trap` code.
  		 * In this case, we will exit very soon, no need to free(). */
  				/* if (trap_ptr != trap && tp[0]) */
-@@ -13748,7 +13811,7 @@ trapcmd(int argc UNUSED_PARAM, char **argv UNUSED_PARAM)
+@@ -13748,7 +13810,7 @@ trapcmd(int argc UNUSED_PARAM, char **argv UNUSED_PARAM)
  
  	exitcode = 0;
  	while (*ap) {
 -		signo = get_signum(*ap);
-+		signo = strstr(*ap, "ERR") ? TRAP_ERR : get_signum(*ap);
++		signo = strcmp(*ap, "ERR") == 0 ? TRAP_ERR : get_signum(*ap);
  		if (signo < 0) {
  			/* Mimic bash message exactly */
  			ash_msg("%s: invalid signal specification", *ap);
-@@ -13767,7 +13830,7 @@ trapcmd(int argc UNUSED_PARAM, char **argv UNUSED_PARAM)
+@@ -13767,7 +13829,7 @@ trapcmd(int argc UNUSED_PARAM, char **argv UNUSED_PARAM)
  		}
  		free(trap[signo]);
  		trap[signo] = action;
@@ -390,7 +376,7 @@ index a33ab0626..3bde7ec31 100644
  			setsignal(signo);
  		INT_ON;
   next:
-@@ -14188,7 +14251,9 @@ exitshell(void)
+@@ -14188,7 +14250,9 @@ exitshell(void)
  	if (p) {
  		trap[0] = NULL;
  		evalskip = 0;
@@ -400,7 +386,7 @@ index a33ab0626..3bde7ec31 100644
  		evalskip = SKIPFUNCDEF;
  		/*free(p); - we'll exit soon */
  	}
-@@ -14495,6 +14560,7 @@ int ash_main(int argc UNUSED_PARAM, char **argv)
+@@ -14495,6 +14559,7 @@ int ash_main(int argc UNUSED_PARAM, char **argv)
  		//  ash -sc 'echo $-'
  		// continue reading input from stdin after running 'echo'.
  		// bash does not do this: it prints "hBcs" and exits.
