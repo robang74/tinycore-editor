@@ -73,6 +73,7 @@ WRKDIR="$PWD"
 
 if [ ! -e tinycore.conf ]; then
 	cp -f tinycore.conf.orig tinycore.conf
+	chownuser tinycore.conf
 fi
 source tinycore.conf
 
