@@ -26,4 +26,6 @@ echo
 
 sleep 3 || exit 1
 
-echo o > /proc/sysrq-trigger
+sleep 1 && echo o > /proc/sysrq-trigger &
+killall dropbear 2>/dev/null
+killall sshd 2>/dev/null
