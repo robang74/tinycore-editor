@@ -26,6 +26,7 @@ echo
 
 sleep 3 || exit 1
 
-sleep 1 && echo o > /proc/sysrq-trigger &
+nohup ash -c 'sleep 1; echo o > /proc/sysrq-trigger' >/dev/null 2>&1 &
+sleep 0.5
 killall dropbear 2>/dev/null
 killall sshd 2>/dev/null
