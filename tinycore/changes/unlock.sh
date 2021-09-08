@@ -36,19 +36,30 @@ if [ "$dtdir" == "" ]; then
 	mkdir -p $dtdir
 fi
 
-mount -o remount,rw $tcdir 2>/dev/null
-if grep -qe "^$tcdev .* rw," /proc/mounts; then
-	echo "$tcdir (RW)"
+[ "$1" ] || set -- 1 2
+
+if [ "$1" == "1" ]; then
+	shift
+	if ! grep -qe "^$tcdev .* rw," /proc/mounts; then
+		mount -o remount,rw $tcdir 2>/dev/null
+	fi
+	if grep -qe "^$tcdev .* rw," /proc/mounts; then
+		echo "$tcdir (RW)"
+	fi
 fi
 
-mount -o remount,rw $dtdir 2>/dev/null
-if ! grep -qe "^$dtdev .* rw," /proc/mounts; then
-	if grep -q " $dtdir " /proc/mounts; then
-		umount $dtdir
-	fi 2>/dev/null
-	$mount $dtdev $dtdir 2>/dev/null
-fi
-if grep -qe "^$dtdev .* rw," /proc/mounts; then
-	echo "$dtdir (RW)"
+if [ "$1" == "2" ]; then
+	if ! grep -qe "^$dtdev .* rw," /proc/mounts; then
+		mount -o remount,rw $dtdir 2>/dev/null
+		if ! grep -qe "^$dtdev .* rw," /proc/mounts; then
+			if grep -q " $dtdir " /proc/mounts; then
+				umount $dtdir
+			fi 2>/dev/null
+			$mount $dtdev $dtdir 2>/dev/null
+		fi
+	fi
+	if grep -qe "^$dtdev .* rw," /proc/mounts; then
+		echo "$dtdir (RW)"
+	fi
 fi
 
