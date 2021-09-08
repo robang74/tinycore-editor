@@ -168,6 +168,13 @@ myname=$(basename $0)
 
 source tinycore.conf
 
+if [ "$1" == "help" ]; then
+	echo
+	echo "USAGE: $myname [clean|force|test]"
+	echo
+	exit 0
+fi
+
 if [ "$1" == "clean" ]; then
 	rm -f tcz/*-meta.tcz* tcz/*.list
 	exit 0
@@ -207,7 +214,13 @@ if [ "$1" != "force" ]; then
 		fi
 	fi
 fi
-[ "$1" == "test" ] && exit 0
+
+if [ "$1" == "test" ]; then
+	echo
+	echo "RESULT: test passed successfully, OK"
+	echo
+	exit 0
+fi
 
 if [ "$USER" != "root" ]; then
 	if ! timeout 0.2 sudo -n true; then
