@@ -69,8 +69,8 @@ function unmountall() {
 #		umount -R $rootdir/sys
 		rumount $rootdir/sys
 		umount $rootdir/proc
-		umount $rootdir/mnt/tcp2
-		umount $rootdir/mnt/tcp1
+		[ "$dtdev" ] && umount $rootdir/mnt/tcp2
+		[ "$tcdev" ] && umount $rootdir/mnt/tcp1
 		umount $rootdir/var/data
 		umount $rootdir/var/log
 		umount $rootdir
