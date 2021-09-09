@@ -202,13 +202,17 @@ if mountdevdir $blkdevp4 $rootdir/var/data rw; then
 	echo -n " DATA"
 fi
 
-tcdev=$(readlink /etc/sysconfig/tcdev)
-if mountdevdir $tcdev $rootdir/mnt/tcp1; then
-	echo -n " TCP1"
+tcdev=$(readlink /etc/sysconfig/tcdev || true)
+if [ "$tcdev" ]; then
+	if mountdevdir $tcdev $rootdir/mnt/tcp1; then
+		echo -n " TCP1"
+	fi
 fi
-dtdev=$(readlink /etc/sysconfig/dtdev)
-if mountdevdir $dtdev $rootdir/mnt/tcp2; then
-	echo -n " TCP2"
+dtdev=$(readlink /etc/sysconfig/dtdev || true)
+if [ "$dtdev" ]; then
+	if mountdevdir $dtdev $rootdir/mnt/tcp2; then
+		echo -n " TCP2"
+	fi
 fi
 
 echo -n " PROC"
