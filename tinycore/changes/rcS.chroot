@@ -1,0 +1,19 @@
+#!/bin/sh
+
+ldconfig
+hostname -F /etc/hostname
+touch /etc/sysconfig/chroot
+chown -R tc.staff /home/tc
+
+if [ ! -e /proc/$$ ]; then
+	mount -t proc proc /proc
+fi
+for i in /usr/local/tce.installed/*; do
+	$i
+done #2>/dev/null
+
+if [ "$1" == "login" ]; then 
+	user=${2:-root}
+	login -f $user
+	umount /proc
+fi

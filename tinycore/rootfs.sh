@@ -81,10 +81,12 @@ if [ "$1" == "chroot" ]; then
 	trap 'printf "\nERROR at line $LINENO, abort\n\n"' ERR
 	trap "chroot_atexit" EXIT
 	set -e
+
 	../busybox/busybox.sh update
 	./$myname open
 	mkdir -p $tmpdir/etc/ssh/users
 	cp -arf ../sshkeys.pub/*.pub $tmpdir/etc/ssh/users
+	cat changes/rcS.chroot >$tmpdir/etc/init.d/rcS
 	tar xzf changes/sshdhostkeys.tgz -moC $tmpdir/etc/ssh
 	tar xzf tccustom$tcsize.tgz -moC $tmpdir
 
@@ -98,6 +100,8 @@ if [ "$1" == "chroot" ]; then
 	mv -f $tmpdir/etc/motd.new $tmpdir/etc/motd
 	echo tc >$tmpdir/etc/sysconfig/tcuser
 	touch $tmpdir/etc/sysconfig/superuser
+	grep -v tc-functions $tmpdir/home/tc/.ashrc >$tmpdir/etc/profile.d/alias.sh
+	rm -f $tmpdir/root/.ashrc $tmpdir/home/tc/.ashrc
 
 	echo
 	echo "gsettings for avoid automount windows displaying..."
