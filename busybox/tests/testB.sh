@@ -55,8 +55,8 @@ echo "FUNCNAME = $FUNCNAME, LINENO = $LINENO"
 myfalse; echo "FUNCNAME = $FUNCNAME, LINENO = $LINENO, EXITSTATUS: $?"
 echo "FUNCNAME = $FUNCNAME, LINENO = $LINENO"
 set -m
-sleep 60 & kill -STOP $!
-sleep 1
+sleep 60 &
+kill -STOP $!
 myexit 1 || echo "FUNCNAME = $FUNCNAME, LINENO = $LINENO, EXITSTATUS: $?"
 echo "should not print this!"
 
