@@ -19,7 +19,8 @@ for i in $all; do
 	test -e tests/test$i.sh || continue
 	echo "################## TEST $i ##################"
 	bash tests/test$i.sh
-	echo "exit code $?"
+	rc=$?; sleep 0.1
+	echo "exit code $rc"
 	echo "#############################################"
 	echo
 done >tests/obash.txt
