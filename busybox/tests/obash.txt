@@ -138,8 +138,8 @@ FUNCNAME = , LINENO = 55, EXITSTATUS: 1
 FUNCNAME = , LINENO = 56
 hello by myexit() at line 22
 exit in myexit() at line 1 == 60, EXITSTATUS: 1
-exit code 1
 exit in () at line 1 == 60, EXITSTATUS: 0
+exit code 1
 #############################################
 
 ################## TEST C ##################

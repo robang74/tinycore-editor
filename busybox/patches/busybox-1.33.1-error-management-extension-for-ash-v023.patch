@@ -397,3 +397,21 @@ index a33ab0626..911045f1b 100644
 -- 
 2.17.1
 
+--- src.1/shell/ash.c	2021-09-12 05:54:31.638163124 +0200
++++ src/shell/ash.c	2021-09-12 06:15:39.428726488 +0200
+@@ -13534,10 +13533,12 @@ exitcmd(int argc UNUSED_PARAM, char **ar
+ 	if (stoppedjobs())
+ 		return 0;
+ 
+-	if (argv[1])
++	if (argv[1]) {
+ 		savestatus = number(argv[1]);
+-
+-	raise_exception(EXEXIT);
++		exitstatus = savestatus;
++	}
++	
++	exitshell();
+ 	/* NOTREACHED */
+ }
+ 

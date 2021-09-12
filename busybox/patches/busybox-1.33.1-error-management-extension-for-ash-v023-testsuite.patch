@@ -1361,3 +1361,65 @@ index 33afacee0..53ea07181 100644
 -- 
 2.17.1
 
+diff -pruN src.0/shell/ash_test/ash-ERR-mgmt/test6.right src/shell/ash_test/ash-ERR-mgmt/test6.right
+--- src.0/shell/ash_test/ash-ERR-mgmt/test6.right	2021-09-12 06:00:58.425701925 +0200
++++ src/shell/ash_test/ash-ERR-mgmt/test6.right	2021-09-12 06:34:23.865554005 +0200
+@@ -1,3 +1,3 @@
+ ciao! at line 29 == 29
+ hello by mytest() at line 22 == 22
+-exit in mytest() at line 30 == 30 with pippo but not pluto
++exit in mytest() at line 23 == 23 with pippo but not pluto
+diff -pruN src.0/shell/ash_test/ash-ERR-mgmt/test6.tests src/shell/ash_test/ash-ERR-mgmt/test6.tests
+--- src.0/shell/ash_test/ash-ERR-mgmt/test6.tests	2021-09-12 06:00:58.425701925 +0200
++++ src/shell/ash_test/ash-ERR-mgmt/test6.tests	2021-09-12 06:33:50.967741105 +0200
+@@ -24,7 +24,7 @@ function mytest() {
+ }
+ 
+ trap 'onerror $LINENO $FUNCNAME' ERR
+-trap 'echo exit in $FUNCNAME\(\) at line $LINENO == 30 with pippo but not pluto' EXIT
++trap 'echo exit in $FUNCNAME\(\) at line $LINENO == 23 with pippo but not pluto' EXIT
+ 
+ echo "ciao! at line $LINENO == 29"
+ mytest
+diff -pruN src.0/shell/ash_test/ash-ERR-mgmt/testB.right src/shell/ash_test/ash-ERR-mgmt/testB.right
+--- src.0/shell/ash_test/ash-ERR-mgmt/testB.right	2021-09-12 06:00:58.425701925 +0200
++++ src/shell/ash_test/ash-ERR-mgmt/testB.right	2021-09-12 06:35:07.918625247 +0200
+@@ -20,4 +20,4 @@ onerror() at line 16 == 16
+ FUNCNAME = , LINENO = 55, EXITSTATUS: 1
+ FUNCNAME = , LINENO = 56
+ hello by myexit() at line 22
+-exit in myexit() at line 60 == 60, EXITSTATUS: 1
++exit in myexit() at line 23 == 23, EXITSTATUS: 1
+diff -pruN src.0/shell/ash_test/ash-ERR-mgmt/testB.tests src/shell/ash_test/ash-ERR-mgmt/testB.tests
+--- src.0/shell/ash_test/ash-ERR-mgmt/testB.tests	2021-09-12 06:00:58.425701925 +0200
++++ src/shell/ash_test/ash-ERR-mgmt/testB.tests	2021-09-12 06:35:29.749173887 +0200
+@@ -38,7 +38,7 @@ function mytrue() {
+ }
+ 
+ trap 'onerror $LINENO $FUNCNAME' ERR
+-trap 'echo exit in $FUNCNAME\(\) at line $LINENO == 60, EXITSTATUS: $?' EXIT
++trap 'echo exit in $FUNCNAME\(\) at line $LINENO == 23, EXITSTATUS: $?' EXIT
+ 
+ set -E
+ 
+diff -pruN src.0/shell/ash_test/ash-ERR-mgmt/testE.right src/shell/ash_test/ash-ERR-mgmt/testE.right
+--- src.0/shell/ash_test/ash-ERR-mgmt/testE.right	2021-09-12 06:00:58.429701723 +0200
++++ src/shell/ash_test/ash-ERR-mgmt/testE.right	2021-09-12 06:37:58.487285391 +0200
+@@ -97,4 +97,4 @@ ERR at line 165
+ ./testE.tests: line 166: can't create /access-denied: Permission denied
+ ERR at line 166
+ -----------------19----------------------
+-EXIT myexit at line 178 == 178
++EXIT myexit at line 174 == 174
+diff -pruN src.0/shell/ash_test/ash-ERR-mgmt/testE.tests src/shell/ash_test/ash-ERR-mgmt/testE.tests
+--- src.0/shell/ash_test/ash-ERR-mgmt/testE.tests	2021-09-12 06:00:58.429701723 +0200
++++ src/shell/ash_test/ash-ERR-mgmt/testE.tests	2021-09-12 06:37:44.308228054 +0200
+@@ -167,7 +167,7 @@ command eval ")"
+ 
+ echo "-----------------19----------------------"
+ 
+-trap 'echo EXIT $FUNCNAME at line $LINENO == 178' EXIT
++trap 'echo EXIT $FUNCNAME at line $LINENO == 174' EXIT
+ 
+ function myexit() {
+ 	true

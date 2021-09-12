@@ -9,5 +9,5 @@
 +//	if (stoppedjobs())
 +//		return 0;
  
- 	if (argv[1])
+ 	if (argv[1]) {
  		savestatus = number(argv[1]);
