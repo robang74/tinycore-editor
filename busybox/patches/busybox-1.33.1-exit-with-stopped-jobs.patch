@@ -1,6 +1,5 @@
-diff -pruN src.0/shell/ash.c src/shell/ash.c
 --- src.0/shell/ash.c	2021-09-12 10:13:27.593826957 +0200
-+++ src/shell/ash.c	2021-09-12 10:14:48.099493776 +0200
++++ src/shell/ash.c	2021-09-12 18:51:43.359873941 +0200
 @@ -5427,7 +5427,7 @@ stoppedjobs(void)
  	int retval;
  
@@ -10,3 +9,24 @@ diff -pruN src.0/shell/ash.c src/shell/ash.c
  		goto out;
  	jp = curjob;
  	if (jp && jp->state == JOBSTOPPED) {
+@@ -13530,14 +13530,14 @@ dotcmd(int argc_ UNUSED_PARAM, char **ar
+ static int FAST_FUNC
+ exitcmd(int argc UNUSED_PARAM, char **argv)
+ {
++	if (argv[1])
++	    exitstatus = number(argv[1]);
++	else
++	    exitstatus = 0;
++
+ 	if (stoppedjobs())
+-		return 0;
++	    return exitstatus;
+ 
+-	if (argv[1]) {
+-		savestatus = number(argv[1]);
+-		exitstatus = savestatus;
+-	}
+-	
+ 	exitshell();
+ 	/* NOTREACHED */
+ }
