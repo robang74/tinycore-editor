@@ -61,7 +61,7 @@ exit code 1
 ################## TEST 6 ##################
 ciao! at line 29 == 29
 hello by mytest() at line 22 == 22
-exit in mytest() at line 1 == 30 with pippo but not pluto
+exit in mytest() at line 1 == 23 with pippo but not pluto
 exit code 0
 #############################################
 
@@ -137,8 +137,9 @@ onerror() at line 16 == 16
 FUNCNAME = , LINENO = 55, EXITSTATUS: 1
 FUNCNAME = , LINENO = 56
 hello by myexit() at line 22
-exit in myexit() at line 1 == 60, EXITSTATUS: 1
-exit in () at line 1 == 60, EXITSTATUS: 0
+exit 1
+exit in myexit() at line 1 == 23, EXITSTATUS: 1
+exit in () at line 1 == 23, EXITSTATUS: 0
 exit code 1
 #############################################
 
@@ -287,7 +288,8 @@ ERR at line 165
 tests/testE.sh: line 166: /access-denied: Permission denied
 ERR at line 166
 -----------------19----------------------
-EXIT myexit at line 1 == 178
+exit 1 - now
+EXIT myexit at line 1 == 176
 exit code 1
 #############################################
 

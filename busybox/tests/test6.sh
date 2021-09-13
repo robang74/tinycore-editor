@@ -24,7 +24,7 @@ function mytest() {
 }
 
 trap 'onerror $LINENO $FUNCNAME' ERR
-trap 'echo exit in $FUNCNAME\(\) at line $LINENO == 30 with pippo but not pluto' EXIT
+trap 'echo exit in $FUNCNAME\(\) at line $LINENO == 23 with pippo but not pluto' EXIT
 
 echo "ciao! at line $LINENO == 29"
 mytest

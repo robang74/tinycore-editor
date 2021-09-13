@@ -20,7 +20,7 @@ function onerror() {
 
 function myexit() {
 	echo "hello by $FUNCNAME() at line $LINENO"
-	exit $1
+	echo "exit $1" && exit $1
 }
 
 function myecho() {
@@ -38,7 +38,7 @@ function mytrue() {
 }
 
 trap 'onerror $LINENO $FUNCNAME' ERR
-trap 'echo exit in $FUNCNAME\(\) at line $LINENO == 60, EXITSTATUS: $?' EXIT
+trap 'echo exit in $FUNCNAME\(\) at line $LINENO == 23, EXITSTATUS: $?' EXIT
 
 set -E
 

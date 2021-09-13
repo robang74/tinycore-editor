@@ -1,0 +1,28 @@
+################## TEST B ##################
+hello by myecho() at line 27
+FUNCNAME = , LINENO = 45, EXITSTATUS: 0
+FUNCNAME = , LINENO = 46
+hello by mytrue() at line 36
+FUNCNAME = , LINENO = 47, EXITSTATUS: 0
+FUNCNAME = , LINENO = 48
+hello by myfalse() at line 31
+FUNCNAME = , LINENO = 50
+hello by myfalse() at line 31
+FUNCNAME = , LINENO = 51, EXITSTATUS: 1
+FUNCNAME = , LINENO = 52
+hello by mytrue() at line 36
+FUNCNAME = , LINENO = 53, EXITSTATUS: 0
+FUNCNAME = , LINENO = 54
+hello by myfalse() at line 31
+ERROR: testB.sh failed in myfalse() at line 32, rc: 1
+onerror() at line 16 == 16
+ERROR: testB.sh failed at line 55, rc: 1
+onerror() at line 16 == 16
+FUNCNAME = , LINENO = 55, EXITSTATUS: 1
+FUNCNAME = , LINENO = 56
+hello by myexit() at line 22
+should not print this!
+exit in () at line 61 == 60, EXITSTATUS: 0
+exit code 0
+#############################################
+

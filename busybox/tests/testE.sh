@@ -167,11 +167,14 @@ command eval ")"
 
 echo "-----------------19----------------------"
 
-trap 'echo EXIT $FUNCNAME at line $LINENO == 178' EXIT
+trap 'echo EXIT $FUNCNAME at line $LINENO == 176' EXIT
 
 function myexit() {
 	true
-	exit 1
+	if echo -n "exit 1 -"; then
+		echo " now"
+		exit 1
+	fi
 }
 
 set -e
