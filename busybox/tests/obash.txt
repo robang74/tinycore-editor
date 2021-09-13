@@ -181,8 +181,6 @@ tests/testD.sh: error trap: line 4: syntax error near unexpected token `)'
 tests/testD.sh: error trap: line 4: `)'
 tests/testD.sh: error trap: line 4: syntax error near unexpected token `)'
 tests/testD.sh: error trap: line 4: `)'
-tests/testD.sh: error trap: line 4: syntax error near unexpected token `)'
-tests/testD.sh: error trap: line 4: `)'
 FUNCNAME='cmdevalfalse' == 'cmdevalfalse'
 FUNCNAME='' == ''
 -----------
@@ -273,17 +271,15 @@ ERR ONE, at line 121
 trap -- 'echo ERR MAIN' ERR
 ERR MAIN
 -----------------17----------------------
-tests/testE.sh: line 142: /access-denied: Permission denied
-ERR myfault at line 142
+tests/testE.sh: line 144: /access-denied: Permission denied
+ERR myfault at line 144
 -----------------18----------------------
 tests/testE.sh: eval: line 152: syntax error near unexpected token `)'
 tests/testE.sh: eval: line 152: `)'
 ERR myfault2 at line 152
-ERR myfault2 at line 152
 ERR at line 164
 tests/testE.sh: eval: line 165: syntax error near unexpected token `)'
 tests/testE.sh: eval: line 165: `)'
-ERR at line 165
 ERR at line 165
 tests/testE.sh: line 166: /access-denied: Permission denied
 ERR at line 166
@@ -306,6 +302,11 @@ exit code 0
 #############################################
 
 ################## TEST G ##################
+tests/testG.sh: eval: line 8: syntax error near unexpected token `)'
+tests/testG.sh: eval: line 8: `)'
+FUNCNAME=''
+tests/testG.sh: line 12: flase: command not found
+FUNCNAME=''
 ERR at in myfalse at 4, exit with 1
 exit code 1
 #############################################
