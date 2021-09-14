@@ -415,3 +415,35 @@ index a33ab0626..911045f1b 100644
  	/* NOTREACHED */
  }
  
+--- src.0/shell/ash.c	2021-09-14 03:19:58.157366262 +0200
++++ src.2/shell/ash.c	2021-09-14 03:51:09.629127870 +0200
+@@ -9791,7 +9791,7 @@ evalfun(struct funcnode *func, int argc,
+ 	exception_handler = &jmploc;
+ 	shellparam.malloced = 0;
+ 	func->count++;
+-	funcname = xstrdup(func->n.ndefun.text);
++	funcname = func->n.ndefun.text;
+ 	funcline = func->n.ndefun.linno;
+ 	INT_ON;
+ 	shellparam.nparam = argc - 1;
+@@ -9803,12 +9803,6 @@ evalfun(struct funcnode *func, int argc,
+ 	evaltree(func->n.ndefun.body, flags & EV_TESTED);
+  funcdone:
+ 	INT_OFF;
+-	if ((exitstatus && eflag) || (e)) {
+-		/* we are exiting within the function */
+-	} else {
+-		free(funcname);
+-		funcname = savefuncname;
+-	}
+ 	if (savetrap) {
+ 		if (!trap[TRAP_ERR])
+ 			trap[TRAP_ERR] = savetrap;
+@@ -9816,6 +9810,7 @@ evalfun(struct funcnode *func, int argc,
+ 			free(savetrap);
+ 	}
+ 	funcline = savefuncline;
++	funcname = savefuncname;
+ 	lineno = savelineno;
+ 	freefunc(func);
+ 	freeparam(&shellparam);
