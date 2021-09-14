@@ -60,16 +60,21 @@ export PATH=$PATH:/apps/bin:/usr/sbin:/usr/bin:/sbin:/bin
 tczlist="bash readline ncursesw dropbear"
 
 ok=0
-if [ "$USER" != "root" ]; then
-	sudo $0 "$@"
-	exit $?
-fi
-
 tmpdir=rootfs.tmp
 tmptczdir=$tmpdir.tcz
 myname=$(basename $0)
 cd $(dirname $0)
 WRKDIR="$PWD"
+
+if [ "$USER" != "root" ]; then
+	if ! timeout 0.2 sudo -n true; then
+		echo
+		warn "WARNING: $myname requires root permissions"
+		echo
+	fi 2>/dev/null
+	sudo ./$myname "$@"
+	exit $?
+fi
 
 if [ ! -e tinycore.conf ]; then
 	cp -f tinycore.conf.orig tinycore.conf
