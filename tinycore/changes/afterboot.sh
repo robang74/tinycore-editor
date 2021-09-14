@@ -74,6 +74,8 @@ function waitcacerts() {
 
 tcpassword="tinycore"
 copylist="
+uskb.sh:uskb.sh
+itkb.sh:itkb.sh
 unlock.sh:unlock.sh
 reboot.sh:reboot.sh
 shutdown.sh:shutdown.sh
