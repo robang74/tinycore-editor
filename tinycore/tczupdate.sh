@@ -91,8 +91,14 @@ for i in $(ls -1 *.tcz); do
 done
 
 if [ "$updated" ]; then
+	for i in $tczmeta; do
+		[ -e $i-meta.tcz ] && remeta="yes"
+		rm -f $i*
+	done
+	cd ..
+	sudo ./tczmetamerge.sh
 	echo
-	warn "Some tcz has been updated, they are:"
+	warn "Some tcz has been updated, meta packages rebuilt"
 	echo "$updated"
 	echo
 else
