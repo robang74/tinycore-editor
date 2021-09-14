@@ -96,7 +96,7 @@ if [ "$updated" ]; then
 		rm -f $i*
 	done
 	cd ..
-	./tczmetamerge.sh
+	[ "$remeta" ] && ./tczmetamerge.sh
 	echo
 	warn "Some tcz has been updated, meta packages rebuilt"
 	echo "$updated"
