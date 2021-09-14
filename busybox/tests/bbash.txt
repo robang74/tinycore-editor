@@ -8,7 +8,7 @@ pippo
 ERROR: test1.sh failed at line 34, rc: 1
 onerror() at line 16 == 16
 exit in () at line 34 == 34 with pippo but not pluto
-exit code 0
+exit code 1
 #############################################
 
 ################## TEST 2 ##################
@@ -21,7 +21,7 @@ pippo
 ERROR: test2.sh failed at line 34, rc: 1
 onerror() at line 16 == 16
 exit at line 34 == 34 with pippo but not pluto
-exit code 0
+exit code 1
 #############################################
 
 ################## TEST 4 ##################
@@ -39,7 +39,7 @@ hello by mytest() at line 22 == 22
 ERROR: test4.sh failed in mytest() at line 23, rc: 1
 onerror() at line 16 == 16
 exit in mytest() at line 23 == 23 without any onerror print
-exit code 0
+exit code 1
 #############################################
 
 ################## TEST 5 ##################
@@ -55,13 +55,13 @@ onerror() at line 16 == 16
 this is a multi-line trap which begins at line 9 == 9
 exit at line 34 == 34 with pippo but not pluto
 this is a multi-line trap which ends at line 9 == 11
-exit code 0
+exit code 1
 #############################################
 
 ################## TEST 6 ##################
 ciao! at line 29 == 29
 hello by mytest() at line 22 == 22
-exit in () at line 30 == 23 with pippo but not pluto
+exit in mytest() at line 23 == 23 with pippo but not pluto
 exit code 0
 #############################################
 
@@ -77,7 +77,7 @@ hello by mytest() at line 22 == 22
 ERROR: test7.sh failed in mytest() at line 23, rc: 1
 onerror() at line 16 == 16
 exit in mytest() at line 23 == 23 with pippo but not pluto
-exit code 0
+exit code 1
 #############################################
 
 ################## TEST 8 ##################
@@ -95,7 +95,7 @@ tests/test8.sh: set: line 37: illegal option -o invalid
 ERROR: test8.sh failed at line 37, rc: 1 != 0
 onerror() at line 16 == 16
 exit in () at line 37 == 37 with pippo but not pluto
-exit code 0
+exit code 1
 #############################################
 
 ################## TEST A ##################
@@ -106,12 +106,12 @@ pippo
 tests/testA.sh: line 33: can't create /access-denied: Permission denied
 ERROR: testA.sh failed at line 33, rc: 2
 onerror() at line 16 == 16
-The script should have failed at line 33 with ERROR message, exitstatus 0 != 0
+The script should have failed at line 33 with ERROR message, exitstatus 2 != 0
 hello by mytest() at line 22 == 22
 ERROR: testA.sh failed in mytest() at line 23, rc: 1
 onerror() at line 16 == 16
 exit in mytest() at line 23 == 23 with pippo but not pluto
-exit code 0
+exit code 1
 #############################################
 
 ################## TEST B ##################
@@ -132,13 +132,14 @@ FUNCNAME = , LINENO = 54
 hello by myfalse() at line 31
 ERROR: testB.sh failed in myfalse() at line 32, rc: 1
 onerror() at line 16 == 16
-FUNCNAME = , LINENO = 55, EXITSTATUS: 0
+ERROR: testB.sh failed at line 55, rc: 1
+onerror() at line 16 == 16
+FUNCNAME = , LINENO = 55, EXITSTATUS: 1
 FUNCNAME = , LINENO = 56
 hello by myexit() at line 22
 exit 1
-should not print this!
-exit in () at line 61 == 23, EXITSTATUS: 0
-exit code 0
+exit in myexit() at line 23 == 23, EXITSTATUS: 1
+exit code 1
 #############################################
 
 ################## TEST C ##################
@@ -159,13 +160,15 @@ FUNCNAME = , LINENO = 54
 hello by myfalse() at line 31
 ERROR: testC.sh failed in myfalse() at line 32, rc: 1
 onerror() at line 16 == 16
-FUNCNAME = , LINENO = 55, EXITSTATUS: 0
+ERROR: testC.sh failed at line 55, rc: 1
+onerror() at line 16 == 16
+FUNCNAME = , LINENO = 55, EXITSTATUS: 1
 FUNCNAME = , LINENO = 56
 hello by myfalse() at line 31
 ERROR: testC.sh failed in myfalse() at line 32, rc: 1
 onerror() at line 16 == 16
-exit in myfalse() at line 32 == 32, EXITSTATUS: 0
-exit code 0
+exit in myfalse() at line 32 == 32, EXITSTATUS: 1
+exit code 1
 #############################################
 
 ################## TEST D ##################
@@ -174,66 +177,101 @@ LINENO=0
 trap -- ')' ERR
 -----------
 tests/testD.sh: eval: line 4: syntax error: unexpected ")"
+tests/testD.sh: line 4: syntax error: unexpected ")"
 FUNCNAME='cmdevalfalse' == 'cmdevalfalse'
 FUNCNAME='' == ''
 -----------
 trap -- 'echo ERR' ERR
 still running
+ERR
 1
 still running after false
+tests/testD.sh: eval: line 43: syntax error: unexpected ")"
 done
 exit code 0
 #############################################
 
 ################## TEST E ##################
+ERR ONE, funcone at line 5
+ERR ONE, at line 27
 ERR ONE, at line 27 is acceptable in busybox ash
 funcone exit status = 0 == 1
 ERR ONE, at line 32
 -----------------01----------------------
 ERR ONE, funcone at line 5
-funcone exit status = 0 == 1
+ERR ONE, at line 38
+funcone exit status = 1 == 1
 ERR ONE, at line 40
 -----------------02----------------------
 ERR ONE, funcone at line 5
+ERR ONE, functwo at line 10
+ERR ONE, at line 44
 ERR ONE, at line 45
 -----------------03----------------------
 ERR ONE, functhree at line 14
 ERR ONE, funcone at line 5
+ERR ONE, functwo at line 10
+ERR ONE, functhree at line 15
 ERR ONE, functhree at line 15 is acceptable in busybox ash
 ERR ONE, functhree at line 19
+ERR ONE, at line 49
 in this test bash seems incoherent about functhree line 15
 ERR ONE, at line 53
 -----------------04----------------------
 -----------------05----------------------
+ERR ONE, funcone at line 5
+ERR ONE, functwo at line 10
+ERR ONE, at line 64
 ERR ONE, at line 64 is acceptable in busybox ash
 ERR ONE, at line 68
 -----------------06----------------------
+ERR ONE, funcone at line 5
+ERR ONE, functwo at line 10
+ERR ONE, functhree at line 15
 ERR ONE, functhree at line 15 is acceptable in busybox ash
+ERR ONE, functhree at line 19
 ERR ONE, at line 72
 ERR ONE, at line 73
 -----------------07----------------------
+ERR ONE, at line 77
+ERR ONE, at line 78
 -----------------08----------------------
 ERR MAIN
+ERR ONE, funcone at line 5
 ERR ONE, at line 85
 -----------------09----------------------
+ERR ONE, funcone at line 5
+ERR ONE, functwo at line 10
 ERR ONE, at line 89
 ERR ONE, at line 90
 -----------------10----------------------
+ERR ONE, funcone at line 5
+ERR ONE, functwo at line 10
+ERR ONE, functhree at line 15
 ERR ONE, functhree at line 15 is acceptable in busybox ash
+ERR ONE, functhree at line 19
 ERR ONE, at line 94
 ERR ONE, at line 95
 -----------------11----------------------
+ERR ONE, at line 99
+ERR ONE, at line 100
 -----------------12----------------------
 ERR MAIN
 ERR ONE, funcone at line 5
+ERR ONE, at line 108
 -----------------13----------------------
 ERR ONE, funcone at line 5
+ERR ONE, functwo at line 10
+ERR ONE, at line 112
 ERR ONE, at line 113
 -----------------14----------------------
 ERR ONE, functhree at line 14
 ERR ONE, funcone at line 5
+ERR ONE, functwo at line 10
+ERR ONE, functhree at line 15
 ERR ONE, functhree at line 15 is acceptable in busybox ash
 ERR ONE, functhree at line 19
+ERR ONE, at line 117
 in this test bash seems incoherent about functhree line 15
 ERR ONE, at line 121
 -----------------15----------------------
@@ -247,18 +285,22 @@ bash reports line 142 but fault is at line 144
 -----------------18----------------------
 tests/testE.sh: eval: line 152: syntax error: unexpected ")"
 ERR myfault2 at line 152
+ERR at line 164
 tests/testE.sh: eval: line 165: syntax error: unexpected ")"
 ERR at line 165
 tests/testE.sh: line 166: can't create /access-denied: Permission denied
 ERR at line 166
 -----------------19----------------------
 exit 1 - now
-EXIT at line 181 == 176
+EXIT myexit at line 176 == 176
 exit code 1
 #############################################
 
 ################## TEST F ##################
 tests/testF.sh: eval: line 6: syntax error: unexpected ")"
+hello 1
+The next instruction is deadly for unpatched busybox ash also
+tests/testF.sh: eval: line 11: syntax error: unexpected ")"
 exit code 2
 #############################################
 
