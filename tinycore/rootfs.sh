@@ -57,7 +57,7 @@ function chroot_atexit() {
 export PATH=/home/tc/.local/bin:/usr/local/sbin:/usr/local/bin
 export PATH=$PATH:/apps/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
-tczlist="bash readline ncursesw dropbear"
+tczlist="bash readline ncursesw dropbear kmaps.tcz"
 
 ok=0
 tmpdir=rootfs.tmp
