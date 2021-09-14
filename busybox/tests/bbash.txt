@@ -263,10 +263,16 @@ exit code 2
 #############################################
 
 ################## TEST G ##################
-tests/testG.sh: eval: line 8: syntax error: unexpected ")"
+tests/testG.sh: eval: line 9: syntax error: unexpected ")"
 FUNCNAME=''
-tests/testG.sh: line 12: flase: not found
+------1------
+tests/testG.sh: line 14: flase: not found
 FUNCNAME=''
+------2------
+ERR in myfalse at 4
+tests/testG.sh: eval: line 4: syntax error: unexpected ")"
+FUNCNAME=''
+------3------
 ERR at in myfalse at 4, exit with 1
 exit code 1
 #############################################
