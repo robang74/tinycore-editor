@@ -57,7 +57,7 @@ function chroot_atexit() {
 export PATH=/home/tc/.local/bin:/usr/local/sbin:/usr/local/bin
 export PATH=$PATH:/apps/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
-tczlist="bash readline ncursesw dropbear kmaps.tcz"
+tczlist="bash readline ncursesw dropbear kmaps"
 
 ok=0
 tmpdir=rootfs.tmp
@@ -95,7 +95,7 @@ if [ "$1" == "chroot" ]; then
 	tar xzf changes/sshdhostkeys.tgz -moC $tmpdir/etc/ssh
 	tar xzf tccustom$tcsize.tgz -moC $tmpdir
 
-	for i in dev2chroot.sh reboot.sh shutdown.sh itkb.sh uskb.sh; do
+	for i in dev2chroot.sh reboot.sh shutdown.sh uskb.sh itkb.sh; do
 		cp -f changes/$i $tmpdir/bin
 		chmod a+x $tmpdir/bin/$i
 	done
@@ -125,6 +125,10 @@ if [ "$1" == "chroot" ]; then
 				fi
 			done
 		done
+		if [ -d $tmptczdir/usr/share ]; then
+			mkdir -p $tmpdir/usr/share
+			cp -arf $tmptczdir/usr/share $tmpdir/usr
+		fi
 		if [ -d $tmptczdir/usr/local/share ]; then
 			mkdir -p $tmpdir/usr/local/share
 			cp -arf $tmptczdir/usr/local/share $tmpdir/usr/local
