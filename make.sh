@@ -782,7 +782,7 @@ if [ "$param" == "qemu-init" ]; then
 		mkdir -p /etc/qemu
 		mkdir -p /var/lib/misc
 		touch /etc/qemu/bridge.conf
-		echo "allow brkvm" | sudo tee /etc/qemu/bridge.conf
+		echo "allow brkvm" >/etc/qemu/bridge.conf
 		sudo dnsmasq --interface=brkvm --bind-interfaces --dhcp-range=$tcip,$tcip
 		if ! iptables -nvL FORWARD | grep -qe " ACCEPT .* all .* brkvm *$ifnm"; then
 			iptables -A FORWARD -i brkvm -o $ifnm -j ACCEPT
@@ -955,10 +955,11 @@ if [ "$param" == "qemu-stop" ]; then
 	fi
 	if [ "$stayalive" != "yes" ]; then
 		set +e
-		sudo killall dnsmasq
-		sudo ip link set brkvm down
-		sudo ip addr del $brip/$netm dev brkvm
-		sudo brctl delbr brkvm
+		killall dnsmasq
+		ip link set brkvm down
+		ip addr del $brip/$netm dev brkvm
+		brctl delbr brkvm
+		rm -f /etc/qemu/bridge.conf
 		set -e
 	fi
 fi
