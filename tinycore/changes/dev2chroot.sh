@@ -57,31 +57,36 @@ function rumount() {
 	done
 }
 
+function real_unmountall() {
+	umount $rootdir/run
+	mount --make-rslave $rootdir/dev
+#	umount -R $rootdir/dev
+	rumount $rootdir/dev
+	mount --make-rslave $rootdir/sys
+#	umount -R $rootdir/sys
+	rumount $rootdir/sys
+	umount $rootdir/proc
+	[ "$dtdev" ] && umount $rootdir/mnt/tcp2
+	[ "$tcdev" ] && umount $rootdir/mnt/tcp1
+	umount $rootdir/var/data
+	umount $rootdir/var/log
+	if grep -q " $rootdir/opt " /proc/mounts; then
+		umount $rootdir/opt
+	fi
+	umount $rootdir
+}
+
 function unmountall() {
 	set +e
-	echo -n "Umounting everything on chroot... "
-	errlog=$(if true; then
-		umount $rootdir/run
-		mount --make-rslave $rootdir/dev
-#		umount -R $rootdir/dev
-		rumount $rootdir/dev
-		mount --make-rslave $rootdir/sys
-#		umount -R $rootdir/sys
-		rumount $rootdir/sys
-		umount $rootdir/proc
-		[ "$dtdev" ] && umount $rootdir/mnt/tcp2
-		[ "$tcdev" ] && umount $rootdir/mnt/tcp1
-		umount $rootdir/var/data
-		umount $rootdir/var/log
-		umount $rootdir
-	fi 2>&1)
+	[ "$revoxid" != "yes" ] && set +x
+	real_unmountall
+	echo -n "Umount everything on chroot... "
 	if grep -qe " $rootdir " /proc/mounts; then
 		perr "KO\n"
 	else
 		comp "OK\n"
 	fi
 	set +x
-	echo "$errlog" | grep -ve "^D*EBUG: "
 }
 
 function exec2chroot() {
@@ -165,7 +170,7 @@ fi
 ###############################################################################
 
 echo -n "" >$logfile
-PS4='DEBUG: $((LASTNO=LINENO)): '
+#PS4='DEBUG: $((LASTNO=LINENO)): '
 exec 3>&2 2>$logfile; set -ex
 trap 'atexit $LASTNO' EXIT
 
