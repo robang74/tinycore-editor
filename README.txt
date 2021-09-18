@@ -23,6 +23,32 @@
     in tincore.conf and using the virtual machine for the building.
 
 ###############################################################################
+			DEAL WITH POSSIBLE PROBLES	
+###############################################################################
+
+ 0. Enabling the qemu virtual network might lead to a conditions in which the
+    internet name resolution would not work anymore but the solution is quite
+    simple to solve and to check:
+
+    ping www.google.com
+    ./make.sh qemu-init
+    ping www.google.com
+
+    if the 2nd ping fails then you should explicely add 8.8.8.8 as DNS in your
+    network connection. You can do this in three ways depending how is your
+    system is configured. First of all check if this package is installed:
+
+    apt list | grep resolvconf
+
+    if is installed then you can add the new DNS address to /etc/resolv.conf.
+    Otherwise you can use the graphical network manager to add the DNS to your
+    connection (the one that give the system the internet access). If you are
+    not using the network manager then you should add the DNS to your network
+    plan. Follow this link if you need more support.
+
+    https://linuxize.com/post/how-to-set-dns-nameservers-on-ubuntu-18-04/
+
+###############################################################################
 			HOW TO DEAL WITH THE SUITE
 ###############################################################################
 
