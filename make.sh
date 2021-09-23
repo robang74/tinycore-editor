@@ -42,6 +42,7 @@ distclean
 image
 download
 busybox
+chroot
 reset
 iso
 "
@@ -86,6 +87,7 @@ function usage() {
 	echo -e "\t\t distclean"
 	echo -e "\t\t download"
 	echo -e "\t\t busybox"
+	echo -e "\t\t chroot"
 	echo -e "\t\t reset"
 	echo -e "\t\t iso"
 	echo
@@ -430,7 +432,7 @@ shift
 option="$1"
 shift
 
-rootlist="qemu-init qemu-test qemu qemu-stop image iso clean"
+rootlist="qemu-init qemu-test qemu qemu-stop image chroot iso clean"
 
 for i in $rootlist; do
 	if [ "$param" == "$i" -o "$param" == "" ]; then
@@ -611,6 +613,13 @@ eval $(grep "^tclabel=" tinycore/changes/rcS)
 sshkeycln=yes
 warning=""
 tdone=0
+
+if [ "$param" == "chroot" ]; then
+	tdone=1
+	info "make.sh executing: chroot"
+	cd tinycore
+	./rootfs.sh chroot
+fi
 
 if [ "$param" == "reset" ]; then
 	tdone=1
