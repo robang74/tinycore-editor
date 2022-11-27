@@ -653,7 +653,7 @@ fi
 if [ "$param" == "busybox" ]; then
 	tdone=1
 	info "make.sh executing: busybox"
-	busybox/busybox.sh all
+	busybox/busybox.sh update
 fi
 
 if [ "$param" == "open" -a "$option" != "8GB" ]; then

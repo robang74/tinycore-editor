@@ -26,6 +26,7 @@ function usage() {
 	echo -e "\t\t download         (retrieve source)"
 	echo -e "\t\t checklib         (check GLIBC version)"
 	echo -e "\t\t open             (deploy source)"
+	echo -e "\t\t binary           (internal usei only)"
 	echo -e "\t\t compile          (from scratch)"
 	echo -e "\t\t install          (into rootfs.gz)"
 	echo -e "\t\t editconfig       (change config)"
@@ -124,7 +125,7 @@ function onerror() {
 
 ###############################################################################
 
-if [ "$USER" != "root" ]; then
+if [ "$USER" != "root" -a "$1" != "" ]; then
 	set -m
 	if ! timeout 0.2 sudo -n true; then
 		echo
@@ -166,6 +167,7 @@ archtune=${archtune/-m32/$cputune32}
 export CFLAGS="$arch $archtune $ccopts"
 export LDFLAGS="$arch"
 compile="CFLAGS='$CFLAGS' LDFLAGS='$LDFLAGS'"
+bb_bin_pkg="busybox-rootfs-${arch/-m/}.tar.bz2"
 
 ###############################################################################
 
@@ -188,6 +190,7 @@ if [ "$2" != "quiet" ]; then
 		chownuser .arch
 	fi
 	tcsnow=$(cat ../tinycore/.arch)
+	tcsnow=${tcsnow:-32}
 	if [ "$tcsnow" != "$tcsize" ]; then
 		echo
 		perr "ERROR: previous download have been done for x86 $tcsnow bits, abort"
@@ -253,7 +256,7 @@ if [ "$1" == "checklib" ]; then
 	$tcdir/rootfs.sh open >/dev/null
 	libc=$tcdir/rootfs.tmp/lib/libc.so.6
 	gver=$(strings $libc | grep "GNU C Library")
-	gnver=${gver//.}
+	gnver=${gver//./}
 	gnver=${gnver: -3}
 	$tcdir/rootfs.sh clean >/dev/null
 	harch=$(uname -m)
@@ -335,6 +338,9 @@ fi
 if [ "$1" == "compile" ]; then
 	done=1
 	cd $mydir
+	if [ -e $bb_bin_pkg ]; then
+		mv -f $bb_bin_pkg bb_bin_pkg.bak
+	fi
 	info "busybox.sh executing compile..."
 	warn "compile with: $compile"
 	checkfordir src open
@@ -355,19 +361,39 @@ if [ "$1" == "compile" ]; then
 	cd ..
 fi
 
+if [ "$1" == "binary" ]; then
+	done=1
+	cd $mydir
+	info "busybox.sh executing binary..."
+	if [ ! -e $bb_bin_pkg ]; then
+		checkfordir src open
+
+		cd src
+		rm -rf _install rootfs
+		if [ ! -e .config.old ]; then
+			usermake oldconfig
+		fi
+		usermake install
+		mv _install rootfs
+
+		cd rootfs
+		mkdir -p etc bin
+		chmod u+s bin/busybox
+		cp -f ../../busybox.conf etc
+		chmod 0444 etc/busybox.conf
+		cp -f ../../busybox.suid bin
+		chmod 0555 bin/busybox.suid
+		chown -R root.root .
+
+		tar cjf ../../$bb_bin_pkg .
+	fi
+fi
+
 if [ "$1" == "install" ]; then
 	done=1
 	cd $mydir
+	./$myname binary
 	info "busybox.sh executing install..."
-	checkfordir src open
-
-	cd src
-	rm -rf _install rootfs
-	if [ ! -e .config.old ]; then
-		usermake oldconfig
-	fi
-	usermake install
-	mv _install rootfs
 
 	rtdir=$($tcdir/rootfs.sh open)
 	echo "$rtdir"
@@ -378,16 +404,8 @@ if [ "$1" == "install" ]; then
 		echo
 		realexit 1
 	fi
-
-	cd rootfs
-	mkdir -p etc bin
-	chmod u+s bin/busybox
-	cp -f ../../busybox.conf etc
-	chmod 0444 etc/busybox.conf
-	cp -f ../../busybox.suid bin
-	chmod 0555 bin/busybox.suid
-	chown -R root.root .
-	cp -arf * $tcdir/$rtdir
+	pwd
+	tar xjf $bb_bin_pkg -C $tcdir/$rtdir
 
 	cd $tcdir/$rtdir
 	sed -i "s,busybox.suid,busybox," $(find etc/init.d -type f)
@@ -400,7 +418,6 @@ if [ "$1" == "install" ]; then
 		echo
 		realexit 1
 	fi
-	cd - >/dev/null
 
 	if which tce-load >/dev/null; then
 		echo; ldd bin/busybox
@@ -410,8 +427,8 @@ if [ "$1" == "install" ]; then
 			echo
 			warn "WARNING: host libcrypt.so.1 inheritance, trying to fix"
 			echo
-			cp -f $libcrypt $tcdir/$rtdir/lib
-			ln -sf $libcrypto $tcdir/$rtdir/lib/libcrypt-2.*.so
+			cp -f $libcrypt lib
+			ln -sf $libcrypto lib/libcrypt-2.*.so
 		fi
 	else
 		libs=$(ldd bin/busybox | sed -ne "s,.* => \(/[^ ]*\) .*,\\1,p")
@@ -422,11 +439,12 @@ if [ "$1" == "install" ]; then
 			echo
 			warn "WARNING: libcrypt.so.1 host/guest mismatch, trying to fix"
 			echo
-			cp -f $(dirname $libcrypt)/$libcrypto $tcdir/$rtdir/lib
-			ln -sf $libcrypto $tcdir/$rtdir/lib/libcrypt-2.*.so
+			cp -f $(dirname $libcrypt)/$libcrypto lib
+			ln -sf $libcrypto lib/libcrypt-2.*.so
 		fi
 	fi
 
+	cd - >/dev/null
 	$tcdir/rootfs.sh close
 	chownuser .	
 	cd ../..	
@@ -478,27 +496,29 @@ fi
 
 if [ "$1" == "update" ]; then
 	done=1
-	cd $mydir
-	checkfordir src open
-	cd src
-	if [ ! -e .config.type -o ! -e .config ]; then
-		info "busybox.sh executing update..."
-		echo
-		perr "ERROR: run $myname compile first, abort"
-		echo
-		realexit 1
+	if [ ! -e $bb_bin_pkg ]; then
+		cd $mydir
+		checkfordir src open
+		cd src
+		if [ ! -e .config.type -o ! -e .config ]; then
+			info "busybox.sh executing update..."
+			echo
+			perr "ERROR: run $myname compile first, abort"
+			echo
+			realexit 1
+		fi
+		ctype=$(cat .config.type 2>/dev/null)
+		info "busybox.sh executing update${ctype+ $ctype}..."
+		warn "compile with: $compile"
+		checkconfig $ctype
+		rm -rf _install rootfs
+		if [ ! -e .config.old ]; then
+			usermake oldconfig
+		fi
+		usermake
+		dd if=busybox >/dev/null
+		cd ..
 	fi
-	ctype=$(cat .config.type 2>/dev/null)
-	info "busybox.sh executing update${ctype+ $ctype}..."
-	warn "compile with: $compile"
-	checkconfig $ctype
-	rm -rf _install rootfs
-	if [ ! -e .config.old ]; then
-		usermake oldconfig
-	fi
-	usermake
-	dd if=busybox >/dev/null
-	cd ..
 	$mydir/$myname install quiet
 fi
 
