@@ -89,7 +89,7 @@ function usage() {
 	echo -e "\t\t download"
 	echo -e "\t\t busybox"
 	echo -e "\t\t chroot"
-	echo -e "\t\t reset"
+	echo -e "\t\t reset [no-download]"
 	echo -e "\t\t iso"
 	echo
 }
@@ -589,6 +589,8 @@ if [ "$1" != "" ]; then
 fi
 
 if [ "$param" == "clean" -a "$option" == "all" ]; then
+	true
+elif [ "$param" == "reset" -a "$option" == "no-download" ]; then
 	true
 elif [ "$param" == "qemu" -a "$option" == "iso" ]; then
 	true
