@@ -169,7 +169,7 @@ function waitforssh() {
 		if ! pgrep qemu; then
 			return 1
 		fi >/dev/null
-	done 2>/dev/null
+	done #2>/dev/null
 	return 0
 }
 
@@ -322,20 +322,27 @@ function sshgettcdir() {
 
 function sshfingerprintclean() {
 	if [ "$sshkeycln" == "yes" ]; then
-		if [ ! -d ~/.ssh ]; then
-			if [ "$SUDO_USER" == "" ]; then
+		echo "whoami: $(whoami), user: $USER, sudo: $SUDO_USER"
+		if [ "$SUDO_USER" == "" ]; then
+			if [ ! -d ~/.ssh ]; then
 				yes "" | ssh-keygen
-			else
-				yes "" | su -l $SUDO_USER -c "ssh-keygen"
-			fi
-		fi 2>/dev/null
-		if [ -e ~/.ssh/known_hosts ]; then
-			if [ "$SUDO_USER" == "" ]; then
+			fi #2>/dev/null
+			if [ -e ~/.ssh/known_hosts ]; then
 				ssh-keygen -R $tcip
-			else
-				su -l $SUDO_USER -c "ssh-keygen -R $tcip"
-			fi
-		fi 2>/dev/null
+			fi #2>/dev/null
+		else
+			home=$(su -l $SUDO_USER -c 'echo $HOME')
+			if [ ! -d $home/.ssh ]; then
+				yes "" | su -l $SUDO_USER -c "ssh-keygen"
+			fi #2>/dev/null
+			if [ -e $home/.ssh/known_hosts ]; then
+				if [ "$SUDO_USER" == "" ]; then
+					ssh-keygen -R $tcip
+				else
+					su -l $SUDO_USER -c "ssh-keygen -R $tcip"
+				fi
+			fi #2>/dev/null
+		fi
 		sshkeycln=no
 	fi >/dev/null
 }
@@ -357,7 +364,7 @@ function killsshafterqemu() {
 function storage_32GB_create()
 {
 	if [ ! -e storage-32GB.disk ]; then
-		dd if=/dev/zero bs=512 count=1 seek=61071359 of=storage-32GB.disk
+		dd if=/dev/zero bs=512 count=1 seek=67108863 of=storage-32GB.disk
 		chownuser storage-32GB.disk
 	fi
 }
