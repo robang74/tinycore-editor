@@ -1,3 +1,3 @@
 echo "nameserver 8.8.8.8" >/etc/resolv.conf
-ifconfig eth0 192.168.43.196 netmask 255.255.255.0
-route add default gw 192.168.43.1 eth0
+ifconfig eth0 10.0.2.18 netmask 255.0.0.0
+route add default gw 10.0.2.16 eth0
