@@ -12,7 +12,7 @@
    reboot|shutdown.sh	to reboot/shutdown the system using sysrq
    dev2chroot.sh	to chroot into installed Ubuntu
    usbsetboot.sh	to enable/disable the USB key boot
-   it|uskb.sh		to change keyboard layaout IT/US
+   ch|de|it|uskb.sh	to change keyboard layaout CH/DE/IT/US
 
    bootable-usbdisk-create.sh 		to create a bootable usb disk
    data-usbdisk-partition-create.sh 	to create data partition

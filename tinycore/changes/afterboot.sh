@@ -76,6 +76,8 @@ tcpassword="tinycore"
 copylist="
 uskb.sh:uskb.sh
 itkb.sh:itkb.sh
+dekb.sh:dekb.sh
+chkb.sh:chkb.sh
 unlock.sh:unlock.sh
 reboot.sh:reboot.sh
 shutdown.sh:shutdown.sh

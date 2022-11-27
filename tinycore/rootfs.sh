@@ -95,7 +95,7 @@ if [ "$1" == "chroot" ]; then
 	tar xzf changes/sshdhostkeys.tgz -moC $tmpdir/etc/ssh
 	tar xzf tccustom$tcsize.tgz -moC $tmpdir
 
-	for i in dev2chroot.sh reboot.sh shutdown.sh uskb.sh itkb.sh; do
+	for i in dev2chroot.sh reboot.sh shutdown.sh uskb.sh ??kb.sh; do
 		cp -f changes/$i $tmpdir/bin
 		chmod a+x $tmpdir/bin/$i
 	done
