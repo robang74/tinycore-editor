@@ -31,6 +31,14 @@ function perr() {
 	echo -e "\e[1;31m$@\e[0m"
 }
 
+function chownuser() {
+        local user guid
+        user=$SUDO_USER
+        user=${user:-$USER}
+        guid=$(grep -e "^$user:" /etc/passwd | cut -d: -f3-4)
+        chown -R $guid "$@"
+}
+
 function download() {
 	local rc=1 opt=-c
 	if [ "$1" == "-ne" ]; then
