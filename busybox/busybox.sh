@@ -82,7 +82,11 @@ function usermake() {
 	nproc=$(nproc 2>/dev/null || true)
 	nproc=${nproc:-2}
 	nproc=1 #RAF: sometimes the compilation fails with -j > 1
-	su $SUDO_USER bash -c "make -j$nproc $1"
+	if [ "$SUDO_USER" != "" ]; then
+		su $SUDO_USER bash -c "make -j$nproc $1"
+	else
+		make -j$nproc $1
+	fi
 }
 
 function realexit() {
