@@ -32,3 +32,4 @@
 /ubuntu/rootfs
 /tclinux.iso
 /ntfs/*
+/.gitpasswd
