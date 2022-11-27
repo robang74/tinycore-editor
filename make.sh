@@ -802,14 +802,18 @@ if [ "$param" == "qemu-init" ]; then
 		mkdir -p /var/lib/misc
 		touch /etc/qemu/bridge.conf
 		echo "allow brkvm" >/etc/qemu/bridge.conf
-		sudo dnsmasq --interface=brkvm --bind-interfaces --dhcp-range=$tcip,$tcip
+		dnsmasq --interface=brkvm --bind-interfaces --dhcp-range=$tcip,$tcip
 		if ! iptables -nvL FORWARD | grep -qe " ACCEPT .* all .* brkvm *$ifnm"; then
 			iptables -A FORWARD -i brkvm -o $ifnm -j ACCEPT
+		fi
+		if ! iptables -nvL FORWARD | grep -qe " ACCEPT .* all .* brkvm .* state RELATED,ESTABLISHED"; then
+			iptables -I FORWARD -o brkvm -m state --state RELATED,ESTABLISHED -j ACCEPT
 		fi
 		if ! iptables -t nat -nvL POSTROUTING | grep -qe " MASQUERADE *all .* \* *$ifnm "; then
 			iptables -t nat -A POSTROUTING -o $ifnm -j MASQUERADE
 		fi
 		sysctl -w net.ipv4.ip_forward=1
+#		brctl addif brkvm $ifnm
 		sshfingerprintclean
 	else
 		stayalive=yes
