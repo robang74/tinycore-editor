@@ -3,6 +3,7 @@
 # Author: Roberto A. Foglietta
 #
 
+set -m
 cd $(dirname $0)
 myname=$(basename $0)
 
@@ -169,7 +170,7 @@ function waitforssh() {
 		if ! pgrep qemu; then
 			return 1
 		fi >/dev/null
-	done #2>/dev/null
+	done 2>/dev/null
 	return 0
 }
 
@@ -348,6 +349,7 @@ function sshfingerprintclean() {
 }
 
 function killsshafterqemu() {
+	echo "exec killsshafterqemu()"
 	while sleep 0.5; do
 		if pgrep qemu; then
 			break;
@@ -457,6 +459,7 @@ if [ "$broot" == "1" ]; then
 		fi 2>/dev/null
 		prev=$(gsettings get org.gnome.desktop.media-handling automount-open 2>/dev/null)
 		gsettings set org.gnome.desktop.media-handling automount-open false 2>/dev/null
+		info "running as root: './$myname $param $option $@'"
 		sudo ./$myname $param $option $@
 		rc=$?
 		gsettings set org.gnome.desktop.media-handling automount-open $prev 2>/dev/null
@@ -1042,4 +1045,3 @@ if [ "$tdone" == "0" ]; then
 fi
 comp "executing: $myname $param ${option:+$option }succeded"
 echo
-
