@@ -11,14 +11,18 @@ tczall="tcz"
 #
 # Meta packages collection
 #
-# sshonly : dropbear and keys maps
-# usbkey  : for a working USB/ISO disk
-# network : networking tools/modules
-# develop : developing USB/ISO disk
-# devtools: add git, autotools, etc.
-# test    : put here tcz to test (should be the last)
+# sshonly    : dropbear and keys maps
+# usbkey     : for a working USB/ISO disk
+# wimtools   : to install wim archive for windows restore
+# network    : networking tools/modules
+# develop    : developing USB/ISO disk
+# devtools   : add git, autotools, etc.
+# wimtool-dev: enough to compile the wimtools
+# test       : put here tcz to test (should be the last)
 #
+tczmeta="sshonly usbkey wimtools develop devtools wimtools-dev"
 tczmeta="sshonly usbkey develop devtools network test"
 tczmeta="sshonly usbkey develop devtools test"
 tczmeta="sshonly usbkey develop test"
-tczmeta="sshonly usbkey"
+tczmeta="sshonly usbkey wimtools"
+#tczmeta="sshonly usbkey"
