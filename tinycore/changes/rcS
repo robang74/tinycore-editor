@@ -30,24 +30,31 @@ if [ "$1" != "log" ]; then
 	exit $?
 fi
 
-# Mount /proc.
-[ -f /proc/cmdline ] || /bin/mount /proc
-
 # Wait for hardware be ready
-echo -e "\n\e[1;36mWait for $tclabel\e[0m"
-for i in $(seq 1 10); do
-	if gettcdev; then
-		break;
-	fi >/dev/null
-	sleep 1
-done
-
-# Remount rootfs rw.
-/bin/mount -o remount,rw /
+echo -ne "\n\e[1;36mWait for $tclabel\e[0m "
 
 # Mount system devices from /etc/fstab.
 /bin/mount -a
 
+# Remount rootfs in read-write mode
+/bin/mount -o remount,rw /
+
+# Start Udev to populate /dev and handle hotplug events
+/sbin/udevd --daemon 2>&1 >/dev/null
+/sbin/udevadm trigger --action=add 2>&1 >/dev/null
+/sbin/udevadm settle --timeout=5
+echo -ne "\e[1;37m"
+for i in $(seq 1 10); do
+	if gettcdev; then
+		break;
+	fi >/dev/null
+	echo -n .
+	sleep 1
+done
+echo -e "\e[0m"
+/sbin/udevadm control --exit --timeout=5
+
+# Configuring the tinycore system
 /etc/init.d/tc-config
 
 echo
