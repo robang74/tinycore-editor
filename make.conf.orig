@@ -1,13 +1,13 @@
 ################ BRIDGED NETWORK ################
 
-ifnm=eth0	# interface on which qemu will be bridged
+ifnm=wlp59s0	# interface on which qemu will be bridged
 brip=10.0.2.16	# bridged interface ip
 tcip=10.0.2.18	# qemu instance ip
 netm=24		# netmask
 
 ################# QEMU INSTANCE #################
 
-qemumem=256
+qemumem=1024
 qemuncpu=$(( ($(nproc 2>/dev/null || true)+1)/2 ))
 qemuncpu=${qemuncpu:-2}
 qemuopts="--cpu host --enable-kvm -smp $qemuncpu"
