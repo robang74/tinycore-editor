@@ -1,0 +1,24 @@
+#
+# (C) 2022, Roberto A. Foglietta, MIT
+#
+# wimapply is a useful tool for re-installing windows
+# a small linux bootable image can make the magic of
+# reinitialize a windows system from scratch
+#
+git clone git://wimlib.net/wimlib
+cd wimlib
+autoheader \
+    && aclocal \
+    && libtoolize --ltdl --copy --force \
+    && automake --add-missing --copy \
+    && autoconf \
+    && ./configure
+make -j $(nproc)
+ln -sf $(readlink -f /lib/libntfs-3g.so) \
+	/usr/local/lib/libntfs-3g.so
+ldconfig
+mkdir _install
+DESTDIR=$PWD/_install make install
+find _install -type f | xargs strip
+ls -1 _install/usr/local/lib/libwim.so*
+ls -1 _install/usr/local/bin/wimapply

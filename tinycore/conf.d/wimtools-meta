@@ -1,0 +1,7 @@
+#!/bin/ash
+#
+# $wd/wimtools-meta
+#
+
+wd=$(dirname $0)
+$wd/openssl-1.1.1
