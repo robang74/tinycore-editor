@@ -99,7 +99,7 @@ if [ "$1" == "chroot" ]; then
 		cp -f changes/$i $tmpdir/bin
 		chmod a+x $tmpdir/bin/$i
 	done
-	echo "cd; sudo su -l root" >$tmpdir/bin/broot
+	echo "cd; sudo -s" >$tmpdir/bin/broot
 	chmod a+x $tmpdir/bin/broot
 	head -n5 $tmpdir/etc/motd >$tmpdir/etc/motd.new
 	mv -f $tmpdir/etc/motd.new $tmpdir/etc/motd

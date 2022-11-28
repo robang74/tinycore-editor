@@ -167,12 +167,12 @@ if ! which shutdown >/dev/null; then
 	chmod a+x /sbin/shutdown
 fi
 if [ ! -e /bin/broot ]; then
-	echo "cd; sudo su -l root" >/bin/broot
+	echo "cd; sudo -s" >/bin/broot
 	chmod a+x /bin/broot
 fi
-touch /etc/sysconfig/superuser
-cat /home/tc/.ashrc >/root/.ashrc
-cat /home/tc/.profile >>/root/.profile
+#touch /etc/sysconfig/superuser
+#cat /home/tc/.ashrc >/root/.ashrc
+#cat /home/tc/.profile >>/root/.profile
 
 for i in $copylist; do
 	src=$(echo "$i" | cut -d: -f1)
