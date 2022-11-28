@@ -261,6 +261,8 @@ function tccopyall() {
 	mkdir -p $tcldir/custom
 	mkdir -p $tcldir/provides
 	mkdir -p $tcldir/boot/syslinux
+	tar xvzf tcl-boot-syslinux.tgz -moC $tcldir |\
+		sed -e "s,./\(.*\),\textract: \\1,"
 	for i in $copylist; do 
 		tcdircopy $i
 	done
