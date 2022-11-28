@@ -24,4 +24,3 @@ alias la='ls -la'
 # alias rm='rm -i'
 
 alias ce='cd /etc/sysconfig/tcedir'
-

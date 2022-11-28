@@ -179,6 +179,10 @@ if [ "$1" == "open" -o "$1" == "update" ]; then
 	if [ -e ../changes/tce-setup ]; then
 		cat ../changes/tce-setup > usr/bin/tce-setup
 	fi
+	for i in root home/tc; do
+		mkdir -p $i
+		cat ../changes/ashrc >$i/.ashrc
+	done
 	setp2type
 	test -e lib64 || ln -sf lib lib64
 	echo "opened folder: $tmpdir"
