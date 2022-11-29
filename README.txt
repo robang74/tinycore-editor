@@ -1,5 +1,5 @@
 #
-# Authore: Roberto A. Foglietta <roberto.foglietta@gmail.com>
+# Author: Roberto A. Foglietta <roberto.foglietta@gmail.com>
 #
 # Repository: https://github.com/robang74/tinycore-editor
 #
@@ -12,11 +12,17 @@
 ###############################################################################
 
 	./make.sh download
-[1]	./make.sh busybox 
+[1]-->	./make.sh busybox
 	./make.sh qemu-test iso
 	./make.sh clean image 8GB qemu 8GB ssh
 
-[1] if your system libraries are incompatible with those included into TinyCore
+[1] This target do not compile anymore busybox but expand an pre-saved archive.
+    However, you can decide to compile the busybox following the instructions
+    in the following list at point 16 but then you should do into a TC system.
+
+    IN FACT,
+
+    if your system libraries are incompatible with those included into TinyCore
     the virtual machine will fail to boot. In such a case remove the rootfs.gz
     and repeat the sequence from the start without busybox start. Then you can
     create a rootfs.gz including the customised busybox enabling develop git 
@@ -100,7 +106,7 @@
     At the first boot, it will create a secondary NTFS partition as large
     as the entire USB disk space left free (USB disk size less 64 MB)
 
- 9. ---------------------------------------------------------------------------
+ 9. --- deleted ---
 
 10. To explore all make.sh features call it without any parameter.
 
