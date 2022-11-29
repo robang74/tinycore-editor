@@ -13,6 +13,7 @@
 /tinycore/.arch
 /tinycore/tcz/*
 /busybox/src
+/busybox/busybox-rootfs-??.tar.bz2.bak
 /busybox/busybox.tar.bz2
 /busybox/busybox.sh.conf
 /busybox/config.nosuid

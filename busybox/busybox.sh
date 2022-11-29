@@ -26,7 +26,6 @@ function usage() {
 	echo -e "\t\t download         (retrieve source)"
 	echo -e "\t\t checklib         (check GLIBC version)"
 	echo -e "\t\t open             (deploy source)"
-	echo -e "\t\t binary           (internal usei only)"
 	echo -e "\t\t compile          (from scratch)"
 	echo -e "\t\t install          (into rootfs.gz)"
 	echo -e "\t\t editconfig       (change config)"
@@ -82,7 +81,7 @@ function usermake() {
 	local nproc
 	nproc=$(nproc 2>/dev/null || true)
 	nproc=${nproc:-2}
-	nproc=1 #RAF: sometimes the compilation fails with -j > 1
+#	nproc=1 #RAF: sometimes the compilation fails with -j > 1
 	if [ "$SUDO_USER" != "" ]; then
 		su $SUDO_USER bash -c "make -j$nproc $1"
 	else
@@ -243,8 +242,9 @@ if [ "$1" == "all" ]; then
 	done=1
 	cd $mydir
 	info "busybox.sh executing all..."
-	./busybox.sh open
-	./busybox.sh update
+	$0 open
+	$0 compile
+	$0 install
 fi
 
 if [ "$1" == "checklib" ]; then
@@ -336,11 +336,17 @@ if [ "$1" == "open" ]; then
 fi
 
 if [ "$1" == "compile" ]; then
+	if ! which tce-load >/dev/null; then
+		echo
+		perr "ERROR: compiling busybox into host enviroment"
+		perr "       the resulting image may fail to boot"
+		echo
+		echo "Press ENTER to continue or CTRL-C to stop"
+		echo
+		read
+	fi
 	done=1
 	cd $mydir
-	if [ -e $bb_bin_pkg ]; then
-		mv -f $bb_bin_pkg bb_bin_pkg.bak
-	fi
 	info "busybox.sh executing compile..."
 	warn "compile with: $compile"
 	checkfordir src open
@@ -359,12 +365,15 @@ if [ "$1" == "compile" ]; then
 
 	dd if=busybox >/dev/null
 	cd ..
+	if [ -e $bb_bin_pkg ]; then
+		mv -f $bb_bin_pkg $bb_bin_pkg.bak
+	fi
 fi
 
-if [ "$1" == "binary" ]; then
+function binary_prepare() {
 	done=1
 	cd $mydir
-	info "busybox.sh executing binary..."
+	info "busybox.sh in binary_prepare()..."
 	if [ ! -e $bb_bin_pkg ]; then
 		checkfordir src open
 
@@ -386,13 +395,18 @@ if [ "$1" == "binary" ]; then
 		chown -R root.root .
 
 		tar cjf ../../$bb_bin_pkg .
+		cd ../..
+		chownuser $bb_bin_pkg
+	else
+		return 1
 	fi
-fi
+	return 0
+}
 
 if [ "$1" == "install" ]; then
 	done=1
 	cd $mydir
-	./$myname binary
+	binary=0; binary_prepare || binary=1
 	info "busybox.sh executing install..."
 
 	rtdir=$($tcdir/rootfs.sh open)
@@ -419,28 +433,30 @@ if [ "$1" == "install" ]; then
 		realexit 1
 	fi
 
-	if which tce-load >/dev/null; then
-		echo; ldd bin/busybox
-		libcrypt=$(realpath /lib/libcrypt.so.1)
-		libcrypto=$(basename $libcrypt)
-		if echo "$libcrypto" | grep -q "libcrypt.so.1"; then
-			echo
-			warn "WARNING: host libcrypt.so.1 inheritance, trying to fix"
-			echo
-			cp -f $libcrypt lib
-			ln -sf $libcrypto lib/libcrypt-2.*.so
-		fi
-	else
-		libs=$(ldd bin/busybox | sed -ne "s,.* => \(/[^ ]*\) .*,\\1,p")
-		libcrypt=$(echo "$libs" | grep "libcrypt.so.1")
-		libcrypto=$(readlink $libcrypt)
-		echo; ldd bin/busybox
-		if echo "$libcrypto" | grep -q "libcrypt.so.1"; then
-			echo
-			warn "WARNING: libcrypt.so.1 host/guest mismatch, trying to fix"
-			echo
-			cp -f $(dirname $libcrypt)/$libcrypto lib
-			ln -sf $libcrypto lib/libcrypt-2.*.so
+	if false && [ $binary -eq 0 ]; then
+		if which tce-load >/dev/null; then
+			libcrypt=$(realpath /lib/libcrypt.so.1)
+			libcrypto=$(basename $libcrypt)
+			echo; ldd bin/busybox
+			if echo "$libcrypto" | grep -q "libcrypt.so.1"; then
+				echo
+				warn "WARNING: host libcrypt.so.1 inheritance, trying to fix"
+				echo
+				cp -f $libcrypt lib
+				ln -sf $libcrypto lib/libcrypt-2.*.so
+			fi
+		else
+			libs=$(ldd bin/busybox | sed -ne "s,.* => \(/[^ ]*\) .*,\\1,p")
+			libcrypt=$(echo "$libs" | grep "libcrypt.so.1")
+			libcrypto=$(readlink $libcrypt)
+			echo; ldd bin/busybox
+			if echo "$libcrypto" | grep -q "libcrypt.so.1"; then
+				echo
+				warn "WARNING: libcrypt.so.1 host/guest mismatch, trying to fix"
+				echo
+				cp -f $(dirname $libcrypt)/$libcrypto lib
+				ln -sf $libcrypto lib/libcrypt-2.*.so
+			fi
 		fi
 	fi
 
