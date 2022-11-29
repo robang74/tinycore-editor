@@ -649,13 +649,16 @@ if [ "$param" == "reset" ]; then
 	if [ "$option" != "no-download" ]; then
 		./$myname download
 	fi
+	rm -f busybox/busybox-rootfs-??.tar.bz2.bak
+	git checkout busybox/busybox-rootfs-32.tar.bz2
+	git checkout busybox/busybox-rootfs-64.tar.bz2
 fi
 
 if [ "$param" == "download" ]; then
 	tdone=1
 	info "make.sh executing: download"
 	tinycore/provides/tcgetdistro.sh
-	busybox/busybox.sh download
+#	busybox/busybox.sh download
 fi
 
 if [ "$param" == "busybox" ]; then
