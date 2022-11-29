@@ -211,7 +211,7 @@ if [ "$tczdir" != "" ]; then
 		ldconfig
 	fi
 	cd - >/dev/null
-if false; then
+ if false; then
 	infotime -n "Installing TCZ archives: "
 	if true; then
 		cd /usr/local/tce.installed
@@ -226,8 +226,18 @@ if false; then
 	fi >/dev/null &
 	rotdash $!
 	echo "OK"
+ fi
 fi
+
+###############################################################################
+
+libntfs=/usr/local/lib/libntfs-3g.so
+libfile=$(readlink -f $libntfs)
+if [ -f $libntfs ]; then
+	ln -s $libfile $libntfs.87.0.0
+	ln -s $libfile $libntfs.87
 fi
+ldconfig
 
 ###############################################################################
 

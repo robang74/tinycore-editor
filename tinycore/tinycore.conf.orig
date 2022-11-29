@@ -1,5 +1,5 @@
-TC=12
-KERN=5.10.3
+TC=13 #12
+KERN=5.15.10 #5.10.3
 ARCH=64 # ARCH= for x86 32 bits
 tcrepo32="http://repo.tinycorelinux.net/$TC.x/x86"
 tcrepo64="http://repo.tinycorelinux.net/$TC.x/x86_64"
