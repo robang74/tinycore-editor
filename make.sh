@@ -479,14 +479,6 @@ syslist="rootfs.gz modules.gz vmlinuz"
 trglist="ssh-copy image iso"
 
 while true; do
-	for i in $trglist; do
-		if [ "$param" == "$i" -o "$param" == "" ]; then
-			print=1
-			break;
-		fi
-	done
-	test "$print" != "1" && break
-
 	cd tinycore
 	if [ ! -r tinycore.conf ]; then
 		echo
@@ -495,10 +487,6 @@ while true; do
 		realexit 1
 	fi
 	source tinycore.conf
-	echo
-	warn "Config files: tinycore/tinycore.conf"
-	warn "Architecture: x86 $tcsize bit"
-	warn "Version: $TC.x"
 
 	if [ ! -e .arch ]; then
 		echo $tcsize >.arch
@@ -512,6 +500,22 @@ while true; do
 		warn "SUGGEST: run '$myname distclean' or change ARCH in tinycore.conf"
 		echo
 		realexit 1
+	fi
+
+	for i in $trglist; do
+		if [ "$param" == "$i" -o "$param" == "" ]; then
+			print=1
+			break;
+		fi
+	done
+	if [ "$print" == "1" ]; then
+		echo
+		warn "Config files: tinycore/tinycore.conf"
+		warn "Architecture: x86 $tcsize bit"
+		warn "Version: $TC.x"
+	else
+		cd ..
+		break
 	fi
 
 	./tczmetamerge.sh test || realexit $?

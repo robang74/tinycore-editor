@@ -409,6 +409,7 @@ if [ "$1" == "install" ]; then
 	binary=0; binary_prepare || binary=1
 	info "busybox.sh executing install..."
 
+	$tcdir/rootfs.sh open || exit 1
 	rtdir=$($tcdir/rootfs.sh open)
 	echo "$rtdir"
 	rtdir=$(echo "$rtdir" | sed -ne "s,^opened folder: \(.*\),\1,p")

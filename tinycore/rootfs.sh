@@ -52,6 +52,22 @@ function chroot_atexit() {
 	echo
 }
 
+function info() {
+        echo -e "\e[1;36m$@\e[0m"
+}
+
+function comp() {
+        echo -e "\e[1;32m$@\e[0m"
+}
+
+function warn() {
+        echo -e "\e[1;33m$@\e[0m"
+}
+
+function perr() {
+        echo -e "\e[1;31m$@\e[0m"
+}
+
 ###############################################################################
 
 export PATH=/home/tc/.local/bin:/usr/local/sbin:/usr/local/bin
@@ -65,6 +81,18 @@ tmptczdir=$tmpdir.tcz
 myname=$(basename $0)
 cd $(dirname $0)
 WRKDIR="$PWD"
+
+
+if [ "$1" != "close" -a "$1" != "distclean"  ]; then
+	if [ ! -r rootfs.gz ]; then
+		echo
+		perr "ERROR: file tinycore/rootfs.gz does not exist"
+		echo
+		warn "SUGGEST: run tinycore/provides/tcgetdistro.sh"
+		echo
+		exit 1
+	fi
+fi
 
 if [ "$USER" != "root" ]; then
 	if ! timeout 0.2 sudo -n true; then
