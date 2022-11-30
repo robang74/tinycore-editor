@@ -28,7 +28,7 @@ function lg() {
 export -f lg
 
 function lt() {
-	git log --graph --abbrev-commit --decorate --format=format:'%C(bold cyan)%h%C(reset) - %C(white)%s%C(reset) %C(bold green)%d%C(reset)' "$@"
+	git log --graph --abbrev-commit --decorate --format=format:'%C(bold cyan)%h%C(reset) - %C(white)%s%C(reset) %C(bold green)%d%C(reset)' --all "$@"
 }
 export -f lt
 
