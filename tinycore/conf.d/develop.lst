@@ -18,7 +18,7 @@ gzip.tcz
 isl.tcz
 kmaps.tcz
 libzstd.tcz
-linux-5.10_api_headers.tcz
+linux-KERNVER_api_headers.tcz
 make.tcz
 mkisofs-tools.tcz
 mpc.tcz

@@ -193,13 +193,20 @@ function tcdircopy() {
 		echo -e "\ttransfer $1" | sed "s,:, -> $tcdir/,"
 }
 
+function tczstrname() {
+	local i="$1"
+	i=${i/.tcz/}.tcz
+	i=${i/KERNVER/${KERN::-3}}
+	i=${i/KERNEL/$KERN-tinycore$ARCH}
+	echo "$i"
+}
+
 function get_tczlist_full() {
 	local deps i tczdir=$1 getdeps
 	getdeps=$tczdir/../provides/tcdepends.sh
 	shift
 	for i in $@; do
-		i=${i/.tcz/}.tcz
-		i=${i/KERNEL/$KERN-tinycore$ARCH}
+		tczstrname $i
 		deps+=" $($getdeps $i | grep -e "^$i:" | cut -d: -f2-)"
 		deps+=" $(cat $tczdir/$i.dep 2>/dev/null) $i"
 	done
@@ -292,8 +299,7 @@ function tccopyall() {
 	mkdir -p $tczdir/upgrade $tczdir/../ondemand
 	tczlistfull=$(get_tczlist_full tinycore/tcz $tczlist)
 	for i in $tczlistfull; do
-		i=${i/.tcz/}.tcz
-		i=${i/KERNEL/$KERN-tinycore$ARCH}
+		tczstrname $i
 		if [ ! -e tinycore/tcz/$i.md5.txt ]; then
 			cd tinycore/tcz
 			md5sum $i >$i.md5.txt
@@ -528,8 +534,7 @@ while true; do
 	done
 	cd tinycore/tcz
 	for i in $tczlist; do
-		i=${i/.tcz/}.tcz
-		i=${i/KERNEL/$KERN-tinycore$ARCH}
+		tczstrname $i
 		if [ ! -e $i ]; then
 			echo
 			perr "ERROR: file tinycore/tcz/$i does not exist"
@@ -539,8 +544,7 @@ while true; do
 			exit 1
 		fi
 		for j in $(cat $i.dep); do
-			j=${j/.tcz/}.tcz
-			j=${j/KERNEL/$KERN-tinycore$ARCH}
+			tczstrname $j
 			if ! ls $j >/dev/null 2>&1; then
 				echo
 				perr "ERROR: $i missing $j in tcz, abort"

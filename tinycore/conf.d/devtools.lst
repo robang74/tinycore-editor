@@ -33,7 +33,7 @@ liblzma.tcz
 libtirpc-dev.tcz
 libtirpc.tcz
 libzstd.tcz
-linux-5.10_api_headers.tcz
+linux-KERNVER_api_headers.tcz
 lzo.tcz
 m4.tcz
 make.tcz

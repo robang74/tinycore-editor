@@ -209,7 +209,7 @@ if [ "$1" == "download" ]; then
 	cd $mydir
 	info "busybox.sh executing download..."
 	if which tce-load >/dev/null; then
-		tczlist="wget patch make linux-5.10_api_headers"
+		tczlist="wget patch make linux-${KERN::-3}_api_headers"
 		tczlist+=" gcc glibc_base-dev libtirpc-dev"
 		tczlist+=" glibc_add_lib advcomp squashfs-tools"
 		su - tc -c "tce-load -wi $tczlist"
