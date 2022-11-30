@@ -164,6 +164,8 @@ echo "Working folder is $WRKDIR"
 
 if [ "$1" == "open" -o "$1" == "update" ]; then
 	ok=1
+	set -e
+	test -f rootfs.gz
 	if [ -d $tmpdir ]; then
 		echo "opened folder: $tmpdir"
 		echo
