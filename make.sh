@@ -270,7 +270,7 @@ function tccopyall() {
 	mkdir -p $tcldir/boot/syslinux
 	tar xvzf tcl-boot-syslinux.tgz -moC $tcldir |\
 		sed -e "s,./\(.*\),\textract: \\1,"
-	for i in $copylist; do 
+	for i in $(echo "$copylist" | sort | uniq); do
 		tcdircopy $i
 	done
 	if [ -e $tcldir/afterboot.sh ]; then
