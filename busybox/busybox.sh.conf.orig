@@ -1,4 +1,4 @@
-version=1.33.1
+version=1.34.1
 source="git://busybox.net/busybox.git"
 source=https://www.busybox.net/downloads/busybox-$version.tar.bz2
 # busybox configuration are identical among x86 and x86_64, so just these are enough
@@ -15,5 +15,4 @@ busybox-1.29.3_root_path.patch
 busybox-1.33.0_modprobe.patch
 busybox-1.33.0_skip-loop-control.patch
 busybox-1.33.0_tc_depmod.patch
-busybox-1.31.1-vi.backward_search.patch
 "
