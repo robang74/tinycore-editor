@@ -120,11 +120,15 @@ if [ "$1" != "--tmp" ]; then
 	mkdir -p tmp
 	cd tmp
 
-	download -ne $tcrepo/$tczall index.lst
-	max=$(cat index.lst | wc -l)
+	echo
+	echo "downloading $tcrepo/$tczall info.lst ..."
+	download -ne $tcrepo/$tczall/info.lst info.lst
+	max=$(cat info.lst | wc -l)
+	echo "info.lst contains $max items"
+	echo
 
 	printf "concurrent wgets:               "
-	for i in $(cat index.lst); do
+	for i in $(cat info.lst); do
 		download -neb $tcrepo/$tczall/$i.dep $i.dep >/dev/null
 		n=$(pgrep -x wget | wc -l)
 		m=$(ls -1 *.dep | wc -l)
@@ -153,7 +157,7 @@ function getmissing() {
 	grep "No such file" missing.lst | cut -d: -f2 | sort | uniq
 }
 
-for tcz in $(cat index.lst); do
+for tcz in $(cat info.lst); do
 	tcz=${tcz/KERNEL/$KERN-tinycore$ARCH}
 	info "Checking $tcz ..."
 	deps=$(cat $tcz.dep || true)

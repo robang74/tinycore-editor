@@ -1,24 +1,31 @@
-TC=13 #12
-KERN=5.15.10 #5.10.3
-ARCH=64 # ARCH= for x86 32 bits
-tcrepo32="http://repo.tinycorelinux.net/$TC.x/x86"
-tcrepo64="http://repo.tinycorelinux.net/$TC.x/x86_64"
+#
+# TC editor parameters setting
+#
+TC=13 							# it was 12
+KERN=5.15.10 						# it was 5.10.3
+ARCH=64 						# ARCH= for x86 32 bits
+tcurl="http://repo.tinycorelinux.net"
+tcurl="https://distro.ibiblio.org/tinycorelinux" 	# faster than tc net
+updates="tcz/updates/updatelist.txt"
+distro="release/distribution_files"
+tcrepo64="$tcurl/$TC.x/x86_64"
+tcrepo32="$tcurl/$TC.x/x86"
 tcrepo=${ARCH:-$tcrepo32}
 tcrepo=${tcrepo/64/$tcrepo64}
 tcsize=${ARCH:-32}
-distro="release/distribution_files"
 tczall="tcz"
+
 #
 # Meta packages collection
 #
-# sshonly    : dropbear and keys maps
-# usbkey     : for a working USB/ISO disk
-# wimtools   : to install wim archive for windows restore
-# network    : networking tools/modules
-# develop    : developing USB/ISO disk
-# devtools   : add git, autotools, etc.
-# wimtool-dev: enough to compile the wimtools
-# test       : put here tcz to test (should be the last)
+# sshonly     : dropbear and keys maps
+# usbkey      : for a working USB/ISO disk
+# wimtools    : to install wim archive for windows restore
+# network     : networking tools/modules
+# develop     : developing USB/ISO disk
+# devtools    : add git, autotools, etc.
+# wimtool-dev : enough to compile the wimtools
+# test        : put here tcz to test (should be the last)
 #
 tczmeta="sshonly usbkey wimtools develop devtools wimtools-dev"
 tczmeta="sshonly usbkey develop devtools network test"
