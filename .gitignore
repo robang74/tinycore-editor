@@ -35,3 +35,16 @@
 /tclinux.iso
 /ntfs/*
 /.gitpasswd
+/realtime/*.tcz*
+/realtime/*.moddeps
+/realtime/Module.symvers*
+/realtime/base_modules.tgz*
+/realtime/modules.gz
+/realtime/modules64.gz
+/realtime/vmlinuz
+/realtime/sorter.sh
+/realtime/patch-*-rt.patch.gz
+/realtime/config-*-tinycore
+/realtime/config-*-tinycore64
+/realtime/linux-*-patched.txz
+/realtime/linux-*/
