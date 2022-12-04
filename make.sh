@@ -1052,8 +1052,11 @@ if [ "$param" == "distclean" ]; then
 fi
 
 if [ "$param" == "iso" -o "$param" == "image" ]; then
-	if [ ! -x busybox/src/rootfs/bin/busybox ]; then
-		warn "SUGGEST: run ./make.sh busybox redo $param"
+	if test -x busybox/src/rootfs/bin/busybox || \
+	   test -e busybox/busybox-rootfs-$tcsize.tar.bz2; then
+		sleep 0
+	else
+		warn "SUGGEST: run ./make.sh busybox and then redo $param"
 		echo
 	fi
 fi
