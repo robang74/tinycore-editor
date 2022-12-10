@@ -158,7 +158,7 @@ function tagdel() {
 export -f tagdel
 
 function tagadd() {
-	git tag -a "$1" "$2" -m "$1" && \
+	git tag -a "$1" $2 -m "$1" && \
 	git push origin --tags
 }
 export -f tagadd
