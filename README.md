@@ -52,7 +52,9 @@ We can call this kind of development model as
 
 Which is quite amusing because it explains how evolution works but in this
 specific case just the bare-minimum non-competitive natural selection
-process-like has been implemented: it works then does not change.
+process-like has been implemented: 
+
+ * if it works then does not change it.
 
 Despite all these limitations in the developing model, the result is still
 interesting in many aspects and also some good ones.
@@ -62,7 +64,7 @@ interesting in many aspects and also some good ones.
 In the past, I worked with a skillful system architect with a deep understanding
 of the system on which he was working, but with a surprisingly monkey-coding
 attitude. Quickly, I realized that it was the environment and not the man being
-broken. It is irrelevant to say anything else about that experience.
+negative. It is irrelevant to say anything else about that experience.
 
 Years later that experience, the monkey-coding design-blind features-addition
 development model gets real. Moreover, a new motto had a birth:
@@ -88,7 +90,7 @@ value. The main difference is the starting point.
 
 Finally, we learned that things can work despite an ill-or-none-at-all design.
 
-### Learned Lessons
+### Lessons Learned
 
 For those who are more interested in learning some theory than dirtying their
 hands deep into the code:
