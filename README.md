@@ -75,8 +75,8 @@ their own life and nothing else.
 
 ### Teaching Tool
 
-Despite everything above, this is a great teaching tool because kept fixed the
-aim, its redesign implies being able to cope with legacy systems, and trust me:
+Despite everything above, this is a great teaching tool because kept the aim,
+its redesign implies being able to cope with legacy systems, and trust me:
 there are a lot of legacy systems out there in the real world that requires a
 progressive redesign because the companies which rely on them are not willing to
 invest into a brand new alternative.
@@ -103,4 +103,4 @@ Dealing properly with a project is as much important as dealing with people
 involved in the project and there is no any way to split these two aspects or
 avoid it. For sure, it is NOT cheap and this is the main reason because of many
 attempts to industrialize intellectual IT work over many years since the 2001's
-dot-com bubble burst has been tried.
+dot-com bubble burst has been tried, in vain.
