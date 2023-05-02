@@ -69,8 +69,9 @@ development model gets real. Moreover, a new motto had a birth:
 
  * You get what you ask for - is the new - WYSIWYG.
  
-To imperishable memory of that colleague who decided to live peacefully as a
-paid monkey-coder to devote himself to the things that are important for him.
+To imperishable memory of that all colleagues who decided to live stressless as
+a paid monkey-coders to devote themselves to the things that are important for
+their own life and nothing else.
 
 ### Teaching Tool
 
