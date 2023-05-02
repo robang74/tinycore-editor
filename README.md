@@ -101,6 +101,6 @@ and
 
 Dealing properly with a project is as much important as dealing with people
 involved in the project and there is no any way to split these two aspects or
-avoid it. For sure, it is cheap and this is the main reason because of many
+avoid it. For sure, it is NOT cheap and this is the main reason because of many
 attempts to industrialize intellectual IT work over many years since the 2001's
 dot-com bubble burst has been tried.
