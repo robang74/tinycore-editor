@@ -69,7 +69,7 @@ negative. It is irrelevant to say anything else about that experience.
 Years later that experience, the monkey-coding design-blind features-addition
 development model gets real. Moreover, a new motto had a birth:
 
- * You get what you {ask,pay} for - is the new - WYSIWYG.
+ * you get what you {ask,pay} for - is the new - WYSIWYG.
  
 To the imperishable memory of all my colleagues who decided to live stressless
 as paid monkey-coders to devote themselves to the things that are important for
