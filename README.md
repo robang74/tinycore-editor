@@ -42,7 +42,7 @@ it is particularly educating about how to NOT deal with IT projects and about
 how to NOT manage IT senior people.
 
 Born by asking for an emergency immediately available single-use workaround, it
-successively grew with a long series of small feature additions out of any
+successively grew with a long series of small features addition out of any
 project planning and without any architecture design or redesign. In other
 words: in adding a new feature as little redesign as possible has been done.
 
@@ -50,7 +50,7 @@ We can call this kind of development model as
 
  * monkey-coding design-blind features-addition
 
-This is quite amusing because of explaining how evolution works BUT in this
+This is quite amusing because it explains how evolution works but in this
 specific case just the bare-minimum non-competitive natural selection
 process-like has been implemented: it works then does not change.
 
@@ -67,7 +67,7 @@ broken. It is irrelevant to say anything else about that experience.
 Years later that experience, the monkey-coding design-blind features-addition
 development model gets real. Moreover, a new motto had a birth:
 
- * You get what you ask for - is the new - WYSIWYG.
+ * You get what you {ask,pay} for - is the new - WYSIWYG.
  
 To imperishable memory of that all colleagues who decided to live stressless as
 a paid monkey-coders to devote themselves to the things that are important for
@@ -82,9 +82,9 @@ progressive redesign because the companies which rely on them are not willing to
 invest into a brand new alternative.
 
 From this point of view, it is an opportunity to learn skills for a real-world
-market segment: scrum/agile development VS scrum/agile redesign. Both are
-progressive and deliverable-based ways of working and bringing value. The main
-difference is the starting point.
+specific market segment: scrum/agile development VS scrum/agile redesign. Both
+are progressive and deliverable-based ways of working and continuosly bringing
+value. The main difference is the starting point.
 
 Finally, we learned that things can work despite an ill-or-none-at-all design.
 
@@ -99,8 +99,8 @@ and
 
 * [P²C² Management Style](https://github.com/robang74/P2C2-Management-Style/raw/main/p2c2-management-style.pdf) for Team Management
 
-Dealing properly with a project is as much important as dealing with people
-involved in the project and there is no any way to split these two aspects or
-avoid it. For sure, it is NOT cheap and this is the main reason because of many
-attempts to industrialize intellectual IT work over many years since the 2001's
-dot-com bubble burst has been tried, in vain.
+Adequately managing a project is just as crucial as managing the people involved
+in the project. There is no way to separate these two aspects or avoid them.
+Undoubtedly, it is not a cheap approach, and this is the primary reason because
+numerous attempts to industrialize creative intellectual IT work have been made,
+in vain, since the burst of the 2001 dot-com bubble.
