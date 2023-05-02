@@ -1,4 +1,12 @@
-## References
+## How to start with this project
+
+Please check from here the instructions:
+
+* [howto.txt (raw)](https://raw.githubusercontent.com/robang74/tinycore-editor/main/howto.txt)
+
+* [howto.txt (blob)](https://github.com/robang74/tinycore-editor/blob/main/howto.txt)
+
+### References
 
 Author: Roberto A. Foglietta <roberto.foglietta@gmail.com>
 
@@ -8,15 +16,7 @@ Forum: https://github.com/robang74/tinycore-editor/discussions
 
 Google group: https://groups.google.com/g/tinycore-editor
 
-## How to start with this project
-
-Please check from here the instructions:
-
-* [howto.txt (raw)](https://raw.githubusercontent.com/robang74/tinycore-editor/main/howto.txt)
-
-* [howto.txt (blob)](https://github.com/robang74/tinycore-editor/blob/main/howto.txt)
-
-## Usefull links to visit
+### Usefull links to visit
 
  - https://github.com/pbatard/rufus/releases/download/v3.14/rufus-3.14.exe
 
@@ -25,6 +25,8 @@ Please check from here the instructions:
  - http://tinycorelinux.net/corebook.pdf
 
  - http://tinycorelinux.net
+
+----
 
 # Rationale
 
