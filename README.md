@@ -31,7 +31,7 @@ Please check from here the instructions:
 # Rationale
 
 This project is a proof-of-concept of an Embedded System Building Suite based on
-TinyCore Linux Distribution. It is broken-by-design to produce a non-certifiable
+TinyCore Linux distribution. It is broken-by-design to produce a non-certifiable
 system even under the mildest standards. Its development history is quite
 amusing and inspired by a real-life human case.
 
@@ -75,11 +75,11 @@ their own life and nothing else.
 
 ### Teaching Tool
 
-Despite everything above, this is a great teaching tool because kept the aim,
-its redesign implies being able to cope with legacy systems, and trust me:
-there are a lot of legacy systems out there in the real world that requires a
+Despite everything above, this is a great teaching tool because its redesign
+implies being able to deal with legacy systems. Trust me when I say that there
+are a lot of legacy systems out there in the real world that requires a
 progressive redesign because the companies which rely on them are not willing
-to invest into a brand new alternative.
+to invest in a brand-new alternative.
 
 From this point of view, it is an opportunity to learn skills for a real-world
 specific market segment: scrum/agile development VS scrum/agile redesign. Both
