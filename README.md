@@ -78,12 +78,12 @@ their own life and nothing else.
 Despite everything above, this is a great teaching tool because kept the aim,
 its redesign implies being able to cope with legacy systems, and trust me:
 there are a lot of legacy systems out there in the real world that requires a
-progressive redesign because the companies which rely on them are not willing to
-invest into a brand new alternative.
+progressive redesign because the companies which rely on them are not willing
+to invest into a brand new alternative.
 
 From this point of view, it is an opportunity to learn skills for a real-world
 specific market segment: scrum/agile development VS scrum/agile redesign. Both
-are progressive and deliverable-based ways of working and continuosly bringing
+are progressive and deliverable-based ways of working and continuously bring
 value. The main difference is the starting point.
 
 Finally, we learned that things can work despite an ill-or-none-at-all design.
