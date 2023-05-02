@@ -62,11 +62,11 @@ Finally, we learned that things can work despite an ill-or-none-at-all design.
 For those who are more interested in learning some theory than dirtying their
 hands deep into the code:
 
-* [My SCRUM in a nutshell for Project Management,https://github.com/robang74/P2C2-Management-Style/raw/main/my-scrum-in-a-nutshell.pdf] 
+* [My SCRUM in a nutshell for Project Management](https://github.com/robang74/P2C2-Management-Style/raw/main/my-scrum-in-a-nutshell.pdf)
 
 and
 
-* [P²C² Management Style for Team Management, https://github.com/robang74/P2C2-Management-Style/raw/main/p2c2-management-style.pdf]
+* [P²C² Management Style for Team Management](https://github.com/robang74/P2C2-Management-Style/raw/main/p2c2-management-style.pdf)
 
 Dealing properly with a project is as much important as dealing with people
 involved in the project and there is no any way to split these two aspects or
