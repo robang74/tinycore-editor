@@ -88,7 +88,7 @@ Google group: https://groups.google.com/g/tinycore-editor
 
 ----
 
-## QUICK START AFTER CLONE
+## Quick start after git clone
 
 	./make.sh download
 [1]-->	./make.sh busybox
@@ -107,7 +107,7 @@ Google group: https://groups.google.com/g/tinycore-editor
     create a rootfs.gz including the customised busybox enabling develop git 
     in tincore.conf and using the virtual machine for the building.
 
-## DEAL WITH POSSIBLE PROBLES
+## Dealing with possible problems
 
  0. Enabling the qemu virtual network might lead to a conditions in which the
     internet name resolution would not work anymore but the solution is quite
@@ -131,7 +131,7 @@ Google group: https://groups.google.com/g/tinycore-editor
 
     https://linuxize.com/post/how-to-set-dns-nameservers-on-ubuntu-18-04/
 
-# HOW TO DEAL WITH THE SUITE
+## How to deal with the suite
 
  This is a suite for quickly editing and testing a USB bootable disk based on 
  TinyCore Linux. It makes use of qemu and it should be installed in advance.
@@ -272,7 +272,7 @@ Google group: https://groups.google.com/g/tinycore-editor
 
 ----
 
-## USEFULL LINKS TO VISIT
+## Usefull links to visit
 
  - https://github.com/pbatard/rufus/releases/download/v3.14/rufus-3.14.exe
 
