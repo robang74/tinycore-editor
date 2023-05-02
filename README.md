@@ -8,13 +8,13 @@ Please check from here the instructions:
 
 ### References
 
-Author: Roberto A. Foglietta <roberto.foglietta@gmail.com>
+ * Author: Roberto A. Foglietta <roberto.foglietta@gmail.com>
 
-Repository: https://github.com/robang74/tinycore-editor
+ * Repository: https://github.com/robang74/tinycore-editor
 
-Forum: https://github.com/robang74/tinycore-editor/discussions
+ * Forum: https://github.com/robang74/tinycore-editor/discussions
 
-Google group: https://groups.google.com/g/tinycore-editor
+ * Google group: https://groups.google.com/g/tinycore-editor
 
 ### Usefull links to visit
 
