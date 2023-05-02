@@ -31,9 +31,9 @@ Please check from here the instructions:
 # Rationale
 
 This project is a proof-of-concept of an Embedded System Building Suite based on
-TinyCore Linux Distribution. It is "broken by design" to produce a 
-non-certifiable system even under the mildest standards. Its development history
-is quite amusing and inspired by a real-life human case.
+TinyCore Linux Distribution. It is broken-by-design to produce a non-certifiable
+system even under the mildest standards. Its development history is quite
+amusing and inspired by a real-life human case.
 
 ### Development Model
 
@@ -50,11 +50,11 @@ We can call this kind of development model as
 
  * monkey-coding design-blind features-addition
 
-This is quite amusing because it explains how evolution works but in this
+Which is quite amusing because it explains how evolution works but in this
 specific case just the bare-minimum non-competitive natural selection
 process-like has been implemented: it works then does not change.
 
-Despite all these limitations in the Developing Model, the result is still
+Despite all these limitations in the developing model, the result is still
 interesting in many aspects and also some good ones.
 
 ### History Case
@@ -69,8 +69,8 @@ development model gets real. Moreover, a new motto had a birth:
 
  * You get what you {ask,pay} for - is the new - WYSIWYG.
  
-To imperishable memory of that all colleagues who decided to live stressless as
-a paid monkey-coders to devote themselves to the things that are important for
+To the imperishable memory of all my colleagues who decided to live stressless
+as paid monkey-coders to devote themselves to the things that are important for
 their own life and nothing else.
 
 ### Teaching Tool
