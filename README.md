@@ -76,18 +76,19 @@ dot-com bubble burst has been tried.
 
 ----
 
-#
-# Author: Roberto A. Foglietta <roberto.foglietta@gmail.com>
-#
-# Repository: https://github.com/robang74/tinycore-editor
-#
-# Forum: https://github.com/robang74/tinycore-editor/discussions
-#
-# Google group: https://groups.google.com/g/tinycore-editor
-#
-###############################################################################
-			QUICK START AFTER CLONE
-###############################################################################
+## References
+
+Author: Roberto A. Foglietta <roberto.foglietta@gmail.com>
+
+Repository: https://github.com/robang74/tinycore-editor
+
+Forum: https://github.com/robang74/tinycore-editor/discussions
+
+Google group: https://groups.google.com/g/tinycore-editor
+
+----
+
+## QUICK START AFTER CLONE
 
 	./make.sh download
 [1]-->	./make.sh busybox
@@ -106,9 +107,7 @@ dot-com bubble burst has been tried.
     create a rootfs.gz including the customised busybox enabling develop git 
     in tincore.conf and using the virtual machine for the building.
 
-###############################################################################
-			DEAL WITH POSSIBLE PROBLES	
-###############################################################################
+## DEAL WITH POSSIBLE PROBLES
 
  0. Enabling the qemu virtual network might lead to a conditions in which the
     internet name resolution would not work anymore but the solution is quite
@@ -132,9 +131,7 @@ dot-com bubble burst has been tried.
 
     https://linuxize.com/post/how-to-set-dns-nameservers-on-ubuntu-18-04/
 
-###############################################################################
-			HOW TO DEAL WITH THE SUITE
-###############################################################################
+# HOW TO DEAL WITH THE SUITE
 
  This is a suite for quickly editing and testing a USB bootable disk based on 
  TinyCore Linux. It makes use of qemu and it should be installed in advance.
@@ -273,15 +270,15 @@ dot-com bubble burst has been tried.
     key as a rescue/maintanance/storage usbkey or using it as a developing
     system in which you can compile directly on the EXT4 secondary partition.
 
-###############################################################################
-			USEFULL LINKS TO VISIT
-###############################################################################
+----
 
-https://github.com/pbatard/rufus/releases/download/v3.14/rufus-3.14.exe
+## USEFULL LINKS TO VISIT
 
-http://forum.tinycorelinux.net/index.php?topic=18682.0
+ - https://github.com/pbatard/rufus/releases/download/v3.14/rufus-3.14.exe
 
-http://tinycorelinux.net/corebook.pdf
+ - http://forum.tinycorelinux.net/index.php?topic=18682.0
 
-http://tinycorelinux.net
+ - http://tinycorelinux.net/corebook.pdf
+
+ - http://tinycorelinux.net
 
