@@ -64,6 +64,7 @@ function download() {
 function get_tczlist_full() {
 	declare deps i tczdir=$1 getdeps
 	getdeps=$tczdir/../provides/tcdepends.sh
+	mkdir -p $tczdir
 	shift
 	for i in $@; do
 		i=${i/.tcz/}.tcz
