@@ -2,9 +2,8 @@
 
 Please check from here the instructions:
 
-* [howto.txt (raw)](https://raw.githubusercontent.com/robang74/tinycore-editor/main/howto.txt)
-
-* [howto.txt (blob)](https://github.com/robang74/tinycore-editor/blob/main/howto.txt)
+* [howto.txt](https://github.com/robang74/tinycore-editor/blob/main/howto.txt)
+ ([raw](https://raw.githubusercontent.com/robang74/tinycore-editor/main/howto.txt))
 
 ### References
 
