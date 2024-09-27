@@ -1,0 +1,6 @@
+# TODO
+
+* add a variable in tinycore.conf.orig for the keyboard layout
+* add make.sh setkb qwerty/it to change the keyboard at boot
+* rebuild thw wimtools using tar.gz and install wimlib-imagex
+
