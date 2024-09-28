@@ -25,3 +25,9 @@ alias la='ls -la'
 # alias rm='rm -i'
 
 alias ce='cd /etc/sysconfig/tcedir'
+
+alias chkb.sh='setkmap.sh ch'
+alias dekb.sh='setkmap.sh de'
+alias itkb.sh='setkmap.sh it'
+alias uskb.sh='setkmap.sh us'
+

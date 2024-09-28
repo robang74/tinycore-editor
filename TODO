@@ -1,6 +1,11 @@
 # TODO
 
 * add a variable in tinycore.conf.orig for the keyboard layout
-* add make.sh setkb qwerty/it to change the keyboard at boot
 * rebuild thw wimtools using tar.gz and install wimlib-imagex
+* in rootfs.sh, copying setkmap.sh & co. should be generalised (changes/bin)
+* add the busybox shred command for secure or zero-writing deletion
+
+# DONE
+
+v add make.sh setkb qwerty/it to change the keyboard at boot
 

@@ -11,12 +11,10 @@
    root-ssh.sh           to allow root logins via SSH -- DANGEROUS!
    system-install.sh     to install the target system on a disk
   {reboot,shutdown}.sh   to reboot/shutdown the system using sysrq
-   dev2chroot.sh         to chroot into installed Ubuntu
-   usbsetboot.sh         to enable/disable the USB key boot
-  {ch,de,it,us}kb.sh     to change keyboard layaout CH/DE/IT/US
+   dev2chroot.sh         to chroot into installed Ubuntu, if any
+   usbsetboot.sh         to enable/disable the USB key boot (*!!*)
+   setkmap.sh ${lg}      to change keyboard layaout eg. ch, de, it
 
    bootable-usbdisk-create.sh 		  to create a bootable usb disk
    data-usbdisk-partition-create.sh        to create data partition
-
-   loadkmap < /usr/share/kmap/qwertx/yz.kmap  to load x/yz keyboard
 
