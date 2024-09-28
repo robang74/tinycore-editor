@@ -1,4 +1,5 @@
 /*.disk
+/*.disk.gz
 /make.conf
 /tinycore/rootfs.gz
 /tinycore/modules.gz
