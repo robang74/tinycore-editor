@@ -1,1 +1,1 @@
-loadkmap < /usr/share/kmap/qwertz/de_CH-latin1.kmap
+sudo loadkmap < /usr/share/kmap/qwertz/de_CH-latin1.kmap

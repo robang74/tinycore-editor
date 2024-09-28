@@ -1,1 +1,1 @@
-loadkmap < /usr/share/kmap/qwerty/us.kmap
+sudo loadkmap < /usr/share/kmap/qwerty/us.kmap
