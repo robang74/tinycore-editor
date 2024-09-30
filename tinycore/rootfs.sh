@@ -206,6 +206,7 @@ if [ "$1" == "open" -o "$1" == "update" ]; then
 	cat ../changes/rcS > etc/init.d/rcS
 	cat ../changes/tce-load > usr/bin/tce-load
 	cat ../changes/tc-functions > etc/init.d/tc-functions
+	cat ../changes/keyboard.rc > etc/profile.d/keyboard.rc
 	if [ -e ../changes/tce-setup ]; then
 		cat ../changes/tce-setup > usr/bin/tce-setup
 	fi
