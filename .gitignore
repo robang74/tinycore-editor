@@ -29,6 +29,7 @@
 /busybox/.patches_applied.close
 /busybox/.patches_applied
 /tcl-*-usb.disk.gz
+/tcl-skeleton.disk.gz
 /ubuntu/ubuntu-base-20.04.2-base-amd64.tar.gz
 /ubuntu/system.tgz
 /sshkeys.pub/*.pub

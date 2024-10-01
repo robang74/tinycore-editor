@@ -718,6 +718,9 @@ if [ "$param" == "image" -a "$option" != "8GB" ]; then
 		exit 1
 	fi
 	storage_32GB_create
+	if [ ! -e tcl-skeleton.disk.gz ]; then
+		ln -sf tcl-skeleton-128.disk.gz tcl-skeleton.disk.gz
+	fi
 	zcat tcl-skeleton.disk.gz >tcl-usb.disk
 	sync
 	sudo losetup --partscan $devloop tcl-usb.disk

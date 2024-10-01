@@ -1,0 +1,86 @@
+#!/bin/bash
+set -e
+
+nrm="\x1b[0m"
+bld="\x1b[1m"
+red="\x1b[41m"
+script="${myname:-$(basename $0)}"
+errmsg="\n${bld}>>> ${red}ERROR${nrm} in $script"
+errmsg=$errmsg' at line $LINENO, abort.'$nrm'\n\n'
+trpcmd='eval "printf \"$errmsg\""'
+trap "$trpcmd" ERR 
+#------------------------------------------------------------------------------#
+
+function zerooing() {
+    test -d "$1" || return 1
+    zf="$1/.zero"
+    {
+    dd if=/dev/zero bs=1M of="$zf" || true
+    sync "$zf"; rm -f "$zf"
+    } >/dev/null 2>&1
+}
+
+function chownuser() {
+	local user guid
+	user=$SUDO_USER
+	user=${user:-$USER}
+	guid=$(grep -e "^$user:" /etc/passwd | cut -d: -f3-4)
+	chown -R $guid "$@"
+}
+
+size="${1:-128}"
+disk="skel.disk"
+skeldir="skel.root"
+skelname="tcl-skeleton"
+skelzext="disk.gz"
+skellink="$skelname.$skelzext"
+
+if [ $size -le 1 ]; then
+    echo
+    echo USAGE: $(basename $0) [size in Mb, default 64] 
+    echo
+    exit
+else
+    let size-=1
+    printf "$bld\n"
+    echo "Requested disk size: ($size+1) Mb"
+    printf "$nrm\n"
+fi
+
+rm -f $skellink
+zcat skeleton-1stMb.dd.gz > $disk
+dd if=/dev/zero bs=1M count=$size status=none >> $disk
+(echo -e "n\np\n1\n2048\n\nt\nb\na\nw" | fdisk --color=never $disk) >/dev/null
+fdisk -l $disk
+eval $(grep "^tclabel=" tinycore/changes/rcS)
+mkfs.vfat -n $tclabel --offset=2048 $disk >/dev/null
+
+sudo umount $skeldir 2>/dev/null || true
+rmdir $skeldir || true; mkdir $skeldir
+if sudo mount -o loop,offset=1M $disk $skeldir; then
+    trap "sudo umount -lr $skeldir 2>/dev/null || true" EXIT
+fi
+sudo tar xvzf skeleton-vfat.tar.gz -C $skeldir
+sudo umount -rl $skeldir && trap - EXIT
+pigz -9fp8 $disk 2>/dev/null || gzip -9f $disk
+rmdir $skeldir
+echo
+
+let size+=1
+skelfile="$skelname-$size.$skelzext"
+if true; then
+    rm -f $skellink
+    skelfile="$skellink"
+else
+    ln -sf $skelfile $skellink
+fi
+mv -f $disk.gz $skelfile
+chownuser $skelfile $skellink
+
+printf $bld
+echo "Skeleton disk size: $size Mb"
+du -ks $skelfile | tr '\t' ' '
+printf "${nrm}\nlink -> $skellink\n\n"
+
+#------------------------------------------------------------------------------#
+trap - ERR
