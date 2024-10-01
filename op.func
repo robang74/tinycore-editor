@@ -4,21 +4,28 @@ lodn() { sudo losetup -D; }
 loup() { sudo losetup --show -Pf $DISK; }
 gtlo() { losetup -l | sed -ne "s,\([0-9]*\) .*$DISK .*,\1,p"; }
 lols() { losetup -l | grep -ve "\.snap "; }
-pm() { sudo mount -o uid=$USER $(gtlo)p$1 $2; }
-pu() { sudo umount $(gtlo)p$1; }
+pm() { sudo mount -vo uid=${USER:-0} $(gtlo)p${1:-1} ${2:-dir}; }
+pu() { sudo umount -v $(gtlo)p${1:-1}; }
 gp() { sudo gparted $(gtlo); }
 pt() { sudo fdisk -l $(gtlo); }
 pe() { sudo fdisk -w never $(gtlo); }
 fk() { sudo fsck -y $(gtlo)p$1; }
 pz() {
-    set -x
-    test "$1" != "" || return 1
+    #set -x
+    local n=${1:-1}
     tmpdir=$(mktemp -d)
-    pm $1 "$tmpdir" || return 1
-    dd if=/dev/zero bs=1M of="$tmpdir/z"
+    pm $n "$tmpdir" || return 1
+    dd if=/dev/zero bs=1M of="$tmpdir/z" 2>&1 |\
+        grep -ve records -ve "o space left o"
     sync "$tmpdir/z"; rm -f "$tmpdir/z"
-    pu $1; rmdir $tmpdir
-    set +x
+    pu $n; rmdir $tmpdir
+    #set +x
 }
-dz() { pigz -9cp8 $DISK >$DISK.gz; du -ks $DISK.gz; }
+dz() { local i=${1:-$DISK}; pigz -9cp8 $i >$i.gz; du -ks $i.gz; }
+dx() { local a=${1:-$DISK}; a=${a%\.gz}; pigz -cdp8 $a.gz >$a; du -ms $a; }
+ds() {
+    test -e "$DISK.gz" || dz $DISK || return 1
+    ln -svf $DISK.gz tcl-skeleton.disk.gz | tr -d \'
+    #ls -l tcl-skeleton.disk.gz | tr -s ' ' | cut -d' ' -f9-
+}
 de() { echo $DISK; }
