@@ -14,9 +14,41 @@ function diskfatresize() {
 	trap - EXIT
 }
 
-set -ex
+function info() {
+    echo -e "\e[1;36m$@\e[0m"
+}
+
+function comp() {
+    echo -e "\e[1;32m$@\e[0m"
+}
+
+function warn() {
+    echo -e "\e[1;33m$@\e[0m"
+}
+
+function perr() {
+    echo -e "\e[1;31m$@\e[0m"
+}
+
+set -e #########################################################################
+
+export myname=${myname:-$(basename $0)}
+export wrkdir=${wrkdir:-{$(dirname $0)}
+
+if [ "$USER" != "root" ]; then
+	if ! timeout 0.2 sudo -n true; then
+		echo
+		warn "WARNING: $myname requires root permissions"
+		echo
+	fi 2>/dev/null
+	cd $wrkdir
+	sudo ./$myname "$@"
+	exit $?
+fi
+
 size=${1:-256}
 disk=${size}MB.disk
+
 zcat tcl-skeleton.disk.gz >$disk
 
 old_size=$(du -b $disk | cut -f1)
