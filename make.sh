@@ -720,10 +720,7 @@ if [ "$param" == "image" -a "$option" != "8GB" ]; then
 	storage_32GB_create
 	if [ ! -e tcl-skeleton.disk.gz ]; then
 		ln -sf tcl-skeleton-128.disk.gz tcl-skeleton.disk.gz
-<<<<<<< HEAD
 		chownuser tcl-skeleton.disk.gz
-=======
->>>>>>> 6d01d01 (skeleton.sh: rewritten entirely, rationalised)
 	fi
 	zcat tcl-skeleton.disk.gz >tcl-usb.disk
 	sync
