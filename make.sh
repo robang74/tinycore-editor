@@ -101,7 +101,7 @@ function atexit() {
 	trap - EXIT
 	set +e
 	echo
-	perr "ERROR: $myname $param failed with error"
+	perr "ERROR: $myname $param at line $1 failed with error"
 	if [  "$warning" != "" ]; then
 		echo
 		warn "$warning"
@@ -624,7 +624,7 @@ fi
 
 ###############################################################################
 
-trap 'atexit' EXIT
+trap 'atexit $LINENO' ERR
 set -e
 echo
 
