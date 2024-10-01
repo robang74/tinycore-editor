@@ -721,8 +721,8 @@ if [ "$param" == "image" -a "$option" != "8GB" ]; then
 	zcat tcl-skeleton.disk.gz >tcl-usb.disk
 	sync
 	sudo losetup --partscan $devloop tcl-usb.disk
-	if ! sudo fsck.vfat -fy ${devloop}p1; then
-		sudo fsck.vfat -fy ${devloop}p1
+	if ! sudo fsck.vfat -y ${devloop}p1; then
+		sudo fsck.vfat -y ${devloop}p1
 	fi
 	dosfslabel ${devloop}p1 $tclabel
 	if ! blkid  --label $tclabel $devloop; then
