@@ -1,7 +1,24 @@
-DISK=tcl-usb.disk
+#!/bin/bash
+test ! -e "$DISK" && DISK=tcl-usb.disk
 lodn() { sudo losetup -D; }
 loup() { sudo losetup --show -Pf $DISK; }
 gtlo() { losetup -l | sed -ne "s,\([0-9]*\) .*$DISK .*,\1,p"; }
 lols() { losetup -l | grep -ve "\.snap "; }
+pm() { sudo mount -o uid=$USER $(gtlo)p$1 $2; }
+pu() { sudo umount $(gtlo)p$1; }
 gp() { sudo gparted $(gtlo); }
 pt() { sudo fdisk -l $(gtlo); }
+pe() { sudo fdisk -w never $(gtlo); }
+fk() { sudo fsck -y $(gtlo)p$1; }
+pz() {
+    set -x
+    test "$1" != "" || return 1
+    tmpdir=$(mktemp -d)
+    pm $1 "$tmpdir" || return 1
+    dd if=/dev/zero bs=1M of="$tmpdir/z"
+    sync "$tmpdir/z"; rm -f "$tmpdir/z"
+    pu $1; rmdir $tmpdir
+    set +x
+}
+dz() { pigz -9cp8 $DISK >$DISK.gz; du -ks $DISK.gz; }
+de() { echo $DISK; }
