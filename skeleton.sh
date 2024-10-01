@@ -3,16 +3,24 @@
 # (C) 2022 Roberto A. Foglietta, MIT
 #
 
-function diskfatresize() {
-	local loop size=$[$2/1024]
+function loopfatresize() {
+    set -x
+	local loop size=$[$2/1024] ret=1
 	loop=$(losetup --show -Pf $1)
-	test -b $loop || exit 1
-	trap "losetp -d $loop 2>/dev/null || true" EXIT
-	fatresize -i -n 1 ${loop} | grep size:;	echo
-	fatresize -vfs ${size}k -n 1 ${loop} || return 1; echo
-	fatresize -i -n 1 ${loop} | grep "Cur size:"
+	test -b $loop || return 1
+	#trap "losetp -d $loop 2>/dev/null || true" EXIT
+	if fatresize -i -n 1 ${loop} | grep size: && echo; then
+	    echo "Resize VFAT to ${size} Kb"
+	    if fatresize -vfs ${size}k -n 1 ${loop} && echo; then
+	        if fatresize -i -n 1 ${loop} | grep "Cur size:"; then
+	            ret=0
+            fi
+        fi
+    fi
+    set +x
 	losetup -d $loop
 	trap - EXIT
+	return $ret
 }
 
 function chownuser() {
@@ -56,7 +64,7 @@ if [ "$USER" != "root" ]; then
 		warn "WARNING: $myname requires root permissions"
 		echo
 	fi 2>/dev/null
-	printf "\nRunning '$myname' in '$PWD'\n\n"
+	printf "\nRunning '$myname' in '$PWD'\n"
 	sudo ./$myname "$@"
 	exit $?
 fi
@@ -73,42 +81,102 @@ if which pigz >/dev/null; then
 fi
 
 size=${1:-256}
-disk=${size}MB.disk
-
+tmpl=${2:-128}
 skelzext="disk.gz"
 skelname="tcl-skeleton"
 skellink="$skelname.$skelzext"
-skelbase="${skelname}-256v6.${skelzext}"
+skelbase="${skelname}-$tmpl.${skelzext}"
 skelfile="${skelname}-${size}.${skelzext}"
+disk="$skelname.disk"
+
+function getfilesize() {
+    find $1 -printf %s
+}
 
 zcat $skelbase >$disk
-old_size=$(du -b $disk | cut -f1)
+old_size=$(getfilesize $disk)
 
-new_size=$[size*1024*1000]
-disk_size=$[new_size+(2048*512)]
-dblk_size=$[((new_size+511)/512)+2048]
+new_size=$[(size-1)*1024*1024]
+disk_size=$[$new_size+(2048*512)]
+dblk_size=$[((disk_size+4095)/4096)*8]
 
+function diskgrowth() {
+    local off=2
+    { dd if=$1 status=none; dd if=/dev/zero status=none; }|\
+        dd bs=512 count=$[$off+$2] conv=notrunc status=none of=$1
+    info "Disk resize from $[old_size/1024] kb to $[$off+$2/2] Kb"
+}
+
+function diskshrink() {
+    local off=1
+	dd if=/dev/zero bs=512 seek=$[$off+$2] count=1 status=none of=$1
+    info "Disk resize from $[old_size/1024] kb to $[$off+$2/2] Kb"
+}
+
+function partbls() {
+    printf "\n${bld} \#$2 ${nrm}\n";
+    fdisk -l $1 | grep -e $1 -e Device; echo
+}
+
+function getvfatsize() {
+    local size
+    size=$(fatresize -i -n 1 $1 | grep "$2 size:" | cut -d: -f2)
+    let size-=2048*512
+    echo $size
+}
+
+function vfatresize() {
+    local loop=$1 size=$2
+
+    from=$(getvfatsize $1 "Cur")
+	info "Resize VFAT from $[from/1024] Kb to $[size/1024] Kb\n"
+
+    if fatresize -vfs ${size} -n 1 ${loop}; then
+        fatresize -i -n 1 ${loop} || return 1
+    fi
+
+    return 0
+}
+
+function vfatenlarge() {
+    vfatresize $1 $(getvfatsize $1 "Max")
+}
+
+function vfatremkpart() {
+	printf "d\n n\n \n \n \n \n t\n 6\n a\n w\n" |\
+	    fdisk -w never $1 >/dev/null
+}
+
+#------------------------------------------------------------------------------#
+
+partbls $disk 1
 if [ $new_size -lt $old_size ]; then
-	diskfatresize $disk $new_size
-	#qemu-img resize --shrink -f raw $disk $disk_size
-	dd if=/dev/zero seek=$dblk_size count=1 of=$disk
+	vfatresize $disk $new_size
+    partbls $disk 2
+    diskshrink $disk $dblk_size
 elif [ $new_size -gt $old_size ]; then
-	#qemu-img resize -f raw $disk $disk_size
-	dd if=/dev/zero seek=$dblk_size count=1 of=$disk
-	echo -e "d\n n\n \n \n \n \n t\n b\n a\n w\n" |\
-	    tr -d ' ' | fdisk $disk
-	diskfatresize $disk $new_size
+	diskgrowth $disk $dblk_size
 fi
+partbls $disk 3
+vfatremkpart $disk
+partbls $disk 4
+vfatenlarge $disk
+partbls $disk 5
+
+#------------------------------------------------------------------------------#
 
 gzip -9c $disk > ${skelfile}
 ln -sf ${skelfile} ${skellink}
 chownuser ${skellink} ${skelfile}
 rm -f $disk
 
-printf "link -> $skellink\n\n$bld"
-echo "Skeleton disk size: ${size} Mb"
-du -ks $skelfile | tr '\t' ' '
-printf "${nrm}\n"
+printf "link -> $skellink\n"
+txt=$(
+    printf "
+${bld}Skeleton disk size: $[(dblk_size+2047)/2048] Mb
+$skelfile: $(du -ks $skelfile | cut -f1) Kb\n${nrm}
+"
+); comp "$txt"
 
 exit 0 ###################################################
 #
