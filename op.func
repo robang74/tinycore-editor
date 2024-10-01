@@ -1,0 +1,7 @@
+DISK=tcl-usb.disk
+lodn() { sudo losetup -D; }
+loup() { sudo losetup --show -Pf $DISK; }
+gtlo() { losetup -l | sed -ne "s,\([0-9]*\) .*$DISK .*,\1,p"; }
+lols() { losetup -l | grep -ve "\.snap "; }
+gp() { sudo gparted $(gtlo); }
+pt() { sudo fdisk -l $(gtlo); }
