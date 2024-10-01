@@ -7,9 +7,9 @@ function diskfatresize() {
 	local loop size=$[$2/1024]
 	loop=$(losetup --show -Pf $1)
 	test -b $loop || exit 1
-	trap "losetp -d $loop 2>/dev/null" EXIT
+	trap "losetp -d $loop 2>/dev/null || true" EXIT
 	fatresize -i -n 1 ${loop} | grep size:;	echo
-	fatresize -vfs ${size}k -n 1 ${loop}; echo
+	fatresize -vfs ${size}k -n 1 ${loop} || return 1; echo
 	fatresize -i -n 1 ${loop} | grep "Cur size:"
 	losetup -d $loop
 	trap - EXIT
@@ -48,10 +48,7 @@ set -e #########################################################################
 export myname=${myname:-$(basename $0)}
 export wrkdir=${wrkdir:-$(dirname $0)}
 
-errmsg="\n${bld}>>> ${red}ERROR${nrm} in $myname"
-errmsg=$errmsg' at line $LINENO, abort.'$nrm'\n\n'
-trpcmd='eval "printf \"$errmsg\""'
-trap "$trpcmd" ERR
+cd $wrkdir
 
 if [ "$USER" != "root" ]; then
 	if ! timeout 0.2 sudo -n true; then
@@ -59,10 +56,15 @@ if [ "$USER" != "root" ]; then
 		warn "WARNING: $myname requires root permissions"
 		echo
 	fi 2>/dev/null
-	cd $wrkdir
+	printf "\nRunning '$myname' in '$PWD'\n\n"
 	sudo ./$myname "$@"
 	exit $?
 fi
+
+errmsg="\n${bld}>>> ${red}ERROR${nrm} in $myname"
+errmsg=$errmsg' at line $LINENO, abort.'$nrm'\n\n'
+trpcmd='eval "printf \"$errmsg\""'
+trap "$trpcmd" ERR
 
 if which pigz >/dev/null; then
     gunzip() { pigz -d "$@"; }
@@ -76,7 +78,7 @@ disk=${size}MB.disk
 skelzext="disk.gz"
 skelname="tcl-skeleton"
 skellink="$skelname.$skelzext"
-skelbase="${skelname}-35.${skelzext}"
+skelbase="${skelname}-256v6.${skelzext}"
 skelfile="${skelname}-${size}.${skelzext}"
 
 zcat $skelbase >$disk
