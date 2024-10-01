@@ -55,8 +55,6 @@ tinycore/provides/tc[udpm]*.sh:provides/
 tinycore/provides/tc*deps.db.gz:provides/
 tinycore/changes/afterboot.sh:
 tinycore/changes/{*.sh,*.tgz}:custom/
-tinycore/changes/syslinux.cfg:boot/syslinux/
-tinycore/changes/boot.msg:boot/syslinux/
 tinycore/vmlinuz:boot/
 tcl-usb-boot-*able.gz:
 sshkeys.pub:
@@ -268,8 +266,7 @@ function tccopyall() {
 	mkdir -p $tcldir/custom
 	mkdir -p $tcldir/provides
 	mkdir -p $tcldir/boot/syslinux
-	tar xvzf tcl-boot-syslinux.tgz -moC $tcldir |\
-		sed -e "s,./\(.*\),\textract: \\1,"
+	cp -r syslinux/* $tcldir/boot/syslinux
 	for i in $(echo "$copylist" | sort | uniq); do
 		tcdircopy $i
 	done
@@ -724,8 +721,8 @@ if [ "$param" == "image" -a "$option" != "8GB" ]; then
 	zcat tcl-skeleton.disk.gz >tcl-usb.disk
 	sync
 	sudo losetup --partscan $devloop tcl-usb.disk
-	if ! sudo fsck -fy ${devloop}p1; then
-		sudo fsck -fy ${devloop}p1
+	if ! sudo fsck.vfat -fy ${devloop}p1; then
+		sudo fsck.vfat -fy ${devloop}p1
 	fi
 	dosfslabel ${devloop}p1 $tclabel
 	if ! blkid  --label $tclabel $devloop; then
@@ -744,8 +741,8 @@ if [ "$param" == "image" -a "$option" != "8GB" ]; then
 		exit 1
 	fi
 	tccopyall
-	sudo dd if=/dev/zero of=$tcldir/zero >/dev/null 2>&1 || true
-	sync; sudo rm -f $tcldir/zero $tcldir/FSCK????.REC; sync
+	#sudo dd if=/dev/zero conv=fsync of=$tcldir/zero >/dev/null 2>&1 || true
+	#sync $tcldir/zero; sudo rm -f $tcldir/zero $tcldir/FSCK????.REC;
 	du -ks $tcldir
 	k=0; sleep 1
 	while ! sudo umount $tcldir; do
