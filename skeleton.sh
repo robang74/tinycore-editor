@@ -65,7 +65,7 @@ if [ "$USER" != "root" ]; then
 		echo
 	fi 2>/dev/null
 	printf "\nRunning '$myname' in '$PWD'\n"
-	sudo ./$myname "$@"
+	sudo -E ./$myname "$@"
 	exit $?
 fi
 
@@ -82,6 +82,20 @@ fi
 
 size=${1:-256}
 tmpl=${2:-128}
+
+if [ "$SKEL_DEBUG" == "" -o "$SKEL_DEBUG" == "0" ]; then
+    if [ $size -eq $tmpl ]; then
+        warn "\nCreating an image from $tmpl Mb =equal= to $size Mb, abort\n"
+        exit 1
+    elif [ $size -gt 128 -o $tmpl -gt 128 ]; then
+        warn "\nCannot handle disk images larger than 128 Mb, abort\n"
+        exit 1
+    elif [ $size -lt 35 ]; then
+        warn "\nCannot handle disk images smaller than 35 Mb, abort\n"
+        exit 1
+    fi
+fi
+
 skelzext="disk.gz"
 skelname="tcl-skeleton"
 skellink="$skelname.$skelzext"
