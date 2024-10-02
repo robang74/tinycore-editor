@@ -9,7 +9,7 @@ pu() { sudo umount -v $(gtlo)p${1:-1}; }
 gp() { sudo gparted $(gtlo); }
 pt() { sudo fdisk -l $(gtlo); }
 pe() { sudo fdisk -w never $(gtlo); }
-fk() { sudo fsck -y $(gtlo)p$1; }
+fk() { sudo fsck -y $(gtlo)p${1:-1}; }
 pz() {
     #set -x
     local n=${1:-1}
