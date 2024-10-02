@@ -24,8 +24,13 @@ pz() {
 dz() { local i=${1:-$DISK}; pigz -9cp8 $i >$i.gz; du -ks $i.gz; }
 dx() { local a=${1:-$DISK}; a=${a%\.gz}; pigz -cdp8 $a.gz >$a; du -ms $a; }
 ds() {
+    local target="tcl-skeleton.disk.gz"
+    local testsz="tcl-skeleton-$1.disk.gz"
+    if [ -n "$1" -a -e $testsz ]; then
+        ln -svf $testsz $target | tr -d \'
+        return $?
+    fi
     test -e "$DISK.gz" || dz $DISK || return 1
-    ln -svf $DISK.gz tcl-skeleton.disk.gz | tr -d \'
-    #ls -l tcl-skeleton.disk.gz | tr -s ' ' | cut -d' ' -f9-
+    ln -svf $DISK.gz $target | tr -d \'
 }
 de() { echo $DISK; }
