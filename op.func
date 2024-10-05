@@ -1,5 +1,5 @@
 #!/bin/bash
-test ! -e "$DISK" && DISK=tcl-usb.disk
+test ! -e "${DISK:-}" && DISK=tcl-usb.disk
 lodn() { sudo losetup -D; }
 loup() { sudo losetup --show -Pf $DISK; }
 gtlo() { losetup -l | sed -ne "s,\([0-9]*\) .*$DISK .*,\1,p"; }
@@ -34,3 +34,5 @@ ds() {
     ln -svf $DISK.gz $target | tr -d \'
 }
 de() { echo $DISK; }
+
+op.stop() { unset -f ilodn loup gtlo lols pm pu gp pt pe fk pz dz dx ds de op.stop; }
